@@ -1,9 +1,4 @@
 import { TSBufferSchema, TSBufferProto } from 'tsbuffer-schema';
-import { AnyTypeSchema } from 'tsbuffer-schema/src/schemas/AnyTypeSchema';
-import { ArrayTypeSchema } from 'tsbuffer-schema/src/schemas/ArrayTypeSchema';
-import { BooleanTypeSchema } from 'tsbuffer-schema/src/schemas/BooleanTypeSchema';
-import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
-import { EnumTypeSchema } from 'tsbuffer-schema/src/schemas/EnumTypeSchema';
 import { BufferWriter } from './BufferWriter';
 import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
 import { LongBits } from '../models/LongBits';
@@ -60,13 +55,17 @@ export class Encoder {
                 break;
             case 'Literal':
                 break;
-            // case 'Interface':
+            case 'Interface':
+                // extends
+                // property
+                // indexSignature
+                break;
             case 'Buffer':
                 this._writer.push({ type: 'buffer', value: value.buffer || value });
                 break;
             case 'IndexedAccess':
             case 'Reference':
-                this._addWriteOp(value, this._validator.parseReference(schema))
+                this._addWriteOp(value, this._validator.protoHelper.parseReference(schema))
                 break;
             // case 'Union':
             // case 'Intersection':

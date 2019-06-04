@@ -47,7 +47,23 @@ Schema编码方式
 - Reference
 
 ## Interface
-- `[property: ID编码块, [indexSignature: [字段名: string, Payload]]`
+```
+[
+    extendsProperties(ID编码块): [
+        [ID, ID编码块],
+        [ID, ID编码块],
+        ...
+    ],
+    property: ID编码块, 
+    indexSignature: [
+        字段数量: Varint, 
+        [字段名1: string, Payload1],
+        [字段名2: string, Payload2],
+        ...
+    ]
+]
+```
+同一字段，前序编码后，后续不再重复编码。
 
 ## Literal
 - 不需要编码 0字节
