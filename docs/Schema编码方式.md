@@ -49,21 +49,42 @@ Schema编码方式
 ## Interface
 ```
 [
-    extendsProperties(ID编码块): [
-        [ID, ID编码块],
-        [ID, ID编码块],
-        ...
-    ],
-    property: ID编码块, 
-    indexSignature: [
-        字段数量: Varint, 
-        [字段名1: string, Payload1],
-        [字段名2: string, Payload2],
-        ...
-    ]
+    [BlockID数量: Varint],
+    [BlockID: Varint, Block],
+    [BlockID: Varint, Block],
+    ...
 ]
 ```
-同一字段，前序编码后，后续不再重复编码。
+
+### BlockID
+BlockID组成方式 实际ID + 末尾1Bit
+- BlockID == 0，代表 indexSignature block
+- BlockID 在 1~9 代表 extend block (extendId = BlockID - 1)
+- BlockID >= 10 代表property (propertyId = BlockID - 10)
+
+### IndexSignature Block
+```
+[
+    [字段名1: string, Payload1],
+    [字段名2: string, Payload2],
+    ...
+]
+```
+
+## MappedType
+### Pick/Omit/Partial
+- 同target的interface编码
+
+### Overwrite
+```
+[overwrite部分编码, 原interface编码]
+```
+
+### Extends Block
+- 同`encode(value, extendSchema)`
+
+### 特别说明
+- 同一字段，前序编码后，后续不再重复编码。
 
 ## Literal
 - 不需要编码 0字节

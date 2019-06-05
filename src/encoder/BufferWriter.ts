@@ -15,29 +15,37 @@ export class BufferWriter {
 
     private _ops: WriteOp[] = [];
 
+    get ops(): WriteOp[] {
+        return this._ops;
+    }
+
     clear() {
         this._ops = [];
     }
 
-    push(req: WriteReq) {
+    push(req: WriteReq): this {
+        this._ops.push(this.req2op(req));
+        return this;
+    }
+
+    req2op(req: WriteReq): WriteOp {
         if (req.type === 'string' || req.type === 'buffer') {
             let valueLength = this.measureLength(req);
             // Length
             this.push({ type: 'varint', value: LongBits.from(valueLength) });
             // Value
-            this._ops.push({
+            return {
                 ...req,
                 length: valueLength
-            })
+            }
         }
         else {
             let length = this.measureLength(req);
-            this._ops.push({
+            return {
                 ...req,
                 length: length
-            });
+            }
         }
-        return this;
     }
 
     measureLength(req: WriteReq): number {
@@ -105,13 +113,13 @@ export class BufferWriter {
         return arr;
     }
 
-    private _zigzag(n: number) {
-        return (n << 1) ^ (n >> 31);
-    }
+    // private _zigzag(n: number) {
+    //     return (n << 1) ^ (n >> 31);
+    // }
 
-    private _rev_zigzag(n: number) {
-        return (n >>> 1) ^ -(n & 1);
-    }
+    // private _rev_zigzag(n: number) {
+    //     return (n >>> 1) ^ -(n & 1);
+    // }
 }
 
 /**
@@ -148,48 +156,3 @@ export interface WriteVarintReq {
 }
 export type WriteReq = WriteNumberReq | WriteStringReq | WriteBufferReq | WriteBooleanReq | WriteVarintReq;
 export type WriteOp = WriteReq & { length: number }
-
-// export type WriteOp = {
-//     type: 'int32' | 'uint32' | 'float' | 'double',
-//     value: number,
-//     length: number
-// } | {
-//     type: 'string',
-//     value: string,
-//     meta: {
-//         strByteLength: number
-//     },
-//     length: number
-// } | {
-//     type: 'buffer',
-//     value: ArrayBuffer,
-//     meta: {
-//         bufByteLength: number
-//     },
-//     length: number
-// } | {
-//     type: 'boolean',
-//     value: boolean,
-//     length: number
-// } | {
-//     type: 'varint',
-//     value: LongBits,
-//     length: number
-// };
-
-// export type WriteReq = {
-//     type: 'int32' | 'uint32' | 'float' | 'double',
-//     value: number
-// } | {
-//     type: 'string',
-//     value: string
-// } | {
-//     type: 'buffer',
-//     value: ArrayBuffer
-// } | {
-//     type: 'boolean',
-//     value: boolean
-// } | {
-//     type: 'varint',
-//     value: LongBits
-// };
