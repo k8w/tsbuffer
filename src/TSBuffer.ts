@@ -15,6 +15,11 @@ export class TSBuffer {
     }
 
     encode(value: any, path: string, symbolName: string) {
-        return this._encoder.encode(value, this._proto[path][symbolName]);
+        let schema = this._proto[path][symbolName];
+        if (!schema) {
+            throw new Error(`Cannot find schema ${symbolName} at ${path}`)
+        }
+        
+        return this._encoder.encode(value, schema);
     }
 }
