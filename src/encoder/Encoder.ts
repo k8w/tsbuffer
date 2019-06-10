@@ -7,6 +7,7 @@ import { Config } from '../models/Config';
 import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
+import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 
 export interface EncodeOperationItem {
     length: number,
@@ -69,14 +70,20 @@ export class Encoder {
             case 'Reference':
                 this._write(value, this._validator.protoHelper.parseReference(schema))
                 break;
+            case 'Pick':
+            case 'Partial':
+            case 'Omit':
+                this._writeInterface(value, schema.target);
+                break;
+            case 'Overwrite':
+                this._writeOverwrite(value, schema);
+                break;
             // case 'Union':
             // case 'Intersection':
-            // case 'Pick':
-            // case 'Partial':
-            // case 'Omit':
-            // case 'Overwrite':
-            // default:
-            //     throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
+
+
+            default:
+                throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
     }
 
@@ -109,9 +116,11 @@ export class Encoder {
         let blockIdCount = 0;
 
         let parsedSchema = this._validator.protoHelper.parseReference(schema) as Exclude<InterfaceTypeSchema | InterfaceReference, TypeReference>;
+
+        // MappedType
         switch (parsedSchema.type) {
             case 'Overwrite':
-                this._writeOverwrite(value, schema, skipFields);
+                this._writeOverwrite(value, parsedSchema, skipFields);
                 return;
             case 'Pick':
             case 'Omit':
@@ -143,7 +152,7 @@ export class Encoder {
         if (parsedSchema.properties) {
             for (let property of parsedSchema.properties) {
                 // 只编码已定义的字段
-                if (!(value as Object).hasOwnProperty(property.name)) {
+                if (value[property.name] === undefined) {
                     continue;
                 }
 
@@ -159,7 +168,9 @@ export class Encoder {
                 }
 
                 let blockId = property.id + Config.interface.maxExtendsNum + 1;
+                // BlockID (propertyID)
                 this._writer.push({ type: 'varint', value: LongBits.from(blockId) });
+                // Value Payload
                 this._write(value[property.name], property.type);
 
                 ++blockIdCount;
@@ -194,12 +205,86 @@ export class Encoder {
         this._writer.ops.splice(opStartOps, 0, this._writer.req2op({ type: 'varint', value: LongBits.from(blockIdCount) }));
     }
 
-    private _writeOverwrite(value: any, schema: InterfaceTypeSchema | InterfaceReference, skipFields: { [fieldName: string]: 1 } = {}) {
-        // TODO
+    private _writeOverwrite(value: any, schema: OverwriteTypeSchema, skipFields: { [fieldName: string]: 1 } = {}) {
+        // 解引用
+        let target = this._validator.protoHelper.parseReference(schema.target) as Exclude<OverwriteTypeSchema['target'], TypeReference>;
+        let overwrite = this._validator.protoHelper.parseReference(schema.overwrite) as Exclude<OverwriteTypeSchema['overwrite'], TypeReference>;
+        let flatTarget = this._validator.protoHelper.getFlatInterfaceSchema(target);
+        let flatOverwrite = this._validator.protoHelper.getFlatInterfaceSchema(overwrite);
+
+
+        // 先区分哪些字段进入Target块，哪些字段进入Overwrite块
+        let overwriteValue: any = {};
+        let targetValue: any = {};
+
+        // Overwrite块 property
+        if (flatOverwrite.properties) {
+            // 只要Overwrite中有此Property，即在Overwrite块编码
+            for (let property of flatOverwrite.properties) {
+                // undefined不编码，跳过SkipFIelds
+                if (value[property.name] !== undefined && !skipFields[property.name]) {
+                    overwriteValue[property.name] = value[property.name];
+                    skipFields[property.name] = 1;
+                }
+            }
+        }
+
+        // Target块 property
+        if (flatTarget.properties) {
+            for (let property of flatTarget.properties) {
+                // undefined不编码，跳过SkipFields
+                if (value[property.name] !== undefined && !skipFields[property.name]) {
+                    targetValue[property.name] = value[property.name];
+                    skipFields[property.name] = 1;
+                }
+            }
+        }
+
+        // indexSignature
+        let indexSignatureWriteValue: any;  // indexSignature要写入的目标（overwrite或target）
+        let indexSignature: InterfaceTypeSchema['indexSignature'];
+        // IndexSignature，优先使用Overwrite的
+        if (flatOverwrite.indexSignature) {
+            indexSignature = flatOverwrite.indexSignature;
+            indexSignatureWriteValue = overwriteValue;
+        }
+        else if (flatTarget.indexSignature) {
+            indexSignature = flatTarget.indexSignature
+            indexSignatureWriteValue = targetValue;
+        }
+        if (indexSignature) {
+            for (let key in value) {
+                if (skipFields[key]) {
+                    continue;
+                }
+
+                indexSignatureWriteValue[key] = value[key];
+                skipFields[key] = 1;
+            }
+        }
+
+        // 编码，此处不再需要SkipFields，因为已经筛选过
+        this._writeInterface(overwriteValue, overwrite);
+        this._writeInterface(targetValue, target);
     }
 
-    // private _writeIdBlocks(blocks: { id: number, value: any }[]) {
+    // private _writeIdBlocks(blocks: IDBlockItem[]) {
+    //     // 字段数量: Varint
+    //     this._writer.push({ type: 'varint', value: LongBits.from(blocks.length) });
 
+    //     // 依次编码
+    //     for (let item of blocks) {
+    //         // ID
+    //         this._writer.push({ type: 'varint', value: LongBits.from(item.id) });
+    //         // Payload
+    //         this._write(item.value, item.schema)
+    //     }
     // }
 
+}
+
+export interface IDBlockItem {
+    id: number,
+    value: any,
+    schema: TSBufferSchema
 }

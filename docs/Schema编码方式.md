@@ -47,6 +47,7 @@ Schema编码方式
 - Reference
 
 ## Interface
+注意，可能存在多个BlockID相同的块（interface），所以不是传统的ID编码块。
 ```
 [
     [BlockID数量: Varint],
