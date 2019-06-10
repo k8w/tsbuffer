@@ -9,7 +9,7 @@
   "dependencies": {
     "k8w-extend-native": "^1.1.0",
     "tsbuffer-schema": "^0.8.0",
-    "tsbuffer-validator": "^0.3.3"
+    "tsbuffer-validator": "^0.3.7"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",

@@ -8,6 +8,7 @@ import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSc
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
+import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 
 export interface EncodeOperationItem {
     length: number,
@@ -78,7 +79,9 @@ export class Encoder {
             case 'Overwrite':
                 this._writeOverwrite(value, schema);
                 break;
-            // case 'Union':
+            case 'Union':
+                this._writeUnion(value, schema);
+                break;
             // case 'Intersection':
 
 
@@ -266,6 +269,71 @@ export class Encoder {
         // 编码，此处不再需要SkipFields，因为已经筛选过
         this._writeInterface(overwriteValue, overwrite);
         this._writeInterface(targetValue, target);
+    }
+
+    private _writeUnion(value: any, schema: UnionTypeSchema) {
+        // 先将member分为两组
+        let interfaceMembers: UnionTypeSchema['members'] = [];
+        let nonInterfaceMembers: UnionTypeSchema['members'] = [];
+        for (let member of schema.members) {
+            if (this._validator.protoHelper.isInterface(member.type)) {
+                interfaceMembers.push(member);
+            }
+            else {
+                nonInterfaceMembers.push(member);
+            }
+        }
+
+        // 非interface，直接验证，验证通过即可编码，且与其它Member互斥
+        if (nonInterfaceMembers.length) {
+            for (let member of nonInterfaceMembers) {
+                if (this._validator.validateBySchema(value, member.type)) {
+                    // 编码
+                    // Part1，ID编码块长度（1）
+                    this._writer.push({ type: 'varint', value: LongBits.from(1) });
+                    // Part2: ID
+                    this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+                    // Part3: Payload
+                    this._write(value, member.type);
+                    return;
+                }
+            }
+        }
+        // interface 考虑unionFields后验证 编码通过测试的
+        else if (interfaceMembers.length) {
+            let skipFields: { [key: string]: 1 } = {};
+
+            // 计算UnionFields
+            let unionFields: string[] = [];
+            this._validator.protoHelper.extendsUnionFields(unionFields, interfaceMembers.map(v => v.type));
+
+            // 记住编码起点
+            let encodeStartPos = this._writer.ops.length;
+            let idNum = 0;
+
+            // 逐个验证
+            for (let member of interfaceMembers) {
+                let schema = this._validator.protoHelper.parseReference(member.type) as InterfaceTypeSchema | InterfaceReference;
+                // 验证通过，编码，由于SkipFields的存在，一个字段只会在它最先出现的那个member内编码
+                if (this._validator.validateInterfaceReference(value, schema, unionFields)) {
+                    // ID
+                    this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+                    // Payload
+                    this._writeInterface(value, schema, skipFields);
+                    ++idNum;
+                }
+            }
+
+            // 已经编码
+            if (idNum > 0) {
+                // 前置ID数量
+                this._writer.ops.splice(encodeStartPos, 0, this._writer.req2op({ type: 'varint', value: LongBits.from(idNum) }));
+                return;
+            }
+        }
+
+        // 未编码，没有任何条件满足，抛出异常
+        throw new Error('Non member is satisfied for union type');
     }
 
     // private _writeIdBlocks(blocks: IDBlockItem[]) {
