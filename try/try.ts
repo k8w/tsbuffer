@@ -47,9 +47,74 @@ let tsb = new TSBuffer({
                 keyType: 'String',
                 type: { type: 'Any' }
             }
+        },
+        a5: {
+            type: 'Union',
+            members: [
+                {
+                    id: 0,
+                    type: {
+                        type: 'Interface',
+                        properties: [
+                            {
+                                id: 0,
+                                name: 'a',
+                                type: {type: 'String'}
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 1,
+                    type: {
+                        type: 'Interface',
+                        properties: [
+                            {
+                                id: 0,
+                                name: 'b',
+                                type: { type: 'Number' }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        a6: {
+            type: 'Intersection',
+            members: [
+                {
+                    id: 0,
+                    type: {
+                        type: 'Interface',
+                        properties: [
+                            {
+                                id: 0,
+                                name: 'a',
+                                type: { type: 'String' }
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: 1,
+                    type: {
+                        type: 'Interface',
+                        properties: [
+                            {
+                                id: 0,
+                                name: 'b',
+                                type: { type: 'Number' }
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     }
 });
+
+console.log('Union', tsb.encode({ a: 'a', b: 123 }, 'a', 'a5'))
+console.log('Intersection', tsb.encode({ a: 'a', b: 123 }, 'a', 'a6'))
 
 let res = tsb.encode(12345, 'a', 'a1');
 let res1 = tsb.encode('哈哈哈abc', 'a', 'a2');
@@ -66,9 +131,9 @@ let v2 = {
 
 };
 let res2 = tsb.encode(v2, 'a', 'a4');
-console.log(res);
-console.log(res1);
-console.log(res2);
+// console.log(res);
+// console.log(res1);
+// console.log(res2);
 
 console.log('压缩率对比', res2.length, JSON.stringify(v2).length);
 

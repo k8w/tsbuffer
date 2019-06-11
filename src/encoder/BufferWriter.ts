@@ -90,7 +90,7 @@ export class BufferWriter {
                     view.setFloat32(pos, op.value);
                     break;
                 case 'double':
-                    view.setFloat64(pos, op.value | 0);
+                    view.setFloat64(pos, op.value);
                     break;
                 case 'string':
                     let encLen = Utf8Util.encode(op.value, arr, pos);
