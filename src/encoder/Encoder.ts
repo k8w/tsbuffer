@@ -9,6 +9,7 @@ import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
+import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 
 export interface EncodeOperationItem {
     length: number,
@@ -31,7 +32,7 @@ export class Encoder {
         return this._writer.finish();
     }
 
-    private _write(value: any, schema: TSBufferSchema) {
+    private _write(value: any, schema: TSBufferSchema, skipFields?: { [fieldName: string]: 1 }) {
         switch (schema.type) {
             case 'Boolean':
                 this._writer.push({ type: 'boolean', value: value });
@@ -62,29 +63,29 @@ export class Encoder {
             case 'Literal':
                 break;
             case 'Interface':
-                this._writeInterface(value, schema);
+                this._writeInterface(value, schema, skipFields);
                 break;
             case 'Buffer':
                 this._writer.push({ type: 'buffer', value: value.buffer || value });
                 break;
             case 'IndexedAccess':
             case 'Reference':
-                this._write(value, this._validator.protoHelper.parseReference(schema))
+                this._write(value, this._validator.protoHelper.parseReference(schema), skipFields);
                 break;
             case 'Pick':
             case 'Partial':
             case 'Omit':
-                this._writeInterface(value, schema.target);
+                this._writeInterface(value, schema.target, skipFields);
                 break;
             case 'Overwrite':
-                this._writeOverwrite(value, schema);
+                this._writeOverwrite(value, schema, skipFields);
                 break;
             case 'Union':
-                this._writeUnion(value, schema);
+                this._writeUnion(value, schema, skipFields);
                 break;
-            // case 'Intersection':
-
-
+            case 'Intersection':
+                this._writeIntersection(value, schema, skipFields);
+                break;
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
@@ -107,7 +108,6 @@ export class Encoder {
             case 'uint':
                 this._writer.push({ type: 'varint', value: LongBits.from(value) });
                 break;
-            // TODO: BigInt
             default:
                 throw new Error('Scalar type not support : ' + scalarType)
         }
@@ -271,7 +271,7 @@ export class Encoder {
         this._writeInterface(targetValue, target);
     }
 
-    private _writeUnion(value: any, schema: UnionTypeSchema) {
+    private _writeUnion(value: any, schema: UnionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}) {
         // 先将member分为两组
         let interfaceMembers: UnionTypeSchema['members'] = [];
         let nonInterfaceMembers: UnionTypeSchema['members'] = [];
@@ -301,8 +301,6 @@ export class Encoder {
         }
         // interface 考虑unionFields后验证 编码通过测试的
         else if (interfaceMembers.length) {
-            let skipFields: { [key: string]: 1 } = {};
-
             // 计算UnionFields
             let unionFields: string[] = [];
             this._validator.protoHelper.extendsUnionFields(unionFields, interfaceMembers.map(v => v.type));
@@ -334,6 +332,19 @@ export class Encoder {
 
         // 未编码，没有任何条件满足，抛出异常
         throw new Error('Non member is satisfied for union type');
+    }
+
+    private _writeIntersection(value: any, schema: IntersectionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}) {
+        // ID数量（member数量）
+        this._writer.push({ type: 'varint', value: LongBits.from(schema.members.length) });
+
+        // 按Member依次编码
+        for (let member of schema.members) {
+            // ID
+            this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+            // 编码块
+            this._write(value, member.type, skipFields);
+        }
     }
 
     // private _writeIdBlocks(blocks: IDBlockItem[]) {

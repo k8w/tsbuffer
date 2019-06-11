@@ -117,9 +117,8 @@ BlockID组成方式 实际ID + 末尾1Bit
 - `[数组长度: varint, Payload1, Payload2, ...]`
 
 ## Intersection / Union
-- 特殊的ID编码块
-- 特殊点
-    - 如果2个ID内部有共同的字段，那么在前序ID中一旦编码，后续ID不再重复编码
+- ID编码块
+- 如果2个ID内部有共同的字段，那么在前序ID中一旦编码，后续ID不再重复编码
 
 # BufferWrite Operation
 
