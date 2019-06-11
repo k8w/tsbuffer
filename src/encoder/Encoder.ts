@@ -11,11 +11,6 @@ import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 
-export interface EncodeOperationItem {
-    length: number,
-    encode: () => {}
-}
-
 export class Encoder {
 
     protected _writer: BufferWriter;
