@@ -1,12 +1,5 @@
 import { LongBits } from './LongBits';
 export class VarintUtil {
-
-    // static measureLength(value: number): number{
-    //     if (value > 4294967295) {
-            
-    //     }
-    // }
-
     static measureUint32(uint32Value: number): number {
         return (uint32Value = uint32Value >>> 0) < 128 ? 1
             : uint32Value < 16384 ? 2

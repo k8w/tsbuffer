@@ -18,34 +18,34 @@ export class Utf8Util {
         return len;
     }
 
-    static encode(str: string, arr: Uint8Array, pos: number): number {
+    static encode(str: string, buf: Uint8Array, pos: number): number {
         let start = pos,
             c1, // character 1
             c2; // character 2
         for (let i = 0; i < str.length; ++i) {
             c1 = str.charCodeAt(i);
             if (c1 < 128) {
-                arr[pos++] = c1;
+                buf[pos++] = c1;
             } else if (c1 < 2048) {
-                arr[pos++] = c1 >> 6 | 192;
-                arr[pos++] = c1 & 63 | 128;
+                buf[pos++] = c1 >> 6 | 192;
+                buf[pos++] = c1 & 63 | 128;
             } else if ((c1 & 0xFC00) === 0xD800 && ((c2 = str.charCodeAt(i + 1)) & 0xFC00) === 0xDC00) {
                 c1 = 0x10000 + ((c1 & 0x03FF) << 10) + (c2 & 0x03FF);
                 ++i;
-                arr[pos++] = c1 >> 18 | 240;
-                arr[pos++] = c1 >> 12 & 63 | 128;
-                arr[pos++] = c1 >> 6 & 63 | 128;
-                arr[pos++] = c1 & 63 | 128;
+                buf[pos++] = c1 >> 18 | 240;
+                buf[pos++] = c1 >> 12 & 63 | 128;
+                buf[pos++] = c1 >> 6 & 63 | 128;
+                buf[pos++] = c1 & 63 | 128;
             } else {
-                arr[pos++] = c1 >> 12 | 224;
-                arr[pos++] = c1 >> 6 & 63 | 128;
-                arr[pos++] = c1 & 63 | 128;
+                buf[pos++] = c1 >> 12 | 224;
+                buf[pos++] = c1 >> 6 & 63 | 128;
+                buf[pos++] = c1 & 63 | 128;
             }
         }
         return pos - start;
     }
 
-    static decode(arr: Uint8Array, pos: number, length: number): string {
+    static decode(buf: Uint8Array, pos: number, length: number): string {
         if (length < 1)
             return "";
         let parts: string[] | undefined = undefined,
@@ -54,17 +54,17 @@ export class Utf8Util {
             t;     // temporary
         let end = pos + length;
         while (pos < end) {
-            t = arr[pos++];
+            t = buf[pos++];
             if (t < 128)
                 chunk[i++] = t;
             else if (t > 191 && t < 224)
-                chunk[i++] = (t & 31) << 6 | arr[pos++] & 63;
+                chunk[i++] = (t & 31) << 6 | buf[pos++] & 63;
             else if (t > 239 && t < 365) {
-                t = ((t & 7) << 18 | (arr[pos++] & 63) << 12 | (arr[pos++] & 63) << 6 | arr[pos++] & 63) - 0x10000;
+                t = ((t & 7) << 18 | (buf[pos++] & 63) << 12 | (buf[pos++] & 63) << 6 | buf[pos++] & 63) - 0x10000;
                 chunk[i++] = 0xD800 + (t >> 10);
                 chunk[i++] = 0xDC00 + (t & 1023);
             } else
-                chunk[i++] = (t & 15) << 12 | (arr[pos++] & 63) << 6 | arr[pos++] & 63;
+                chunk[i++] = (t & 15) << 12 | (buf[pos++] & 63) << 6 | buf[pos++] & 63;
             if (i > 8191) {
                 (parts || (parts = [])).push(String.fromCharCode.apply(String, chunk));
                 i = 0;

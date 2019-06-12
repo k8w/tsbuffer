@@ -1,7 +1,6 @@
 import { TSBufferSchema } from 'tsbuffer-schema';
 import { BufferWriter } from './BufferWriter';
 import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
-import { LongBits } from '../models/LongBits';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
@@ -10,6 +9,7 @@ import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
+import { Varint64 } from '../models/Varint64';
 
 export class Encoder {
 
@@ -42,14 +42,14 @@ export class Encoder {
             case 'Tuple':
                 let _v = value as any[];
                 // 数组长度：Varint
-                this._writer.push({ type: 'varint', value: LongBits.from(_v.length) });
+                this._writer.push({ type: 'varint', value: Varint64.from(_v.length) });
                 // Element Payload
                 for (let i = 0; i < _v.length; ++i) {
                     this._write(_v[i], schema.type === 'Array' ? schema.elementType : schema.elementTypes[i]);
                 }
                 break;
             case 'Enum':
-                this._writer.push({ type: 'varint', value: LongBits.from(value) });
+                this._writer.push({ type: 'varint', value: Varint64.from(value) });
                 break;
             case 'Any':
             case 'NonPrimitive':
@@ -100,8 +100,10 @@ export class Encoder {
                 break;
             // Varint编码
             case 'int':
+                this._writer.push({ type: 'varint', value: Varint64.from(value).zzEncode() });
+                break;
             case 'uint':
-                this._writer.push({ type: 'varint', value: LongBits.from(value) });
+                this._writer.push({ type: 'varint', value: Varint64.from(value) });
                 break;
             default:
                 throw new Error('Scalar type not support : ' + scalarType)
@@ -138,7 +140,7 @@ export class Encoder {
             for (let extend of parsedSchema.extends) {
                 // BlockID = extend.id + 1
                 let blockId = extend.id + 1;
-                this._writer.push({ type: 'varint', value: LongBits.from(blockId) });
+                this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
                 // extend Block
                 this._writeInterface(value, extend.type, skipFields);
 
@@ -167,7 +169,7 @@ export class Encoder {
 
                 let blockId = property.id + Config.interface.maxExtendsNum + 1;
                 // BlockID (propertyID)
-                this._writer.push({ type: 'varint', value: LongBits.from(blockId) });
+                this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
                 // Value Payload
                 this._write(value[property.name], property.type);
 
@@ -190,7 +192,7 @@ export class Encoder {
                 skipFields[key] = 1;
 
                 // BlockID == 0
-                this._writer.push({ type: 'varint', value: LongBits.from(0) });
+                this._writer.push({ type: 'varint', value: Varint64.from(0) });
                 // 字段名
                 this._writer.push({ type: 'string', value: key });
                 // Value Payload
@@ -200,7 +202,7 @@ export class Encoder {
             }
         }
 
-        this._writer.ops.splice(opStartOps, 0, this._writer.req2op({ type: 'varint', value: LongBits.from(blockIdCount) }));
+        this._writer.ops.splice(opStartOps, 0, this._writer.req2op({ type: 'varint', value: Varint64.from(blockIdCount) }));
     }
 
     private _writeOverwrite(value: any, schema: OverwriteTypeSchema, skipFields: { [fieldName: string]: 1 } = {}) {
@@ -285,9 +287,9 @@ export class Encoder {
                 if (this._validator.validateBySchema(value, member.type)) {
                     // 编码
                     // Part1，ID编码块长度（1）
-                    this._writer.push({ type: 'varint', value: LongBits.from(1) });
+                    this._writer.push({ type: 'varint', value: Varint64.from(1) });
                     // Part2: ID
-                    this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+                    this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
                     // Part3: Payload
                     this._write(value, member.type);
                     return;
@@ -310,7 +312,7 @@ export class Encoder {
                 // 验证通过，编码，由于SkipFields的存在，一个字段只会在它最先出现的那个member内编码
                 if (this._validator.validateInterfaceReference(value, schema, unionFields)) {
                     // ID
-                    this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+                    this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
                     // Payload
                     this._writeInterface(value, schema, skipFields);
                     ++idNum;
@@ -320,7 +322,7 @@ export class Encoder {
             // 已经编码
             if (idNum > 0) {
                 // 前置ID数量
-                this._writer.ops.splice(encodeStartPos, 0, this._writer.req2op({ type: 'varint', value: LongBits.from(idNum) }));
+                this._writer.ops.splice(encodeStartPos, 0, this._writer.req2op({ type: 'varint', value: Varint64.from(idNum) }));
                 return;
             }
         }
@@ -331,12 +333,12 @@ export class Encoder {
 
     private _writeIntersection(value: any, schema: IntersectionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}) {
         // ID数量（member数量）
-        this._writer.push({ type: 'varint', value: LongBits.from(schema.members.length) });
+        this._writer.push({ type: 'varint', value: Varint64.from(schema.members.length) });
 
         // 按Member依次编码
         for (let member of schema.members) {
             // ID
-            this._writer.push({ type: 'varint', value: LongBits.from(member.id) });
+            this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
             // 编码块
             this._write(value, member.type, skipFields);
         }
@@ -344,12 +346,12 @@ export class Encoder {
 
     // private _writeIdBlocks(blocks: IDBlockItem[]) {
     //     // 字段数量: Varint
-    //     this._writer.push({ type: 'varint', value: LongBits.from(blocks.length) });
+    //     this._writer.push({ type: 'varint', value: Varint64.from(blocks.length) });
 
     //     // 依次编码
     //     for (let item of blocks) {
     //         // ID
-    //         this._writer.push({ type: 'varint', value: LongBits.from(item.id) });
+    //         this._writer.push({ type: 'varint', value: Varint64.from(item.id) });
     //         // Payload
     //         this._write(item.value, item.schema)
     //     }

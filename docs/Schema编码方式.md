@@ -40,7 +40,7 @@ Schema编码方式
 - `[byteLength: varint, Buffer]`
 
 ## Enum
-- `[Value: Varint]`
+- `[Value: Varint(ZigZag)]`
 
 ## 引用类型，按实际引用编码
 - IndexedAccess
@@ -65,12 +65,14 @@ BlockID组成方式 实际ID + 末尾1Bit
 
 ### IndexSignature Block
 ```
-[
-    [字段名1: string, Payload1],
-    [字段名2: string, Payload2],
-    ...
-]
+[ 字段名: string, Payload ]
 ```
+
+### Extend Block
+- Block同interface
+
+### Property Block
+- Block即为值Payload
 
 ## MappedType
 ### Pick/Omit/Partial
@@ -93,7 +95,7 @@ BlockID组成方式 实际ID + 末尾1Bit
 ## Number
 采用类似Protobuf的编码方式
 - uint: Varint
-- int: ZigZag and Varint
+- int: Varint(ZigZag)
 - int32/uint32/float32: 32位定长
 - int64/uint64/double: 64位定长
 - bigint: `[byteLength: varint, bytes]`
@@ -102,7 +104,8 @@ BlockID组成方式 实际ID + 末尾1Bit
 - 同其target的interface，编码ID亦一致
 
 ## Overwrite
-- `[targetID块, overwriteID块]`
+- `[target interface ID块, overwrite interface ID块]`
+- 以上ID块，均同interface
 - 字段出现在overwriteID块的情况
     - 字段在overwrite schema中有定义
     - 字段属于indexSignature，而overwrite中有定义indexSignature
@@ -114,6 +117,7 @@ BlockID组成方式 实际ID + 末尾1Bit
 - `[byteLength: varint, buffer]`
 
 ## Tuple
+- 同 `Array`
 - `[数组长度: varint, Payload1, Payload2, ...]`
 
 ## Intersection / Union

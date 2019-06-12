@@ -1,7 +1,6 @@
-import { VarintUtil } from "../models/VarintUtil";
 import { Utf8Util } from '../models/Utf8Util';
 import { WriteReq } from './BufferWriter';
-import { LongBits } from '../models/LongBits';
+import { Varint64 } from '../models/Varint64';
 
 /**
  * 用Op来串联 next
@@ -32,7 +31,7 @@ export class BufferWriter {
         if (req.type === 'string' || req.type === 'buffer') {
             let valueLength = this.measureLength(req);
             // Length
-            this.push({ type: 'varint', value: LongBits.from(valueLength) });
+            this.push({ type: 'varint', value: Varint64.from(valueLength) });
             // Value
             return {
                 ...req,
@@ -51,7 +50,7 @@ export class BufferWriter {
     measureLength(req: WriteReq): number {
         switch (req.type) {
             case 'varint':
-                return req.value.getVarintLength();
+                return req.value.byteLength;
             case 'string':
                 return Utf8Util.measureLength(req.value);
             case 'buffer':
@@ -78,7 +77,10 @@ export class BufferWriter {
         for (let op of this._ops) {
             switch (op.type) {
                 case 'varint':
-                    VarintUtil.encodeUint64(op.value, arr, pos);
+                    let newPos = op.value.writeToBuffer(arr, pos);
+                    if (newPos !== pos + op.length) {
+                        throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}`);
+                    }
                     break;
                 case 'int32':
                     view.setInt32(pos, op.value);
@@ -152,7 +154,7 @@ export interface WriteBooleanReq {
 }
 export interface WriteVarintReq {
     type: 'varint',
-    value: LongBits
+    value: Varint64
 }
 export type WriteReq = WriteNumberReq | WriteStringReq | WriteBufferReq | WriteBooleanReq | WriteVarintReq;
 export type WriteOp = WriteReq & { length: number }
