@@ -51,6 +51,9 @@ export class Decoder {
             case 'Any':
             case 'NonPrimitive':
                 let jsonStr = this._reader.readString();
+                if (jsonStr === 'undefined') {
+                    return undefined;
+                }
                 return JSON.parse(jsonStr);
             case 'Literal':
                 return schema.literal;

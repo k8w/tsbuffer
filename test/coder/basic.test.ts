@@ -185,14 +185,34 @@ describe('Basic Encode', function () {
     });
 
     it('Any', function () {
+        let tsb = new TSBuffer({
+            a: {
+                b: {
+                    type: 'Any'
+                }
+            }
+        });
 
-    });
-
-    it('Literal', function () {
-
+        [0, 123, 'abc', true, null, undefined, { a: 1, b: '测试', c: [1, 2, 3] }, [1, 2, '3a', 'adf3']].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+        });
     });
 
     it('NonPrimitive', function () {
+        let tsb = new TSBuffer({
+            a: {
+                b: {
+                    type: 'NonPrimitive'
+                }
+            }
+        });
+
+        [{ a: 1, b: '测试', c: [1, 2, 3] }, [1, 2, '3a', 'adf3']].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+        });
+    });
+
+    it('Literal', function () {
 
     });
 

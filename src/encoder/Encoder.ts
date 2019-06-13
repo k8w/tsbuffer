@@ -56,6 +56,13 @@ export class Encoder {
                 this._writer.push({ type: 'varint', value: Varint64.from(enumItem.id) });
                 break;
             case 'Any':
+                if (value === undefined) {
+                    this._writer.push({ type: 'string', value: 'undefined' });
+                }
+                else {
+                    this._writer.push({ type: 'string', value: JSON.stringify(value) });
+                }
+                break;
             case 'NonPrimitive':
                 this._writer.push({ type: 'string', value: JSON.stringify(value) });
                 break;
