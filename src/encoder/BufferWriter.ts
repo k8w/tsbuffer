@@ -79,7 +79,7 @@ export class BufferWriter {
                 case 'varint':
                     let newPos = op.value.writeToBuffer(arr, pos);
                     if (newPos !== pos + op.length) {
-                        throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}`);
+                        throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}, value is ${op.value.toNumber()}`);
                     }
                     break;
                 case 'int32':

@@ -85,11 +85,9 @@ export class Varint64 {
      * 编码
      * @param buf 
      * @param pos 
-     * @returns 编码的字节长度
+     * @returns 编码后最新的pos
      */
     writeToBuffer(buf: Uint8Array, pos: number): number {
-        let startPos = pos;
-
         while (this._uint32s[0]) {
             buf[pos++] = this._uint32s[1] & 127 | 128;
             this._uint32s[1] = (this._uint32s[1] >>> 7 | this._uint32s[0] << 25) >>> 0;
@@ -101,7 +99,7 @@ export class Varint64 {
         }
         buf[pos++] = this._uint32s[1];
 
-        return pos - startPos;
+        return pos;
     }
 
     static readFromBuffer(buf: Uint8Array, pos: number): Varint64 {

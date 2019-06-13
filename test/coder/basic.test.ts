@@ -176,8 +176,6 @@ describe('Basic Encode', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        console.log(JSON.stringify(proto, null, 2));
-
         [TestEnum.v0, TestEnum.v1, TestEnum.v100, TestEnum.v101, TestEnum.vabc, TestEnum.vf100, TestEnum.vf99].forEach(v => {
             assert.equal(tsb.encode(v, 'a', 'TestEnum').length, 1);
             assert.strictEqual(tsb.decode(tsb.encode(v, 'a', 'TestEnum'), 'a', 'TestEnum'), v);
