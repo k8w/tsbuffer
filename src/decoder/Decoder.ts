@@ -6,6 +6,7 @@ import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSc
 import { InterfaceReference } from "tsbuffer-schema/src/InterfaceReference";
 import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
+import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 
 export class Decoder {
 
@@ -61,12 +62,9 @@ export class Decoder {
                 return this._read(schema.target);
             case 'Overwrite':
                 return this._readOverwrite(schema);
-            // case 'Union':
-            //     this._writeUnion(value, schema, skipFields);
-            //     break;
-            // case 'Intersection':
-            //     this._writeIntersection(value, schema, skipFields);
-            //     break;
+            case 'Union':
+            case 'Intersection':
+                return this._readUnionOrIntersection(schema);
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
@@ -144,7 +142,7 @@ export class Decoder {
         return Object.assign({}, target, overwrite);
     }
 
-    private _readUnion(schema: UnionTypeSchema): unknown {
+    private _readUnionOrIntersection(schema: UnionTypeSchema | IntersectionTypeSchema): unknown {
         let output: any;
 
         let idNum = this._reader.readUint();
@@ -152,7 +150,7 @@ export class Decoder {
             let id = this._reader.readUint();
             let member = schema.members.find(v => v.id === id);
             if (!member) {
-                throw new Error(`Error union encoding: invalid member id ${id}`);
+                throw new Error(`Error ${schema.type} encoding: invalid member id ${id}`);
             }
             let value = this._read(member.type);
             if (this._isObject(output) && this._isObject(value)) {
