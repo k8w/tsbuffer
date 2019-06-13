@@ -10,6 +10,8 @@ import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 import { Varint64 } from '../models/Varint64';
+import { TypedArrays, TypedArray, TypedArrayConstructor } from '../TypedArrays';
+import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
 
 export class Encoder {
 
@@ -72,7 +74,7 @@ export class Encoder {
                 this._writeInterface(value, schema, skipFields);
                 break;
             case 'Buffer':
-                this._writer.push({ type: 'buffer', value: value.buffer || value });
+                this._writeBuffer(value, schema);
                 break;
             case 'IndexedAccess':
             case 'Reference':
@@ -352,6 +354,24 @@ export class Encoder {
             this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
             // 编码块
             this._write(value, member.type, skipFields);
+        }
+    }
+
+    private _writeBuffer(value: ArrayBuffer | TypedArray, schema: BufferTypeSchema) {
+        // ArrayBuffer 转为Uint8Array
+        if (value instanceof ArrayBuffer) {
+            this._writer.push({ type: 'buffer', value: new Uint8Array(value) });
+        }
+        // Uint8Array 直接写入
+        else if (value instanceof Uint8Array) {
+            this._writer.push({ type: 'buffer', value: value });
+        }
+        // 其它TypedArray 转为Uint8Array
+        else {
+            let key = value.constructor.name as keyof typeof TypedArrays;
+            let arrType = TypedArrays[key];
+            let uint8Arr = new Uint8Array(value.buffer, value.byteOffset, value.length * arrType.BYTES_PER_ELEMENT);
+            this._writer.push({ type: 'buffer', value: uint8Arr });
         }
     }
 

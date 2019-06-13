@@ -47,14 +47,14 @@ export class BufferReader {
     }
 
     readString(): string {
-        let strByteLength = this.readVarint().toNumber(true);
+        let strByteLength = this.readUint();
         let str = Utf8Util.decode(this._buf, this._pos, strByteLength);
         this._pos += strByteLength;
         return str;
     }
 
     readBuffer(): Uint8Array {
-        let bufByteLength = this.readVarint().toNumber(true);
+        let bufByteLength = this.readUint();
         let buf = this._buf.subarray(this._pos, this._pos + bufByteLength);
         this._pos += bufByteLength;
         return buf;

@@ -3,10 +3,10 @@ import { BufferReader } from './BufferReader';
 import { NumberTypeSchema } from "tsbuffer-schema/src/schemas/NumberTypeSchema";
 import { TSBufferValidator } from "tsbuffer-validator";
 import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
-import { InterfaceReference } from "tsbuffer-schema/src/InterfaceReference";
 import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
+import { TypedArrays } from '../TypedArrays';
 
 export class Decoder {
 
@@ -58,9 +58,35 @@ export class Decoder {
             case 'Literal':
                 return schema.literal;
             case 'Interface':
-                this._readInterface(schema);
+                return this._readInterface(schema);
             case 'Buffer':
-                return this._reader.readBuffer();
+                let uint8Arr = this._reader.readBuffer();
+                if (schema.arrayType) {
+                    if (schema.arrayType === 'BigInt64Array' || schema.arrayType === 'BigUint64Array') {
+                        throw new Error('Unsupported arrayType: ' + schema.arrayType);
+                    }
+                    // Uint8Array 性能最高
+                    else if (schema.arrayType === 'Uint8Array') {
+                        return uint8Arr;
+                    }
+                    // 其余TypedArray 可能需要内存拷贝 性能次之
+                    else {
+                        let typedArr = TypedArrays[schema.arrayType];
+                        // 字节对齐，可以直接转，无需拷贝内存
+                        if (uint8Arr.byteOffset % typedArr.BYTES_PER_ELEMENT === 0) {
+                            return new typedArr(uint8Arr.buffer, uint8Arr.byteOffset, uint8Arr.byteLength / typedArr.BYTES_PER_ELEMENT);
+                        }
+                        // 字节不对齐，不能直接转，只能拷贝内存后再生成
+                        else {
+                            let arrBuf = uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
+                            return new typedArr(arrBuf);
+                        }
+                    }
+                }
+                else {
+                    // ArrayBuffer涉及内存拷贝，性能较低，不建议用
+                    return uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
+                }
             case 'IndexedAccess':
             case 'Reference':
                 return this._read(this._validator.protoHelper.parseReference(schema));

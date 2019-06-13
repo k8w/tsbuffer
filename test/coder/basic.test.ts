@@ -213,11 +213,107 @@ describe('Basic Encode', function () {
     });
 
     it('Literal', function () {
+        let tsb = new TSBuffer({
+            a: {
+                v123: {
+                    type: 'Literal',
+                    literal: 123
+                },
+                vabc: {
+                    type: 'Literal',
+                    literal: 'abc'
+                },
+                vnull: {
+                    type: 'Literal',
+                    literal: null
+                },
+                vundef: {
+                    type: 'Literal',
+                    literal: undefined
+                }
+            }
+        });
 
+        ([['v123', 123], ['vabc', 'abc'], ['vnull', null], ['vundef', undefined]] as const).forEach(v => {
+            assert.equal(tsb.encode(v[1], 'a', v[0]), 0);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v[1], 'a', v[0]), 'a', v[0]), v[1]);
+        });
     });
 
     it('Buffer', function () {
+        // ArrayBuffer
+        let tsb = new TSBuffer({
+            a: {
+                b: {
+                    type: 'Buffer'
+                }
+            }
+        });
+        let buf = new Uint8Array([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
+        assert.equal(tsb.encode(buf.buffer, 'a', 'b').length, 11);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(buf, 'a', 'b'), 'a', 'b'), buf.buffer);
 
+        // TypedArray
+        const typedArrays = {
+            Int8Array: {
+                type: Int8Array,
+                itemByteLength: 1
+            },
+            Int16Array: {
+                type: Int16Array,
+                itemByteLength: 2
+            },
+            Int32Array: {
+                type: Int32Array,
+                itemByteLength: 4
+            },
+            Uint8Array: {
+                type: Uint8Array,
+                itemByteLength: 1
+            },
+            Uint16Array: {
+                type: Uint16Array,
+                itemByteLength: 2
+            },
+            Uint32Array: {
+                type: Uint32Array,
+                itemByteLength: 4
+            },
+            Float32Array: {
+                type: Float32Array,
+                itemByteLength: 4
+            },
+            Float64Array: {
+                type: Float64Array,
+                itemByteLength: 8
+            }
+        } as const;
+        for (let key in typedArrays) {
+            let tsb = new TSBuffer({
+                a: {
+                    b: {
+                        type: 'Buffer',
+                        arrayType: key as keyof typeof typedArrays
+                    }
+                }
+            });
+            let arrItem = typedArrays[key as keyof typeof typedArrays];
+
+            // 完整的ArrayBuffer试一遍
+            let arr1 = new arrItem.type([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
+            assert.equal(tsb.encode(arr1, 'a', 'b').length, 1 + 10 * arrItem.itemByteLength);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(arr1, 'a', 'b'), 'a', 'b'), arr1, key + ' failed');
+
+            // 使用subarray生成数组
+            let value = [1, 3, 5, 7, 9, 2, 4, 6, 8, 0];
+            let wholeOri = Array.from({ length: 7 }, () => 0).concat(value).concat(Array.from({ length: 13 }, () => 0))
+            let wholeTyped = new arrItem.type(wholeOri);
+            let arr = wholeTyped.subarray(7, 7 + value.length);
+            assert.deepStrictEqual(arr, new arrItem.type(value));
+            // subarray 测试
+            assert.equal(tsb.encode(arr, 'a', 'b').length, 1 + 10 * arrItem.itemByteLength);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(arr, 'a', 'b'), 'a', 'b'), arr, key + ' failed');
+        }
     });
 });
 

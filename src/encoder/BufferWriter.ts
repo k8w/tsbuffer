@@ -101,7 +101,7 @@ export class BufferWriter {
                     }
                     break;
                 case 'buffer':
-                    arr.subarray(pos, pos + op.length).set(new Uint8Array(op.value));
+                    arr.subarray(pos, pos + op.length).set(op.value);
                     break;
                 case 'boolean':
                     view.setUint8(pos, op.value ? 255 : 0);
@@ -146,7 +146,7 @@ export interface WriteStringReq {
 }
 export interface WriteBufferReq {
     type: 'buffer',
-    value: ArrayBuffer
+    value: Uint8Array
 }
 export interface WriteBooleanReq {
     type: 'boolean',
