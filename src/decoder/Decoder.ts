@@ -18,8 +18,8 @@ export class Decoder {
         this._validator = validator;
     }
 
-    decode(buffer: ArrayBuffer, schema: TSBufferSchema): unknown {
-        this._reader.load(buffer);
+    decode(buffer: ArrayBuffer | Uint8Array, schema: TSBufferSchema): unknown {
+        this._reader.load((buffer as Uint8Array).buffer || buffer);
         return this._read(schema);
     }
 
@@ -42,7 +42,12 @@ export class Decoder {
                 }
                 return output;
             case 'Enum':
-                return this._reader.readVarint().toNumber();
+                let enumId = this._reader.readVarint().toNumber();
+                let enumItem = schema.members.find(v => v.id === enumId);
+                if (!enumItem) {
+                    throw new Error(`Error enum encoding: unexpected id ${enumId}`);
+                }
+                return enumItem.value;
             case 'Any':
             case 'NonPrimitive':
                 let jsonStr = this._reader.readString();
@@ -78,7 +83,7 @@ export class Decoder {
             // 定长编码
             case 'int32':
             case 'uint32':
-            case 'float':
+            // case 'float':
             case 'double':
                 return this._reader.readNumber(scalarType);
             // Varint编码

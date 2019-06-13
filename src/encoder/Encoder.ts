@@ -49,7 +49,11 @@ export class Encoder {
                 }
                 break;
             case 'Enum':
-                this._writer.push({ type: 'varint', value: Varint64.from(value) });
+                let enumItem = schema.members.find(v => v.value === value);
+                if (!enumItem) {
+                    throw new Error(`Unexpect enum value: ${value}`);
+                }
+                this._writer.push({ type: 'varint', value: Varint64.from(enumItem.id) });
                 break;
             case 'Any':
             case 'NonPrimitive':
@@ -94,7 +98,7 @@ export class Encoder {
             // 定长编码
             case 'int32':
             case 'uint32':
-            case 'float':
+            // case 'float':
             case 'double':
                 this._writer.push({ type: scalarType, value: value });
                 break;
