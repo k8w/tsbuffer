@@ -123,6 +123,14 @@ BlockID组成方式 实际ID + 末尾1Bit
 ## Intersection / Union
 - ID编码块
 - 如果2个ID内部有共同的字段，那么在前序ID中一旦编码，后续ID不再重复编码
+```
+[
+    ID数量: varint,
+    [ID1, Payload1],
+    [ID2, Payload2],
+    ...
+]
+```
 
 # BufferWrite Operation
 

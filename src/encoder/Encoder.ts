@@ -175,11 +175,6 @@ export class Encoder {
                 }
                 skipFields[property.name] = 1;
 
-                // undefined
-                if (value[property.name] === undefined) {
-                    continue;
-                }
-
                 let blockId = property.id + Config.interface.maxExtendsNum + 1;
                 // BlockID (propertyID)
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
@@ -297,7 +292,7 @@ export class Encoder {
         // 非interface，直接验证，验证通过即可编码，且与其它Member互斥
         if (nonInterfaceMembers.length) {
             for (let member of nonInterfaceMembers) {
-                if (this._validator.validateBySchema(value, member.type)) {
+                if (this._validator.validateBySchema(value, member.type).isSucc) {
                     // 编码
                     // Part1，ID编码块长度（1）
                     this._writer.push({ type: 'varint', value: Varint64.from(1) });
@@ -323,7 +318,7 @@ export class Encoder {
             for (let member of interfaceMembers) {
                 let schema = this._validator.protoHelper.parseReference(member.type) as InterfaceTypeSchema | InterfaceReference;
                 // 验证通过，编码，由于SkipFields的存在，一个字段只会在它最先出现的那个member内编码
-                if (this._validator.validateInterfaceReference(value, schema, unionFields)) {
+                if (this._validator.validateInterfaceReference(value, schema, unionFields).isSucc) {
                     // ID
                     this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
                     // Payload
