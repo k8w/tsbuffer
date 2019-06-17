@@ -116,4 +116,31 @@ describe('LogicTypes', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
         });
     })
+
+    it('A&B | C&D)', async function () {
+        let proto = await new TSBufferSchemaGenerator({
+            readFile: () => `
+                type A = { a: string };
+                type B = { b: number };
+                type C = { c: 'asdfasdf' };
+                type D = { d: boolean | null };
+                export type b = (A & B) | (C&D);
+                export type b1 = A & B | C&D;
+                export type b2 = A & B | (C&D);
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        [
+            { a: 'asdgasdg', b: 1234567890 },
+            { c: 'asdfasdf', d: true },
+            { c: 'asdfasdf', d: null },
+            { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf', d: null },
+            { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf', d: false },
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b2'), 'a', 'b2'), v);
+        });
+    })
 })
