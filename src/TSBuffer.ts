@@ -17,21 +17,41 @@ export class TSBuffer {
         this._decoder = new Decoder(this._validator);
     }
 
-    encode(value: any, path: string, symbolName: string) {
+    encode(value: any, path: string, symbolName: string, options?: {
+        skipValidate?: boolean
+    }) {
         let schema = this._proto[path][symbolName];
         if (!schema) {
             throw new Error(`Cannot find schema ${symbolName} at ${path}`)
+        }
+
+        if (!options || !options.skipValidate) {
+            let vRes = this._validator.validateBySchema(value, schema);
+            if (!vRes.isSucc) {
+                throw new Error(`Invalid value: ${vRes.originalError.message}`)
+            }
         }
 
         return this._encoder.encode(value, schema);
     }
 
-    decode(buf: ArrayBuffer, path: string, symbolName: string): unknown {
+    decode(buf: ArrayBuffer, path: string, symbolName: string, options?: {
+        skipValidate?: boolean
+    }): unknown {
         let schema = this._proto[path][symbolName];
         if (!schema) {
             throw new Error(`Cannot find schema ${symbolName} at ${path}`)
         }
 
-        return this._decoder.decode(buf, schema);
+        let value = this._decoder.decode(buf, schema)
+
+        if (!options || !options.skipValidate) {
+            let vRes = this._validator.validateBySchema(value, schema);
+            if (!vRes.isSucc) {
+                throw new Error(`Invalid decoded value: ${vRes.originalError.message}`)
+            }
+        }
+
+        return value;
     }
 }

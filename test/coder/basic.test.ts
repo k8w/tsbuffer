@@ -99,7 +99,7 @@ describe('Basic Encode', function () {
         });
 
         assert.equal(tsb.encode(60, 'a', 'b').length, 1);
-        assert.equal(tsb.encode(-60, 'a', 'b').length, 10);
+        assert.equal(tsb.encode(-60, 'a', 'b', { skipValidate: true }).length, 10);
 
         [0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER - 1].forEach(v => {
             assert.strictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
@@ -135,7 +135,7 @@ describe('Basic Encode', function () {
         });
 
         assert.equal(tsb.encode(60, 'a', 'b').length, 4);
-        assert.equal(tsb.encode(-60, 'a', 'b').length, 4);
+        assert.equal(tsb.encode(-60, 'a', 'b', { skipValidate: true }).length, 4);
 
         [0, 4294967295].forEach(v => {
             assert.strictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
@@ -249,7 +249,7 @@ describe('Basic Encode', function () {
         });
         let buf = new Uint8Array([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
         assert.equal(tsb.encode(buf.buffer, 'a', 'b').length, 11);
-        assert.deepStrictEqual(tsb.decode(tsb.encode(buf, 'a', 'b'), 'a', 'b'), buf.buffer);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(buf.buffer, 'a', 'b'), 'a', 'b'), buf.buffer);
 
         // TypedArray
         const typedArrays = {

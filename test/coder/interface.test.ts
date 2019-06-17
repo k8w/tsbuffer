@@ -21,7 +21,7 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: '哈哈' }, 'a', 'b').length, 9);
+        assert.equal(tsb.encode({ a: '哈哈' }, 'a', 'b', { skipValidate: true }).length, 9);
         assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a', 'b').length, 9);
         assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a', 'b').length, 12);
         assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a', 'b').length, 20);
