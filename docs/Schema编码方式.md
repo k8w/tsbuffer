@@ -104,7 +104,7 @@ BlockID组成方式 实际ID + 末尾1Bit
 - 同其target的interface，编码ID亦一致
 
 ## Overwrite
-- `[target interface ID块, overwrite interface ID块]`
+- `[overwrite interface ID块, target interface ID块]`
 - 以上ID块，均同interface
 - 字段出现在overwriteID块的情况
     - 字段在overwrite schema中有定义

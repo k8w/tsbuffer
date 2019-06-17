@@ -123,7 +123,7 @@ export class Encoder {
         }
     }
 
-    private _writeInterface(value: any, schema: InterfaceTypeSchema | InterfaceReference, skipFields: { [fieldName: string]: 1 } = {}) {
+    private _writeInterface(value: any, schema: InterfaceTypeSchema | InterfaceReference, skipFields: { [fieldName: string]: 1 } = {}, skipIndexSignature?: boolean) {
         // 记录起始op位置，用于最后插入BlockID数量
         let opStartOps = this._writer.ops.length;
         let blockIdCount = 0;
@@ -155,7 +155,10 @@ export class Encoder {
                 let blockId = extend.id + 1;
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
                 // extend Block
-                this._writeInterface(value, extend.type, skipFields);
+                this._writeInterface(value, extend.type, skipFields,
+                    // 确保indexSignature是在最小层级编码
+                    !!parsedSchema.indexSignature || skipIndexSignature // 如果父级有indexSignature 或 父级跳过 则跳过indexSignature
+                );
 
                 ++blockIdCount;
             }
@@ -186,27 +189,29 @@ export class Encoder {
         }
 
         // indexSignature
-        let flat = this._validator.protoHelper.getFlatInterfaceSchema(parsedSchema);
-        if (flat.indexSignature) {
-            for (let key in value) {
-                if (value[key] === undefined) {
-                    continue;
+        if (!skipIndexSignature) {
+            let flat = this._validator.protoHelper.getFlatInterfaceSchema(parsedSchema);
+            if (flat.indexSignature) {
+                for (let key in value) {
+                    if (value[key] === undefined) {
+                        continue;
+                    }
+
+                    // SkipFields
+                    if (skipFields[key]) {
+                        continue;
+                    }
+                    skipFields[key] = 1;
+
+                    // BlockID == 0
+                    this._writer.push({ type: 'varint', value: Varint64.from(0) });
+                    // 字段名
+                    this._writer.push({ type: 'string', value: key });
+                    // Value Payload
+                    this._write(value[key], flat.indexSignature.type);
+
+                    ++blockIdCount;
                 }
-
-                // SkipFields
-                if (skipFields[key]) {
-                    continue;
-                }
-                skipFields[key] = 1;
-
-                // BlockID == 0
-                this._writer.push({ type: 'varint', value: Varint64.from(0) });
-                // 字段名
-                this._writer.push({ type: 'string', value: key });
-                // Value Payload
-                this._write(value[key], flat.indexSignature.type);
-
-                ++blockIdCount;
             }
         }
 

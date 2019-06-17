@@ -167,11 +167,11 @@ export class Decoder {
     }
 
     private _readOverwrite(schema: OverwriteTypeSchema): unknown {
-        // Target Block
-        let target = this._read(schema.target);
-
         // Overwrite Block
         let overwrite = this._read(schema.overwrite);
+
+        // Target Block
+        let target = this._read(schema.target);        
 
         return Object.assign({}, target, overwrite);
     }
