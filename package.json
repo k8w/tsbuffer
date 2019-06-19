@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -13,6 +13,8 @@
   },
   "devDependencies": {},
   "scripts": {
+    "build": "rm -rf dist && tsc -d && cp package.json LICENSE README.md dist/",
+    "bp": "npm version patch && npm run build && cd dist && npm publish & cd..",
     "test": "cd test && npx mocha --opts mocha.opts **\\*.test.ts & cd ..",
     "us": "npm install tsbuffer-schema@* tsbuffer-validator@*"
   },
