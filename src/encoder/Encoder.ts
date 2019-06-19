@@ -10,7 +10,7 @@ import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 import { Varint64 } from '../models/Varint64';
-import { TypedArrays, TypedArray, TypedArrayConstructor } from '../TypedArrays';
+import { TypedArrays, TypedArray } from '../TypedArrays';
 import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
 import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
 

@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.2.0",
-    "tsbuffer-schema": "^0.8.0",
-    "tsbuffer-validator": "^0.3.10"
+    "tsbuffer-schema": "^0.9.0",
+    "tsbuffer-validator": "^0.4.0"
   },
   "devDependencies": {},
   "scripts": {

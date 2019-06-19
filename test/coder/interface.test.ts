@@ -1,10 +1,10 @@
 import * as assert from 'assert';
-import { TSBufferSchemaGenerator } from 'tsbuffer-schema-generator';
+import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
 import { TSBuffer } from '../..';
 
 describe('Interface', function () {
     it('property', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface b {
                     a: string;
@@ -21,11 +21,11 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: '哈哈' }, 'a', 'b', { skipValidate: true }).length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a', 'b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a', 'b').length, 12);
-        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a', 'b').length, 20);
-        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a', 'b').length, 22);
+        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b', { skipValidate: true }).length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 12);
+        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 20);
+        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 22);
 
         [
             { a: 'xx' },
@@ -39,13 +39,13 @@ describe('Interface', function () {
             { a: 'xxxx', e: { a: '1'.repeat(1000), b: 60 } },
             { a: 'xxxx', f: { a: 'xxx', b: 'xxx' } },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
-        assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxxx', b: undefined }, 'a', 'b'), 'a', 'b'), { a: 'xxxx' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxxx', b: undefined }, 'a/b'), 'a/b'), { a: 'xxxx' });
     })
 
     it('indexSignature', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface b {
                     a: string;
@@ -55,21 +55,21 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: '哈哈' }, 'a', 'b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'a' }, 'a', 'b').length, 14);
-        assert.equal(tsb.encode({ a: '哈哈', abc: 'a' }, 'a', 'b').length, 16);
+        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b').length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'a' }, 'a/b').length, 14);
+        assert.equal(tsb.encode({ a: '哈哈', abc: 'a' }, 'a/b').length, 16);
 
         [
             { a: 'xx' },
             { a: 'xx', b: '' },
             { a: 'xx', b: 'xx', c: 'xxx', zxvzxcvzxv: 'xxxx' },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
     })
 
     it('extends', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 interface base1 {
                     v1: 'base1';
@@ -88,9 +88,9 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a', 'b').length, 12);
-        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a', 'b').length, 21);
-        assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a', 'b'), new Uint8Array([
+        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a/b').length, 12);
+        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').length, 21);
+        assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a/b'), new Uint8Array([
             4,
             1,
             1, 10,
@@ -107,12 +107,12 @@ describe('Interface', function () {
             { v1: 'base1', v2: 'base2', a: 'xxx' },
             { v1: 'base1', v2: 'base2', a: 'xxx', b: 'ccc' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
     })
 
     it('nested interface', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface b {
                     a: {
@@ -148,12 +148,12 @@ describe('Interface', function () {
                 }
             }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
     })
 
     it('Pick', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface base {
                     a: string;
@@ -171,18 +171,18 @@ describe('Interface', function () {
             { a: 'xxx' },
             { a: 'xxx', c: { value: 'xxx' } }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
 
         [
             { a: 'xxx' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
     })
 
     it('Omit', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface base {
                     a: string;
@@ -200,18 +200,18 @@ describe('Interface', function () {
         [
             { a: 'xxx', b: 123 }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
 
         [
             { a: 'xxx' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
     })
 
     it('Partial', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface base {
                     a: string;
@@ -233,7 +233,7 @@ describe('Interface', function () {
             { a: 'xxx', b: 123, c: { value: 'xxx' } },
             { a: 'xxx', b: 123, c: { value: 'xxx' }, d: [true, false] },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
 
         [
@@ -243,12 +243,12 @@ describe('Interface', function () {
             { a: 'xxx', b: 123, c: { value: 'xxx' } },
             { a: 'xxx', b: 123, c: { value: 'xxx' }, d: [true, false] },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
     })
 
     it('Overwrite', async function () {
-        let proto = await new TSBufferSchemaGenerator({
+        let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export interface base {
                     a: string;
@@ -261,12 +261,12 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a', 'b').length, 11);
+        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 11);
 
         [
             { a: 'xxx', b: { value: 1234 } },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b'), 'a', 'b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });
 
         [
@@ -279,7 +279,7 @@ describe('Interface', function () {
                 ff: null
             },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a', 'b1'), 'a', 'b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
     })
 })

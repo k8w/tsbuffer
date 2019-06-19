@@ -17,12 +17,18 @@ export class TSBuffer {
         this._decoder = new Decoder(this._validator);
     }
 
-    encode(value: any, path: string, symbolName: string, options?: {
+    /**
+     * 编码
+     * @param value 要编码的值
+     * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
+     * @param options.skipValidate 跳过编码前的验证步骤（不安全）
+     */
+    encode(value: any, schemaId: string, options?: {
         skipValidate?: boolean
     }) {
-        let schema = this._proto[path][symbolName];
+        let schema = this._proto[schemaId];
         if (!schema) {
-            throw new Error(`Cannot find schema ${symbolName} at ${path}`)
+            throw new Error(`Cannot find schema： ${schemaId}`)
         }
 
         if (!options || !options.skipValidate) {
@@ -35,12 +41,18 @@ export class TSBuffer {
         return this._encoder.encode(value, schema);
     }
 
-    decode(buf: ArrayBuffer, path: string, symbolName: string, options?: {
+    /**
+     * 解码
+     * @param buf 二进制数据
+     * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
+     * @param options.skipValidate 跳过解码后的验证步骤（不安全）
+     */
+    decode(buf: ArrayBuffer, schemaId: string, options?: {
         skipValidate?: boolean
     }): unknown {
-        let schema = this._proto[path][symbolName];
+        let schema = this._proto[schemaId];
         if (!schema) {
-            throw new Error(`Cannot find schema ${symbolName} at ${path}`)
+            throw new Error(`Cannot find schema: ${schemaId}`)
         }
 
         let value = this._decoder.decode(buf, schema)
