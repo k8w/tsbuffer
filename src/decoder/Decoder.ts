@@ -18,8 +18,8 @@ export class Decoder {
         this._validator = validator;
     }
 
-    decode(buffer: ArrayBuffer | Uint8Array, schema: TSBufferSchema): unknown {
-        this._reader.load((buffer as Uint8Array).buffer || buffer);
+    decode(buffer: Uint8Array, schema: TSBufferSchema): unknown {
+        this._reader.load(buffer);
         return this._read(schema);
     }
 

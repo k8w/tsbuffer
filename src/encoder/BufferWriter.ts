@@ -71,40 +71,40 @@ export class BufferWriter {
     finish(): Uint8Array {
         let byteLength = this._ops.sum(v => v.length);
         let pos = 0;
-        let arr = new Uint8Array(byteLength);
-        let view = new DataView(arr.buffer);
+        let buf = new Uint8Array(byteLength);
+        let view = new DataView(buf.buffer);
 
         for (let op of this._ops) {
             switch (op.type) {
                 case 'varint':
-                    let newPos = op.value.writeToBuffer(arr, pos);
+                    let newPos = op.value.writeToBuffer(buf, pos);
                     if (newPos !== pos + op.length) {
                         throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}, value is ${op.value.toNumber()}`);
                     }
                     break;
                 case 'int32':
-                    view.setInt32(pos, op.value);
+                    view.setInt32(buf.byteOffset+pos, op.value);
                     break;
                 case 'uint32':
-                    view.setUint32(pos, op.value);
+                    view.setUint32(buf.byteOffset +pos, op.value);
                     break;
                 case 'float':
-                    view.setFloat32(pos, op.value);
+                    view.setFloat32(buf.byteOffset +pos, op.value);
                     break;
                 case 'double':
-                    view.setFloat64(pos, op.value);
+                    view.setFloat64(buf.byteOffset +pos, op.value);
                     break;
                 case 'string':
-                    let encLen = Utf8Util.encode(op.value, arr, pos);
+                    let encLen = Utf8Util.encode(op.value, buf, pos);
                     if (encLen !== op.length) {
                         throw new Error(`Expect ${op.length} bytes but encoded ${encLen} bytes`);
                     }
                     break;
                 case 'buffer':
-                    arr.subarray(pos, pos + op.length).set(op.value);
+                    buf.subarray(pos, pos + op.length).set(op.value);
                     break;
                 case 'boolean':
-                    view.setUint8(pos, op.value ? 255 : 0);
+                    view.setUint8(buf.byteOffset +pos, op.value ? 255 : 0);
                     break;
                 default:
                     break;
@@ -112,7 +112,7 @@ export class BufferWriter {
             pos += op.length;
         }
 
-        return arr;
+        return buf;
     }
 
     // private _zigzag(n: number) {

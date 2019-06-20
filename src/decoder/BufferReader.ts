@@ -6,10 +6,10 @@ export class BufferReader {
     private _buf!: Uint8Array;
     private _view!: DataView;
 
-    load(buf: ArrayBuffer, pos: number = 0) {
-        this._buf = new Uint8Array(buf);
+    load(buf: Uint8Array, pos: number = 0) {
+        this._buf = buf;
         this._pos = pos;
-        this._view = new DataView(buf);
+        this._view = new DataView(buf.buffer);
     }
 
     readVarint(): Varint64 {
@@ -31,16 +31,16 @@ export class BufferReader {
         switch (scalarType) {
             case 'int32':
                 this._pos += 4;
-                return this._view.getInt32(pos);
+                return this._view.getInt32(this._buf.byteOffset + pos);
             case 'uint32':
                 this._pos += 4;
-                return this._view.getUint32(pos);
+                return this._view.getUint32(this._buf.byteOffset + pos);
             case 'float':
                 this._pos += 4;
-                return this._view.getFloat32(pos);
+                return this._view.getFloat32(this._buf.byteOffset + pos);
             case 'double':
                 this._pos += 8;
-                return this._view.getFloat64(pos);
+                return this._view.getFloat64(this._buf.byteOffset + pos);
             default:
                 throw new Error(`Error scalarType to read: ${scalarType}`)
         }
@@ -61,7 +61,7 @@ export class BufferReader {
     }
 
     readBoolean(): boolean {
-        let value = this._view.getUint8(this._pos++);
+        let value = this._view.getUint8(this._buf.byteOffset + this._pos++);
         if (value === 255) {
             return true;
         }

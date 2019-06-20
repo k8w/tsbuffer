@@ -49,7 +49,7 @@ export class TSBuffer {
      * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      * @param options.skipValidate 跳过解码后的验证步骤（不安全）
      */
-    decode(buf: ArrayBuffer | Uint8Array, schemaId: string, options?: {
+    decode(buf: Uint8Array, schemaId: string, options?: {
         skipValidate?: boolean
     }): unknown {
         let schema = this._proto[schemaId];
