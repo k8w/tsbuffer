@@ -2,6 +2,7 @@ import { TSBufferProto } from "tsbuffer-schema";
 import { Encoder } from './encoder/Encoder';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
+import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 
 export class TSBuffer {
 
@@ -34,7 +35,8 @@ export class TSBuffer {
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                throw new Error(`Invalid value: ${vRes.originalError.message}`)
+                let err = vRes.originalError;
+                throw new Error(`Invalid value: ${err.fieldName ? (err.fieldName + ' ') : ''}${vRes.originalError.message}`)
             }
         }
 
@@ -55,15 +57,26 @@ export class TSBuffer {
             throw new Error(`Cannot find schema: ${schemaId}`)
         }
 
-        let value = this._decoder.decode(buf, schema)
+        let value: unknown;
+        try {
+            value = this._decoder.decode(buf, schema);
+        }
+        catch (e) {
+            throw new Error('Invalid encoding: ' + e.message);
+        }
 
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                throw new Error(`Invalid decoded value: ${vRes.originalError.message}`)
+                let err = vRes.originalError;
+                throw new Error(`Invalid decoded value: ${err.fieldName ? (err.fieldName + ' ') : ''}${vRes.originalError.message}`)
             }
         }
 
         return value;
+    }
+
+    validate(value: any, schemaId: string): ValidateResult {
+        return this._validator.validate(value, schemaId);
     }
 }
