@@ -36,7 +36,7 @@ export class TSBuffer {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
                 let err = vRes.originalError;
-                throw new Error(`Invalid value: ${err.fieldName ? (err.fieldName + ' ') : ''}${vRes.originalError.message}`)
+                throw new Error(`Invalid input: ${err.fieldName ? (err.fieldName + ': ') : ''}${vRes.originalError.message}`)
             }
         }
 
