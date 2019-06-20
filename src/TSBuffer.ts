@@ -35,8 +35,7 @@ export class TSBuffer {
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                let err = vRes.originalError;
-                throw new Error(`Invalid input: ${err.fieldName ? (err.fieldName + ': ') : ''}${vRes.originalError.message}`)
+                throw new Error(`Invalid input:\n    ${vRes.originalError.message}`)
             }
         }
 
@@ -68,8 +67,7 @@ export class TSBuffer {
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                let err = vRes.originalError;
-                throw new Error(`Invalid decoded value: ${err.fieldName ? (err.fieldName + ' ') : ''}${vRes.originalError.message}`)
+                throw new Error(`Invalid decoded value:\n    ${vRes.originalError.message}`)
             }
         }
 
