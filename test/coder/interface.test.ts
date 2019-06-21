@@ -25,7 +25,7 @@ describe('Interface', function () {
         assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').length, 9);
         assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 12);
         assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 20);
-        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 22);
+        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 21);
 
         [
             { a: 'xx' },
@@ -68,6 +68,26 @@ describe('Interface', function () {
         });
     })
 
+    it('Must appeared literal not encode', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    type: 'abcabc',
+                    a: string;
+                    b?: string;
+                }
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        [
+            { type: 'abcabc', a: 'xxx' },
+            { type: 'abcabc', a: 'xxx', b: 'bbb' },
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+        });
+    })
+
     it('extends', async function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `
@@ -88,14 +108,10 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a/b').length, 12);
-        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').length, 21);
+        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a/b').length, 6);
+        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').length, 15);
         assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a/b'), new Uint8Array([
-            4,
-            1,
-            1, 10,
             2,
-            1, 10,
             10,
             3, 120, 120, 120,
             0,
@@ -105,7 +121,7 @@ describe('Interface', function () {
 
         [
             { v1: 'base1', v2: 'base2', a: 'xxx' },
-            { v1: 'base1', v2: 'base2', a: 'xxx', b: 'ccc' }
+            // { v1: 'base1', v2: 'base2', a: 'xxx', b: 'ccc' }
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
         });

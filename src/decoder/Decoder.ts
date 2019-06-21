@@ -163,6 +163,17 @@ export class Decoder {
             }
         }
 
+        // Literal property 由于不编码 将其补回
+        for (let property of flatSchema.properties) {
+            if (output.hasOwnProperty(property.name)) {
+                continue;
+            }
+            let parsedType = this._validator.protoHelper.parseReference(property.type);
+            if (parsedType.type === 'Literal') {
+                output[property.name] = parsedType.literal;
+            }
+        }
+
         return output;
     }
 
@@ -171,7 +182,7 @@ export class Decoder {
         let overwrite = this._read(schema.overwrite);
 
         // Target Block
-        let target = this._read(schema.target);        
+        let target = this._read(schema.target);
 
         return Object.assign({}, target, overwrite);
     }

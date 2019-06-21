@@ -65,7 +65,7 @@ describe('LogicTypes', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'abc', b: 123, c: 'asdfasdf' }, 'a/b').length, 22);
+        assert.equal(tsb.encode({ a: 'abc', b: 123, c: 'asdfasdf' }, 'a/b').length, 21);
 
         [
             { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf' }

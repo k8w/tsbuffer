@@ -155,19 +155,39 @@ export class Encoder {
                 // BlockID = extend.id + 1
                 let blockId = extend.id + 1;
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
+
+                // 写入extend interface前 writeOps的长度
+                let opsLengthBeforeWrite = this._writer.ops.length;
+
                 // extend Block
                 this._writeInterface(value, extend.type, skipFields,
                     // 确保indexSignature是在最小层级编码
                     !!parsedSchema.indexSignature || skipIndexSignature // 如果父级有indexSignature 或 父级跳过 则跳过indexSignature
                 );
 
-                ++blockIdCount;
+                // 写入前后writeOps只增加了一个（block length），说明该extend并未写入任何property字段，取消编码这个block
+                if (this._writer.ops.length === opsLengthBeforeWrite + 1) {
+                    // 移除BlockID
+                    this._writer.ops.splice(this._writer.ops.length - 2, 2);
+                }
+                // extend写入成功 blockId数量+1
+                else {
+                    ++blockIdCount;
+                }
             }
         }
 
         // property
         if (parsedSchema.properties) {
             for (let property of parsedSchema.properties) {
+                let parsedType = this._validator.protoHelper.parseReference(property.type);
+
+                // Literal不编码 直接跳过
+                if (parsedType.type === 'Literal') {
+                    skipFields[property.name] = 1;
+                    continue;
+                }
+
                 // 只编码已定义的字段
                 if (value[property.name] === undefined) {
                     continue;
@@ -183,7 +203,7 @@ export class Encoder {
                 // BlockID (propertyID)
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
                 // Value Payload
-                this._write(value[property.name], property.type);
+                this._write(value[property.name], parsedType);
 
                 ++blockIdCount;
             }

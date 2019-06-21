@@ -74,6 +74,11 @@ BlockID组成方式 实际ID + 末尾1Bit
 ### Property Block
 - Block即为值Payload
 
+### 特殊说明
+- type为Literal的property将不会被编码（解码时自动补回这些字段）
+- extend block，如果其中没有可编码字段，将不编码该block
+    - 例如extend自 `{ type: 'SomeThing' }`，虽然其中有一个字段，但由于上述规则，Literal不编码，故实际可编码字段数为0，所以将不编码这个extend block。
+
 ## MappedType
 ### Pick/Omit/Partial
 - 同target的interface编码
