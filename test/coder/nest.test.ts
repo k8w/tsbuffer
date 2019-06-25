@@ -30,7 +30,7 @@ describe('Nest', function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `
                 export type b = [number, number, string];
-                export type c = [number, string, string?, number?];
+                export type c = [number, string, string?, number?, true?];
             `
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
@@ -40,6 +40,10 @@ describe('Nest', function () {
         });
 
         [[123, 'asbc'], [123, 'asdg', 'sgdasdg'], [123.124, 'asdg', 'asdg', 412]].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
+        });
+
+        [[123.124, 'asdg', 'asdg', 412, true]].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
         });
     })
