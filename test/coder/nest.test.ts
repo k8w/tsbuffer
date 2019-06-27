@@ -48,6 +48,7 @@ describe('Nest', function () {
         });
 
         assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c'), 'a/c'), [123.124, 'asdg']);
+        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, 123, undefined], 'a/c'), 'a/c'), [123.124, 'asdg', undefined, 123]);
         assert.equal(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c').length, tsb.encode([123.124, 'asdg'], 'a/c').length);
     })
 })

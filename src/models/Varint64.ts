@@ -1,9 +1,9 @@
 export class Varint64 {
     // [high, low]
-    private _uint32s: Uint32Array;
+    uint32s: Uint32Array;
 
     constructor(high: number, low: number, byteLength?: number) {
-        this._uint32s = new Uint32Array([high, low]);
+        this.uint32s = new Uint32Array([high, low]);
         if (byteLength !== undefined) {
             this._byteLength = byteLength;
         }
@@ -37,36 +37,36 @@ export class Varint64 {
     }
 
     toNumber(unsigned?: boolean): number {
-        if (!unsigned && this._uint32s[0] >>> 31) {
-            var low = ~this._uint32s[1] + 1 >>> 0,
-                high = ~this._uint32s[0] >>> 0;
+        if (!unsigned && this.uint32s[0] >>> 31) {
+            var low = ~this.uint32s[1] + 1 >>> 0,
+                high = ~this.uint32s[0] >>> 0;
             if (!low)
                 high = high + 1 >>> 0;
             return -(low + high * 4294967296);
         }
-        return this._uint32s[1] + this._uint32s[0] * 4294967296;
+        return this.uint32s[1] + this.uint32s[0] * 4294967296;
     }
 
     zzEncode() {
-        let mask = this._uint32s[0] >> 31;
-        this._uint32s[0] = ((this._uint32s[0] << 1 | this._uint32s[1] >>> 31) ^ mask) >>> 0;
-        this._uint32s[1] = (this._uint32s[1] << 1 ^ mask) >>> 0;
+        let mask = this.uint32s[0] >> 31;
+        this.uint32s[0] = ((this.uint32s[0] << 1 | this.uint32s[1] >>> 31) ^ mask) >>> 0;
+        this.uint32s[1] = (this.uint32s[1] << 1 ^ mask) >>> 0;
         return this;
     }
 
     zzDecode() {
-        let mask = -(this._uint32s[1] & 1);
-        this._uint32s[1] = ((this._uint32s[1] >>> 1 | this._uint32s[0] << 31) ^ mask) >>> 0;
-        this._uint32s[0] = (this._uint32s[0] >>> 1 ^ mask) >>> 0;
+        let mask = -(this.uint32s[1] & 1);
+        this.uint32s[1] = ((this.uint32s[1] >>> 1 | this.uint32s[0] << 31) ^ mask) >>> 0;
+        this.uint32s[0] = (this.uint32s[0] >>> 1 ^ mask) >>> 0;
         return this;
     }
 
     private _byteLength?: number;
     get byteLength(): number {
         if (this._byteLength === undefined) {
-            let part0 = this._uint32s[1],
-                part1 = (this._uint32s[1] >>> 28 | this._uint32s[0] << 4) >>> 0,
-                part2 = this._uint32s[0] >>> 24;
+            let part0 = this.uint32s[1],
+                part1 = (this.uint32s[1] >>> 28 | this.uint32s[0] << 4) >>> 0,
+                part2 = this.uint32s[0] >>> 24;
             this._byteLength = part2 === 0
                 ? part1 === 0
                     ? part0 < 16384
@@ -88,16 +88,16 @@ export class Varint64 {
      * @returns 编码后最新的pos
      */
     writeToBuffer(buf: Uint8Array, pos: number): number {
-        while (this._uint32s[0]) {
-            buf[pos++] = this._uint32s[1] & 127 | 128;
-            this._uint32s[1] = (this._uint32s[1] >>> 7 | this._uint32s[0] << 25) >>> 0;
-            this._uint32s[0] >>>= 7;
+        while (this.uint32s[0]) {
+            buf[pos++] = this.uint32s[1] & 127 | 128;
+            this.uint32s[1] = (this.uint32s[1] >>> 7 | this.uint32s[0] << 25) >>> 0;
+            this.uint32s[0] >>>= 7;
         }
-        while (this._uint32s[1] > 127) {
-            buf[pos++] = this._uint32s[1] & 127 | 128;
-            this._uint32s[1] = this._uint32s[1] >>> 7;
+        while (this.uint32s[1] > 127) {
+            buf[pos++] = this.uint32s[1] & 127 | 128;
+            this.uint32s[1] = this.uint32s[1] >>> 7;
         }
-        buf[pos++] = this._uint32s[1];
+        buf[pos++] = this.uint32s[1];
 
         return pos;
     }

@@ -56,7 +56,15 @@ export class TSBuffer {
             throw new Error(`Cannot find schema: ${schemaId}`)
         }
 
-        let value = this._decoder.decode(buf, schema);
+        let value: unknown;
+        try {
+            value = this._decoder.decode(buf, schema);
+        }
+        catch (e) {
+            let err = new Error('Invalid buffer encoding');
+            (err as any).encodingError = e;
+            throw err;
+        }
 
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);

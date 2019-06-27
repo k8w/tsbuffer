@@ -7,6 +7,7 @@ import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 import { TypedArrays } from '../TypedArrays';
+import { Varint64 } from '../models/Varint64';
 
 export class Decoder {
 
@@ -31,21 +32,62 @@ export class Decoder {
                 return this._readNumber(schema);
             case 'String':
                 return this._reader.readString();
-            case 'Array':
-            case 'Tuple':
+            case 'Array': {
                 let output: any[] = [];
                 // 数组长度：Varint
                 let length = this._reader.readUint();
                 for (let i = 0; i < length; ++i) {
-                    let item = this._read(schema.type === 'Array' ? schema.elementType : schema.elementTypes[i]);
+                    let item = this._read(schema.elementType);
                     output.push(item);
                 }
                 return output;
+            }
+            case 'Tuple': {
+                if (schema.elementTypes.length > 64) {
+                    throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
+                }
+
+                let output: any[] = [];
+                // PayloadMask: Varint64
+                let payloadMask: Varint64 = this._reader.readVarint();
+                // 计算maskIndices
+                let maskIndices: number[] = [];
+                // Low
+                for (let i = 0; i < 32; ++i) {
+                    if (payloadMask.uint32s[1] & 1 << i) {
+                        maskIndices.push(i);
+                    }
+                }
+                // High
+                for (let i = 0; i < 32; ++i) {
+                    if (payloadMask.uint32s[0] & 1 << i) {
+                        maskIndices.push(i + 32);
+                    }
+                }
+
+                if (!maskIndices.length) {
+                    return [];
+                }
+
+                let maxIndex = maskIndices.last();
+                for (let i = 0, nextMaskIndex = 0, next = maskIndices[0]; i <= maxIndex; ++i) {
+                    if (i === next) {
+                        output[i] = this._read(schema.elementTypes[i]);
+                        ++nextMaskIndex;
+                        next = maskIndices[nextMaskIndex];
+                    }
+                    else {
+                        output[i] = undefined;
+                    }
+                }
+                
+                return output;
+            }
             case 'Enum':
                 let enumId = this._reader.readVarint().toNumber();
                 let enumItem = schema.members.find(v => v.id === enumId);
                 if (!enumItem) {
-                    throw new Error(`Error enum encoding: unexpected id ${enumId}`);
+                    throw new Error(`Invalid enum encoding: unexpected id ${enumId}`);
                 }
                 return enumItem.value;
             case 'Any':
@@ -138,7 +180,7 @@ export class Decoder {
             if (blockId === 0) {
                 let fieldName = this._reader.readString();
                 if (!flatSchema.indexSignature) {
-                    throw new Error(`Error interface encoding: unexpected indexSignature at block${i}`)
+                    throw new Error(`Invalid interface encoding: unexpected indexSignature at block${i}`)
                 }
                 output[fieldName] = this._read(flatSchema.indexSignature.type);
             }
@@ -147,7 +189,7 @@ export class Decoder {
                 let extendId = blockId - 1;
                 let extend = schema.extends && schema.extends.find(v => v.id === extendId);
                 if (!extend) {
-                    throw new Error(`Error interface encoding: unexpected extendId ${extendId}`);
+                    throw new Error(`Invalid interface encoding: unexpected extendId ${extendId}`);
                 }
                 let extendValue = this._read(extend.type);
                 Object.assign(output, extendValue);
@@ -157,7 +199,7 @@ export class Decoder {
                 let propertyId = blockId - 10;
                 let property = schema.properties && schema.properties.find(v => v.id === propertyId);
                 if (!property) {
-                    throw new Error(`Error interface encoding: unexpected propertyId ${propertyId}`);
+                    throw new Error(`Invalid interface encoding: unexpected propertyId ${propertyId}`);
                 }
                 output[property.name] = this._read(property.type);
             }
@@ -195,7 +237,7 @@ export class Decoder {
             let id = this._reader.readUint();
             let member = schema.members.find(v => v.id === id);
             if (!member) {
-                throw new Error(`Error ${schema.type} encoding: invalid member id ${id}`);
+                throw new Error(`Invalid ${schema.type} encoding: invalid member id ${id}`);
             }
             let value = this._read(member.type);
             if (this._isObject(output) && this._isObject(value)) {

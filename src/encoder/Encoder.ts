@@ -41,16 +41,49 @@ export class Encoder {
             case 'String':
                 this._writer.push({ type: 'string', value: value });
                 break;
-            case 'Array':
-            case 'Tuple':
+            case 'Array': {
                 let _v = value as any[];
                 // 数组长度：Varint
                 this._writer.push({ type: 'varint', value: Varint64.from(_v.length) });
                 // Element Payload
                 for (let i = 0; i < _v.length; ++i) {
-                    this._write(_v[i], schema.type === 'Array' ? schema.elementType : schema.elementTypes[i]);
+                    this._write(_v[i], schema.elementType);
                 }
                 break;
+            }
+            case 'Tuple': {
+                if (schema.elementTypes.length > 64) {
+                    throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
+                }
+
+                let _v = value as any[];
+
+                // 计算maskPos（要编码的值的index）
+                let maskIndices: number[] = [];
+                for (let i = 0; i < _v.length; ++i) {
+                    if (_v[i] !== undefined) {
+                        maskIndices.push(i);
+                    }
+                }
+                // 生成PayloadMask：Varint64
+                let lo = 0;
+                let hi = 0;
+                for (let v of maskIndices) {
+                    if (v < 32) {
+                        lo |= 1 << v;
+                    }
+                    else {
+                        hi |= 1 << v - 32;
+                    }
+                }
+                this._writer.push({ type: 'varint', value: new Varint64(hi, lo) });
+
+                // Element Payload
+                for (let i of maskIndices) {
+                    this._write(_v[i], schema.elementTypes[i]);
+                }
+                break;
+            }
             case 'Enum':
                 let enumItem = schema.members.find(v => v.value === value);
                 if (!enumItem) {

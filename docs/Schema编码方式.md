@@ -122,8 +122,16 @@ BlockID组成方式 实际ID + 末尾1Bit
 - `[byteLength: varint, buffer]`
 
 ## Tuple
-- 同 `Array`
-- `[数组长度: varint, Payload1, Payload2, ...]`
+- `[PayloadMASK: varint, Payload1, Payload2, ..., PayloadN]`
+- PayloadMASK最高64位，从低1位到高N位，分别代表Payload1~PayloadN，位值为1代表该字段有值，位置为0代表该字段undefined
+- Payload区域只包含值不为undefined的元素
+
+例如：
+```
+type Tuple = [number, number?, number?];
+value = [undefined, 123, 321]
+```
+将编码为 `[0b110, 123, 321]`
 
 ## Intersection / Union
 - ID编码块
