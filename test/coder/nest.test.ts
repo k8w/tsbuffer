@@ -46,5 +46,8 @@ describe('Nest', function () {
         [[123.124, 'asdg', 'asdg', 412, true]].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
         });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c'), 'a/c'), [123.124, 'asdg']);
+        assert.equal(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c').length, tsb.encode([123.124, 'asdg'], 'a/c').length);
     })
 })

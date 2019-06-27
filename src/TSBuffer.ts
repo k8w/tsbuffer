@@ -35,7 +35,7 @@ export class TSBuffer {
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                throw new Error(`Invalid input:\n    ${vRes.originalError.message}`)
+                throw new Error(vRes.originalError.message)
             }
         }
 
@@ -56,18 +56,12 @@ export class TSBuffer {
             throw new Error(`Cannot find schema: ${schemaId}`)
         }
 
-        let value: unknown;
-        try {
-            value = this._decoder.decode(buf, schema);
-        }
-        catch (e) {
-            throw new Error('Invalid encoding: ' + e.message);
-        }
+        let value = this._decoder.decode(buf, schema);
 
         if (!options || !options.skipValidate) {
             let vRes = this._validator.validateBySchema(value, schema);
             if (!vRes.isSucc) {
-                throw new Error(`Invalid decoded value:\n    ${vRes.originalError.message}`)
+                throw new Error(vRes.originalError.message)
             }
         }
 
