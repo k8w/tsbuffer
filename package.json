@@ -1,19 +1,24 @@
 {
   "name": "tsbuffer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "dependencies": {
-    "k8w-extend-native": "^1.2.0",
-    "tsbuffer-schema": "^0.9.0",
-    "tsbuffer-validator": "^0.4.2"
+    "k8w-extend-native": "*",
+    "tsbuffer-schema": "^0.9.2",
+    "tsbuffer-validator": "^0.5.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "rollup": "^1.16.6",
+    "rollup-plugin-typescript2": "^0.21.2",
+    "rollup-plugin-uglify": "^6.0.2",
+    "typescript": "^3.5.3"
+  },
   "scripts": {
-    "build": "rm -rf dist && tsc -d && cp package.json LICENSE README.md dist/",
+    "build": "rm -rf dist && npx rollup -c && cp package.json LICENSE README.md dist/",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd..",
     "test": "cd test && npx mocha --opts mocha.opts **\\*.test.ts & cd ..",
     "us": "npm install tsbuffer-schema@* tsbuffer-validator@*"
