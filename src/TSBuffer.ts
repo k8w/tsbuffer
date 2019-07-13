@@ -3,7 +3,7 @@ import { Encoder } from './encoder/Encoder';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
-import { TSBufferSchema } from "../../tsbuffer-schema/src/TSBufferSchema";
+import { TSBufferSchema } from "tsbuffer-schema";
 
 export interface EncodeOptions {
     skipValidate?: boolean
