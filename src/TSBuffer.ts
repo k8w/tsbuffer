@@ -3,6 +3,15 @@ import { Encoder } from './encoder/Encoder';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
+import { TSBufferSchema } from "../../tsbuffer-schema/src/TSBufferSchema";
+
+export interface EncodeOptions {
+    skipValidate?: boolean
+}
+
+export interface DecodeOptions {
+    skipValidate?: boolean
+}
 
 export class TSBuffer {
 
@@ -24,12 +33,16 @@ export class TSBuffer {
      * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      * @param options.skipValidate 跳过编码前的验证步骤（不安全）
      */
-    encode(value: any, schemaId: string, options?: {
-        skipValidate?: boolean
-    }) {
-        let schema = this._proto[schemaId];
-        if (!schema) {
-            throw new Error(`Cannot find schema： ${schemaId}`)
+    encode(value: any, idOrSchema: string | TSBufferSchema, options?: EncodeOptions) {
+        let schema: TSBufferSchema;
+        if (typeof idOrSchema === 'string') {
+            schema = this._proto[idOrSchema];
+            if (!schema) {
+                throw new Error(`Cannot find schema： ${idOrSchema}`)
+            }
+        }
+        else {
+            schema = idOrSchema
         }
 
         if (!options || !options.skipValidate) {
@@ -48,12 +61,16 @@ export class TSBuffer {
      * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      * @param options.skipValidate 跳过解码后的验证步骤（不安全）
      */
-    decode(buf: Uint8Array, schemaId: string, options?: {
-        skipValidate?: boolean
-    }): unknown {
-        let schema = this._proto[schemaId];
-        if (!schema) {
-            throw new Error(`Cannot find schema: ${schemaId}`)
+    decode(buf: Uint8Array, idOrSchema: string | TSBufferSchema, options?: DecodeOptions): unknown {
+        let schema: TSBufferSchema;
+        if (typeof idOrSchema === 'string') {
+            schema = this._proto[idOrSchema];
+            if (!schema) {
+                throw new Error(`Cannot find schema： ${idOrSchema}`)
+            }
+        }
+        else {
+            schema = idOrSchema
         }
 
         let value: unknown;
@@ -76,7 +93,18 @@ export class TSBuffer {
         return value;
     }
 
-    validate(value: any, schemaId: string): ValidateResult {
-        return this._validator.validate(value, schemaId);
+    validate(value: any, idOrSchema: string | TSBufferSchema): ValidateResult {
+        let schema: TSBufferSchema;
+        if (typeof idOrSchema === 'string') {
+            schema = this._proto[idOrSchema];
+            if (!schema) {
+                throw new Error(`Cannot find schema： ${idOrSchema}`)
+            }
+        }
+        else {
+            schema = idOrSchema
+        }
+
+        return this._validator.validateBySchema(value, schema);
     }
 }
