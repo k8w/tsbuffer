@@ -1,13 +1,13 @@
 {
   "name": "tsbuffer",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "dependencies": {
-    "k8w-extend-native": "*",
+    "k8w-extend-native": "^1.4.0",
     "tsbuffer-schema": "^0.9.2",
     "tsbuffer-validator": "^0.5.2"
   },
