@@ -18,11 +18,11 @@ export class BufferReader {
         return varint;
     }
 
-    readUint(): number{
+    readUint(): number {
         return this.readVarint().toNumber(true);
     }
 
-    readInt(): number{
+    readInt(): number {
         return this.readVarint().zzDecode().toNumber();
     }
 
@@ -75,5 +75,9 @@ export class BufferReader {
 
     get unreadByteLength(): number {
         return this._buf.byteLength - this._pos;
+    }
+
+    dispose() {
+        this._buf = this._view = undefined as any;
     }
 }

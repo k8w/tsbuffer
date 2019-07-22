@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "directories": {
@@ -9,7 +9,7 @@
   "dependencies": {
     "k8w-extend-native": "*",
     "tsbuffer-schema": "^0.9.2",
-    "tsbuffer-validator": "^0.5.0"
+    "tsbuffer-validator": "^0.5.2"
   },
   "devDependencies": {
     "rollup": "^1.16.6",
