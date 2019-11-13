@@ -8,6 +8,8 @@ import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 import { TypedArrays } from '../TypedArrays';
 import { Varint64 } from '../models/Varint64';
+import { LengthType, IdBlockUtil } from '../models/IdBlockUtil';
+import { TypeReference } from "tsbuffer-schema/src/TypeReference";
 
 export class Decoder {
 
@@ -80,7 +82,7 @@ export class Decoder {
                         output[i] = undefined;
                     }
                 }
-                
+
                 return output;
             }
             case 'Enum':
@@ -175,33 +177,55 @@ export class Decoder {
         let blockIdNum = this._reader.readUint();
         for (let i = 0; i < blockIdNum; ++i) {
             // ReadBlock
-            let blockId = this._reader.readUint();
+            let readBlockId = this._reader.readUint();
+            let lengthType: LengthType = readBlockId & 3;
+            let blockId = readBlockId >> 2;
+
             // indexSignature
             if (blockId === 0) {
-                let fieldName = this._reader.readString();
-                if (!flatSchema.indexSignature) {
-                    throw new Error(`Invalid interface encoding: unexpected indexSignature at block${i}`)
+                if (flatSchema.indexSignature) {
+                    let type = flatSchema.indexSignature.type;
+                    let fieldName = this._reader.readString();
+                    this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(type));
+                    output[fieldName] = this._read(type);
                 }
-                output[fieldName] = this._read(flatSchema.indexSignature.type);
+                // indexSignature未定义，可能是新协议，此处兼容，根据lengthType跳过
+                else {
+                    // skip fieldName
+                    this._reader.skipByLengthType(LengthType.LengthDelimited);
+                    // skipPayload
+                    this._reader.skipByLengthType(lengthType);
+                }
+
             }
             // extend block
             else if (blockId <= 9) {
                 let extendId = blockId - 1;
                 let extend = schema.extends && schema.extends.find(v => v.id === extendId);
-                if (!extend) {
-                    throw new Error(`Invalid interface encoding: unexpected extendId ${extendId}`);
+                if (extend) {
+                    this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(extend.type));
+                    let extendValue = this._read(extend.type);
+                    Object.assign(output, extendValue);
                 }
-                let extendValue = this._read(extend.type);
-                Object.assign(output, extendValue);
+                // 未知的extendId 可能是新协议 跳过
+                else {
+                    // skipPayload
+                    this._reader.skipByLengthType(lengthType);
+                }
             }
             // property
             else {
                 let propertyId = blockId - 10;
                 let property = schema.properties && schema.properties.find(v => v.id === propertyId);
-                if (!property) {
-                    throw new Error(`Invalid interface encoding: unexpected propertyId ${propertyId}`);
+                if (property) {
+                    this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(property.type));
+                    output[property.name] = this._read(property.type);
                 }
-                output[property.name] = this._read(property.type);
+                // 未知的PropertyID 可能是新协议 跳过
+                else {
+                    // skipPayload
+                    this._reader.skipByLengthType(lengthType);
+                }
             }
         }
 
@@ -217,6 +241,14 @@ export class Decoder {
         }
 
         return output;
+    }
+
+    private _skipIdLengthPrefix(parsedSchema: Exclude<TSBufferSchema, TypeReference>) {
+        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema);
+        if (lengthInfo.needLengthPrefix) {
+            // skip length prefix
+            this._reader.skipByLengthType(LengthType.Varint);
+        }
     }
 
     private _readOverwrite(schema: OverwriteTypeSchema): unknown {

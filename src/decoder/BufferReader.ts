@@ -1,5 +1,6 @@
 import { Varint64 } from '../models/Varint64';
 import { Utf8Util } from '../models/Utf8Util';
+import { LengthType } from '../models/IdBlockUtil';
 export class BufferReader {
 
     private _pos: number = 0;
@@ -58,6 +59,29 @@ export class BufferReader {
         let buf = this._buf.subarray(this._pos, this._pos + bufByteLength);
         this._pos += bufByteLength;
         return buf;
+    }
+
+    skip(byteLength: number) {
+        this._pos += byteLength;
+    }
+
+    skipByLengthType(lengthType: LengthType) {
+        if (lengthType === LengthType.Bit32) {
+            this._pos += 4;
+        }
+        else if (lengthType === LengthType.Bit64) {
+            this._pos += 8;
+        }
+        else if (lengthType === LengthType.Varint) {
+            this.readVarint();
+        }
+        else if (lengthType === LengthType.LengthDelimited) {
+            let bufByteLength = this.readUint();
+            this._pos += bufByteLength;
+        }
+        else {
+            throw new Error('Unknown lengthType: ' + lengthType);
+        }
     }
 
     readBoolean(): boolean {

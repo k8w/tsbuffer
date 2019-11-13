@@ -13,6 +13,7 @@ import { Varint64 } from '../models/Varint64';
 import { TypedArrays, TypedArray } from '../TypedArrays';
 import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
 import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
+import { IdBlockUtil } from '../models/IdBlockUtil';
 
 export class Encoder {
 
@@ -188,6 +189,7 @@ export class Encoder {
                 // BlockID = extend.id + 1
                 let blockId = extend.id + 1;
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
+                let blockIdPos = this._writer.ops.length - 1;
 
                 // 写入extend interface前 writeOps的长度
                 let opsLengthBeforeWrite = this._writer.ops.length;
@@ -206,6 +208,7 @@ export class Encoder {
                 // extend写入成功 blockId数量+1
                 else {
                     ++blockIdCount;
+                    this._processIdWithLengthType(blockIdPos, extend.type);
                 }
             }
         }
@@ -235,10 +238,13 @@ export class Encoder {
                 let blockId = property.id + Config.interface.maxExtendsNum + 1;
                 // BlockID (propertyID)
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
+                let blockIdPos = this._writer.ops.length - 1;
+
                 // Value Payload
                 this._write(value[property.name], parsedType);
 
                 ++blockIdCount;
+                this._processIdWithLengthType(blockIdPos, parsedType);
             }
         }
 
@@ -259,12 +265,17 @@ export class Encoder {
 
                     // BlockID == 0
                     this._writer.push({ type: 'varint', value: Varint64.from(0) });
+                    let blockIdPos = this._writer.ops.length - 1;
+
                     // 字段名
                     this._writer.push({ type: 'string', value: key });
+                    let lengthPrefixPos = this._writer.ops.length;
+
                     // Value Payload
                     this._write(value[key], flat.indexSignature.type);
 
                     ++blockIdCount;
+                    this._processIdWithLengthType(blockIdPos, flat.indexSignature.type, lengthPrefixPos);
                 }
             }
         }
@@ -441,6 +452,36 @@ export class Encoder {
     //     }
     // }
 
+    /**
+     * 重新处理ID位，使其加入末位长度信息2Bit
+     * @param idPos 
+     */
+    private _processIdWithLengthType(idPos: number, payloadType: TSBufferSchema, lengthPrefixPos?: number) {
+        let idOp = this._writer.ops[idPos];
+        if (idOp.type !== 'varint') {
+            throw new Error('Error idPos: ' + idPos);
+        }
+
+        // 解引用
+        let parsedSchema = this._validator.protoHelper.parseReference(payloadType);
+
+        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema);
+        let newId = (idOp.value.toNumber() << 2) + lengthInfo.lengthType;
+        this._writer.ops[idPos] = this._writer.req2op({
+            type: 'varint',
+            value: Varint64.from(newId)
+        });
+
+        if (lengthInfo.needLengthPrefix) {
+            let payloadByteLength = this._writer.ops.filter((v, i) => i > idPos).sum(v => v.length);
+            this._writer.ops.splice(lengthPrefixPos == undefined ? idPos + 1 : lengthPrefixPos, 0, this._writer.req2op({
+                type: 'varint',
+                value: Varint64.from(payloadByteLength)
+            }))
+        }
+
+    }
+
 }
 
 export interface IDBlockItem {
@@ -448,3 +489,4 @@ export interface IDBlockItem {
     value: any,
     schema: TSBufferSchema
 }
+

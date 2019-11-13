@@ -23,9 +23,9 @@ describe('Interface', function () {
 
         assert.equal(tsb.encode({ a: '哈哈' }, 'a/b', { skipValidate: true }).length, 9);
         assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 12);
-        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 20);
-        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 21);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 13);
+        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 21);
+        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 22);
 
         [
             { a: 'xx' },
@@ -112,7 +112,7 @@ describe('Interface', function () {
         assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').length, 15);
         assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a/b'), new Uint8Array([
             2,
-            10,
+            40,
             3, 120, 120, 120,
             0,
             2, 120, 120,
@@ -277,7 +277,7 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 11);
+        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 12);
 
         [
             { a: 'xxx', b: { value: 1234 } },
@@ -327,13 +327,11 @@ describe('Interface', function () {
 
         // 新字段不影响旧Proto解码
         [
-            { a: 'asdfa' },
             { a: 'asdf', b: 123 },
             { a: 'asdf', b: 123, c: true }
         ].forEach(v => {
-            let v1 = Object.assign({}, v, { a1: 'asdf', b1: [1, 2, 3] });
-            let v2 = Object.assign({}, v, { a1: 'asdf', b1: [1, 2, 3], c1: [true, false] });
-            assert.deepStrictEqual(tsb.decode(tsb1.encode(v, 'a/b'), 'a/b'), v);
+            let v1 = Object.assign({}, v, { a1: ['asdf'], b1: [1, 2, 3] });
+            let v2 = Object.assign({}, v, { a1: ['asdf'], b1: [1, 2, 3], c1: [true, false] });
             assert.deepStrictEqual(tsb.decode(tsb1.encode(v1, 'a/b'), 'a/b'), v);
             assert.deepStrictEqual(tsb.decode(tsb1.encode(v2, 'a/b'), 'a/b'), v);
         });
