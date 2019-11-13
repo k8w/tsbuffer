@@ -298,4 +298,44 @@ describe('Interface', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
     })
+
+    it('AllowUnknownFields', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string,
+                    b: number,
+                    c?: boolean
+                }
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        let proto1 = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string,
+                    b: number,
+                    c?: boolean,
+                    a1: string[],
+                    b1: number[],
+                    c1?: boolean[]
+                }
+            `
+        }).generate('a.ts');
+        let tsb1 = new TSBuffer(proto1);
+
+        // 新字段不影响旧Proto解码
+        [
+            { a: 'asdfa' },
+            { a: 'asdf', b: 123 },
+            { a: 'asdf', b: 123, c: true }
+        ].forEach(v => {
+            let v1 = Object.assign({}, v, { a1: 'asdf', b1: [1, 2, 3] });
+            let v2 = Object.assign({}, v, { a1: 'asdf', b1: [1, 2, 3], c1: [true, false] });
+            assert.deepStrictEqual(tsb.decode(tsb1.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb1.encode(v1, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb1.encode(v2, 'a/b'), 'a/b'), v);
+        });
+    })
 })
