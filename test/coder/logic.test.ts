@@ -143,4 +143,43 @@ describe('LogicTypes', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
         });
     })
+
+    it('Unknown Union ID', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export type a = {a:string} | {b:number} | {c:boolean};
+                export type a1 = {a:string} | {b:number} | {c:boolean} | {d:boolean[]};
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        [
+            { a: 'a' },
+            { b: 12 },
+            { c: true },
+            { a: 'asdg', b: 12412, c: false }
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a'), 'a/a1'), v);
+
+            let v1 = Object.assign({}, v, { d: [true, false] });
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1'), 'a/a'), v);
+        });
+    })
+
+    it('Unknown Intersection ID', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export type a = {a:string} & {b:number} & {c:boolean};
+                export type a1 = {a:string} & {b:number} & {c:boolean} & {d?: boolean[]};
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        let v = { a: 'asdg', b: 12412, c: false };
+        let v1 = { a: 'asdg', b: 12412, c: false, d: [true, false] };
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a'), 'a/a1'), v);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a1'), 'a/a'), v);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1'), 'a/a'), v);
+    })
 })

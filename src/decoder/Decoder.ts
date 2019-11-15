@@ -263,11 +263,18 @@ export class Decoder {
 
         let idNum = this._reader.readUint();
         for (let i = 0; i < idNum; ++i) {
-            let id = this._reader.readUint();
+            let readId = this._reader.readUint();
+            let lengthType: LengthType = readId & 3;
+            let id = readId >> 2;
+
             let member = schema.members.find(v => v.id === id);
+            // 不可识别的Member，可能是新协议，跳过使兼容
             if (!member) {
-                throw new Error(`Invalid ${schema.type} encoding: invalid member id ${id}`);
+                this._reader.skipByLengthType(lengthType);
+                continue;
             }
+
+            this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(member.type));
             let value = this._read(member.type);
             if (this._isObject(output) && this._isObject(value)) {
                 Object.assign(output, value);

@@ -377,6 +377,8 @@ export class Encoder {
                 // 编码
                 // Part2: ID
                 this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
+                let idPos = this._writer.ops.length - 1;
+
                 // Part3: Payload
                 if (member.type.type === 'Union') {
                     this._writeUnion(value, member.type, skipFields, unionFields)
@@ -385,6 +387,8 @@ export class Encoder {
                     this._write(value, member.type, skipFields);
                 }
                 idNum++;
+
+                this._processIdWithLengthType(idPos, member.type);
 
                 // 非object的value，类型一定互斥，只编码一个足矣
                 if (typeof value !== 'object') {
@@ -413,8 +417,11 @@ export class Encoder {
         for (let member of schema.members) {
             // ID
             this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
+            let idPos = this._writer.ops.length - 1;
+
             // 编码块
             this._write(value, member.type, skipFields);
+            this._processIdWithLengthType(idPos, member.type);
         }
     }
 

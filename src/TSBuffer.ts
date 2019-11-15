@@ -4,6 +4,7 @@ import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 import { TSBufferSchema } from "tsbuffer-schema";
+import { TSBufferValidatorOptions } from "tsbuffer-validator/src/TSBufferValidator";
 
 export interface EncodeOptions {
     skipValidate?: boolean
@@ -13,6 +14,10 @@ export interface DecodeOptions {
     skipValidate?: boolean
 }
 
+export interface TSBufferOptions {
+    validatorOptions?: Partial<TSBufferValidatorOptions>;
+}
+
 export class TSBuffer {
 
     protected _validator: TSBufferValidator;
@@ -20,9 +25,15 @@ export class TSBuffer {
     protected _decoder: Decoder;
     protected _proto: TSBufferProto;
 
-    constructor(proto: TSBufferProto) {
+    protected _options: TSBufferOptions = {
+
+    }
+
+    constructor(proto: TSBufferProto, options?: Partial<TSBufferOptions>) {
+        Object.assign(this._options, options);
+
         this._proto = proto;
-        this._validator = new TSBufferValidator(proto);
+        this._validator = new TSBufferValidator(proto, this._options.validatorOptions);
         this._encoder = new Encoder(this._validator);
         this._decoder = new Decoder(this._validator);
     }
