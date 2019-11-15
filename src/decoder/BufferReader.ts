@@ -1,6 +1,6 @@
 import { Varint64 } from '../models/Varint64';
 import { Utf8Util } from '../models/Utf8Util';
-import { LengthType, IdBlockUtil } from '../models/IdBlockUtil';
+import { LengthType } from '../models/IdBlockUtil';
 export class BufferReader {
 
     private _pos: number = 0;
