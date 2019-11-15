@@ -140,9 +140,6 @@ export class Encoder {
 
         switch (scalarType) {
             // 定长编码
-            case 'int32':
-            case 'uint32':
-            // case 'float':
             case 'double':
                 this._writer.push({ type: scalarType, value: value });
                 break;

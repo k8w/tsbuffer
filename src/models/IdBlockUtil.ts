@@ -11,10 +11,7 @@ export class IdBlockUtil {
             case 'Enum':
                 return { lengthType: LengthType.Varint };
             case 'Number':
-                if (parsedSchema.scalarType && parsedSchema.scalarType.includes('32') || parsedSchema.scalarType === 'float') {
-                    return { lengthType: LengthType.Bit32 }
-                }
-                else if (!parsedSchema.scalarType || parsedSchema.scalarType.includes('64') || parsedSchema.scalarType === 'double') {
+                if (!parsedSchema.scalarType || parsedSchema.scalarType.includes('64') || parsedSchema.scalarType === 'double') {
                     return { lengthType: LengthType.Bit64 }
                 }
                 else if (parsedSchema.scalarType && parsedSchema.scalarType.startsWith('big')) {
@@ -22,27 +19,31 @@ export class IdBlockUtil {
                 }
                 else {
                     return { lengthType: LengthType.Varint };
-                }
-            case 'String':
+                }            
             case 'Buffer':
+            case 'String':
             case 'Any':
             case 'NonPrimitive':
                 return { lengthType: LengthType.LengthDelimited };
-            case 'Array':
             case 'Interface':
             case 'Pick':
             case 'Partial':
             case 'Omit':
-            case 'Overwrite':
-            case 'Tuple':
             case 'Union':
             case 'Intersection':
+                return { lengthType: LengthType.IdBlock };
+            case 'Array':            
+            case 'Overwrite':
+            case 'Tuple':            
                 return {
                     lengthType: LengthType.LengthDelimited,
                     needLengthPrefix: true
                 };
             case 'Literal':
-                throw new Error('Literal should not be encoded');
+                return {
+                    lengthType: LengthType.LengthDelimited,
+                    needLengthPrefix: false
+                }
             default:
                 throw new Error(`Unrecognized schema type: ${(parsedSchema as any).type}`);
         }
@@ -52,6 +53,6 @@ export class IdBlockUtil {
 export enum LengthType {
     LengthDelimited = 0,
     Varint = 1,
-    Bit32 = 2,
-    Bit64 = 3,
+    Bit64 = 2,
+    IdBlock = 3,
 }

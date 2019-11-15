@@ -1,6 +1,6 @@
 import { Varint64 } from '../models/Varint64';
 import { Utf8Util } from '../models/Utf8Util';
-import { LengthType } from '../models/IdBlockUtil';
+import { LengthType, IdBlockUtil } from '../models/IdBlockUtil';
 export class BufferReader {
 
     private _pos: number = 0;
@@ -27,24 +27,10 @@ export class BufferReader {
         return this.readVarint().zzDecode().toNumber();
     }
 
-    readNumber(scalarType: 'int32' | 'uint32' | 'float' | 'double'): number {
+    readDouble(): number {
         let pos = this._pos;
-        switch (scalarType) {
-            case 'int32':
-                this._pos += 4;
-                return this._view.getInt32(this._buf.byteOffset + pos);
-            case 'uint32':
-                this._pos += 4;
-                return this._view.getUint32(this._buf.byteOffset + pos);
-            case 'float':
-                this._pos += 4;
-                return this._view.getFloat32(this._buf.byteOffset + pos);
-            case 'double':
-                this._pos += 8;
-                return this._view.getFloat64(this._buf.byteOffset + pos);
-            default:
-                throw new Error(`Error scalarType to read: ${scalarType}`)
-        }
+        this._pos += 8;
+        return this._view.getFloat64(this._buf.byteOffset + pos);
     }
 
     readString(): string {
@@ -66,10 +52,7 @@ export class BufferReader {
     }
 
     skipByLengthType(lengthType: LengthType) {
-        if (lengthType === LengthType.Bit32) {
-            this._pos += 4;
-        }
-        else if (lengthType === LengthType.Bit64) {
+        if (lengthType === LengthType.Bit64) {
             this._pos += 8;
         }
         else if (lengthType === LengthType.Varint) {
@@ -79,8 +62,20 @@ export class BufferReader {
             let bufByteLength = this.readUint();
             this._pos += bufByteLength;
         }
+        else if (lengthType === LengthType.IdBlock) {
+            this.skipIdBlock();
+        }
         else {
             throw new Error('Unknown lengthType: ' + lengthType);
+        }
+    }
+
+    skipIdBlock() {
+        let idNum = this.readUint();
+        for (let i = 0; i < idNum; ++i) {
+            let id = this.readUint();
+            let lengthType = id & 3 as LengthType;
+            this.skipByLengthType(lengthType);
         }
     }
 

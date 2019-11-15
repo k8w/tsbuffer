@@ -154,11 +154,8 @@ export class Decoder {
 
         switch (scalarType) {
             // 定长编码
-            case 'int32':
-            case 'uint32':
-            // case 'float':
             case 'double':
-                return this._reader.readNumber(scalarType);
+                return this._reader.readDouble();
             // Varint编码
             case 'int':
                 return this._reader.readInt();

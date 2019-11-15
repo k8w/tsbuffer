@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tsbuffer-proto-generator": "^1.0.1"
+    "tsbuffer-proto-generator": "^1.2.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",

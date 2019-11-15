@@ -23,9 +23,9 @@ describe('Interface', function () {
 
         assert.equal(tsb.encode({ a: '哈哈' }, 'a/b', { skipValidate: true }).length, 9);
         assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 13);
-        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 21);
-        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 22);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 12);
+        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 20);
+        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 21);
 
         [
             { a: 'xx' },
@@ -277,7 +277,7 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 12);
+        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 11);
 
         [
             { a: 'xxx', b: { value: 1234 } },

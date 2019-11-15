@@ -98,38 +98,6 @@ describe('Basic Encode', function () {
         });
     });
 
-    it('Number: int32', function () {
-        let tsb = new TSBuffer({
-            'a/b': {
-                type: 'Number',
-                scalarType: 'int32'
-            }
-        });
-
-        assert.equal(tsb.encode(60, 'a/b').length, 4);
-        assert.equal(tsb.encode(-60, 'a/b').length, 4);
-
-        [0, 2147483647, -2147483647].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-        });
-    });
-
-    it('Number: uint32', function () {
-        let tsb = new TSBuffer({
-            'a/b': {
-                type: 'Number',
-                scalarType: 'uint32'
-            }
-        });
-
-        assert.equal(tsb.encode(60, 'a/b').length, 4);
-        assert.equal(tsb.encode(-60, 'a/b', { skipValidate: true }).length, 4);
-
-        [0, 4294967295].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-        });
-    });
-
     it('String', function () {
         let tsb = new TSBuffer({
             'a/b': {

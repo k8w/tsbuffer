@@ -55,10 +55,6 @@ export class BufferWriter {
                 return Utf8Util.measureLength(req.value);
             case 'buffer':
                 return req.value.byteLength;
-            case 'int32':
-            case 'uint32':
-            case 'float':
-                return 4;
             case 'double':
                 return 8;
             case 'boolean':
@@ -81,15 +77,6 @@ export class BufferWriter {
                     if (newPos !== pos + op.length) {
                         throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}, value is ${op.value.toNumber()}`);
                     }
-                    break;
-                case 'int32':
-                    view.setInt32(buf.byteOffset+pos, op.value);
-                    break;
-                case 'uint32':
-                    view.setUint32(buf.byteOffset +pos, op.value);
-                    break;
-                case 'float':
-                    view.setFloat32(buf.byteOffset +pos, op.value);
                     break;
                 case 'double':
                     view.setFloat64(buf.byteOffset +pos, op.value);
@@ -128,7 +115,7 @@ export class BufferWriter {
  * 编码类型说明
  * Varint 常规Varint
  * Z-Varint 原数值做ZigZag变换后再Varint编码
- * int32/uint32/float/double 机器码常规编码
+ * double 机器码常规编码
  * buffer 原样编码
  * string utf8编码
  * bigint-varint BigInt的Varint编码
@@ -137,7 +124,7 @@ export class BufferWriter {
  * Boolean 1或0 （1字节）
  */
 export interface WriteNumberReq {
-    type: 'int32' | 'uint32' | 'float' | 'double',
+    type: 'double',
     value: number
 }
 export interface WriteStringReq {
