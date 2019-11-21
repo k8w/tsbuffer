@@ -1,5 +1,4 @@
 import { Utf8Util } from '../models/Utf8Util';
-import { WriteReq } from './BufferWriter';
 import { Varint64 } from '../models/Varint64';
 
 /**
