@@ -1,5 +1,5 @@
-import { Utf8Util } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
+import { TSBufferOptions } from '../TSBuffer';
 
 /**
  * 用Op来串联 next
@@ -12,6 +12,11 @@ import { Varint64 } from '../models/Varint64';
 export class BufferWriter {
 
     private _ops: WriteOp[] = [];
+    private _utf8: TSBufferOptions['utf8'];
+
+    constructor(utf8: TSBufferOptions['utf8']) {
+        this._utf8 = utf8;
+    }
 
     get ops(): WriteOp[] {
         return this._ops;
@@ -51,7 +56,7 @@ export class BufferWriter {
             case 'varint':
                 return req.value.byteLength;
             case 'string':
-                return Utf8Util.measureLength(req.value);
+                return this._utf8.measureLength(req.value);
             case 'buffer':
                 return req.value.byteLength;
             case 'double':
@@ -81,7 +86,7 @@ export class BufferWriter {
                     view.setFloat64(buf.byteOffset +pos, op.value);
                     break;
                 case 'string':
-                    let encLen = Utf8Util.encode(op.value, buf, pos);
+                    let encLen = this._utf8.write(op.value, buf, pos);
                     if (encLen !== op.length) {
                         throw new Error(`Expect ${op.length} bytes but encoded ${encLen} bytes`);
                     }
@@ -100,14 +105,6 @@ export class BufferWriter {
 
         return buf;
     }
-
-    // private _zigzag(n: number) {
-    //     return (n << 1) ^ (n >> 31);
-    // }
-
-    // private _rev_zigzag(n: number) {
-    //     return (n >>> 1) ^ -(n & 1);
-    // }
 }
 
 /**
