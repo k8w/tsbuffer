@@ -10,14 +10,15 @@ import { TypedArrays } from '../TypedArrays';
 import { Varint64 } from '../models/Varint64';
 import { LengthType, IdBlockUtil } from '../models/IdBlockUtil';
 import { TypeReference } from "tsbuffer-schema/src/TypeReference";
+import { TSBufferOptions } from '../TSBuffer';
 
 export class Decoder {
 
     private _reader: BufferReader;
     protected _validator: TSBufferValidator;
 
-    constructor(validator: TSBufferValidator) {
-        this._reader = new BufferReader();
+    constructor(validator: TSBufferValidator, utf8: TSBufferOptions['utf8']) {
+        this._reader = new BufferReader(utf8);
         this._validator = validator;
     }
 

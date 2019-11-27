@@ -41,8 +41,8 @@ export class TSBuffer {
 
         this._proto = proto;
         this._validator = new TSBufferValidator(proto, this.options.validatorOptions);
-        this._encoder = new Encoder(this._validator);
-        this._decoder = new Decoder(this._validator);
+        this._encoder = new Encoder(this._validator, this.options.utf8);
+        this._decoder = new Decoder(this._validator, this.options.utf8);
     }
 
     /**
