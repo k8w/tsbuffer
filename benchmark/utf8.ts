@@ -19,15 +19,16 @@ for (let i = 0; i < N; ++i) {
 console.timeEnd('NodeJS measureLength')
 
 let length = Buffer.byteLength(str);
+let toWrite = new Uint8Array(length);
 console.time('Utf8Util.write')
 for (let i = 0; i < N; ++i) {
-    Utf8Util.write(str, new Uint8Array(length), 0);
+    Utf8Util.write(str, toWrite, 0);
 }
 console.timeEnd('Utf8Util.write')
 
 console.time('NodeJS write')
 for (let i = 0; i < N; ++i) {
-    Buffer.from(str, 'utf-8');
+    Buffer.from(toWrite).write(str, 'utf-8');
 }
 console.timeEnd('NodeJS write')
 
