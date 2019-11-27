@@ -8,14 +8,15 @@ import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 import { TypedArrays } from '../TypedArrays';
 import { Varint64 } from '../models/Varint64';
+import { TSBufferOptions } from '../TSBuffer';
 
 export class Decoder {
 
     private _reader: BufferReader;
     protected _validator: TSBufferValidator;
 
-    constructor(validator: TSBufferValidator) {
-        this._reader = new BufferReader();
+    constructor(validator: TSBufferValidator, utf8: TSBufferOptions['utf8']) {
+        this._reader = new BufferReader(utf8);
         this._validator = validator;
     }
 

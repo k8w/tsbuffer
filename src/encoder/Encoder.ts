@@ -1,5 +1,4 @@
 import { TSBufferSchema } from 'tsbuffer-schema';
-import { BufferWriter } from './BufferWriter';
 import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
@@ -13,14 +12,16 @@ import { Varint64 } from '../models/Varint64';
 import { TypedArrays, TypedArray } from '../TypedArrays';
 import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
 import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
+import { BufferWriter } from './BufferWriter';
+import { TSBufferOptions } from '../TSBuffer';
 
 export class Encoder {
 
     protected _writer: BufferWriter;
     protected _validator: TSBufferValidator;
 
-    constructor(validator: TSBufferValidator) {
-        this._writer = new BufferWriter;
+    constructor(validator: TSBufferValidator, utf8: TSBufferOptions['utf8']) {
+        this._writer = new BufferWriter(utf8);
         this._validator = validator;
     }
 

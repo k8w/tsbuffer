@@ -28,7 +28,7 @@ console.timeEnd('Utf8Util.write')
 
 console.time('NodeJS write')
 for (let i = 0; i < N; ++i) {
-    Buffer.from(toWrite).write(str, 'utf-8');
+    Buffer.from(toWrite.buffer, toWrite.byteOffset, toWrite.byteLength).write(str, 'utf-8');
 }
 console.timeEnd('NodeJS write')
 
