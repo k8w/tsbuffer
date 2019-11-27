@@ -12,10 +12,13 @@ describe('Utf8Util', function () {
 
         let jsLength = Utf8Util.measureLength(str);
         let jsBuf = new Uint8Array(jsLength + 10);
-        Utf8Util.write(str, jsBuf, 5);
-
         let nodeBuf = new Uint8Array(jsLength + 10);
-        Buffer.from(nodeBuf.buffer, nodeBuf.byteOffset, nodeBuf.byteLength).write(str, 5, 'utf-8')
+
+        // same written length
+        assert.strictEqual(
+            Utf8Util.write(str, jsBuf, 5),
+            Buffer.from(nodeBuf.buffer, nodeBuf.byteOffset, nodeBuf.byteLength).write(str, 5, 'utf-8')
+        );        
 
         assert.deepStrictEqual(jsBuf, nodeBuf);
 
