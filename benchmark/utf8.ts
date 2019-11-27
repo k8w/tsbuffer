@@ -1,5 +1,5 @@
 import { Utf8Util } from '../src/models/Utf8Util';
-import { BufferReader } from '../src/decoder/BufferReader';
+
 console.log('字符串UTF8编码，JS VS NodeJS原生');
 
 let str = 'test'.repeat(1000);
@@ -19,27 +19,27 @@ for (let i = 0; i < N; ++i) {
 console.timeEnd('NodeJS measureLength')
 
 let length = Buffer.byteLength(str);
-console.time('Utf8Util.encode')
+console.time('Utf8Util.write')
 for (let i = 0; i < N; ++i) {
-    Utf8Util.encode(str, new Uint8Array(length), 0);
+    Utf8Util.write(str, new Uint8Array(length), 0);
 }
-console.timeEnd('Utf8Util.encode')
+console.timeEnd('Utf8Util.write')
 
-console.time('NodeJS encode')
+console.time('NodeJS write')
 for (let i = 0; i < N; ++i) {
     Buffer.from(str, 'utf-8');
 }
-console.timeEnd('NodeJS encode')
+console.timeEnd('NodeJS write')
 
-let encodedBuf = Buffer.from(str, 'utf-8');
-console.time('Utf8Util.decode')
+let writedBuf = Buffer.from(str, 'utf-8');
+console.time('Utf8Util.read')
 for (let i = 0; i < N; ++i) {
-    Utf8Util.decode(encodedBuf, 0, length);
+    Utf8Util.read(writedBuf, 0, length);
 }
-console.timeEnd('Utf8Util.decode')
+console.timeEnd('Utf8Util.read')
 
-console.time('NodeJS decode')
+console.time('NodeJS read')
 for (let i = 0; i < N; ++i) {
-    encodedBuf.toString('utf-8');
+    writedBuf.toString('utf-8');
 }
-console.timeEnd('NodeJS decode')
+console.timeEnd('NodeJS read')

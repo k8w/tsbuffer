@@ -1,10 +1,15 @@
 import { Varint64 } from '../models/Varint64';
-import { Utf8Util } from '../models/Utf8Util';
+import { TSBufferOptions } from '../TSBuffer';
 export class BufferReader {
 
     private _pos: number = 0;
     private _buf!: Uint8Array;
     private _view!: DataView;
+    private _utf8: TSBufferOptions['utf8'];
+
+    constructor(utf8: TSBufferOptions['utf8']) {
+        this._utf8 = utf8;
+    }
 
     load(buf: Uint8Array, pos: number = 0) {
         this._buf = buf;
@@ -48,7 +53,7 @@ export class BufferReader {
 
     readString(): string {
         let strByteLength = this.readUint();
-        let str = Utf8Util.decode(this._buf, this._pos, strByteLength);
+        let str = this._utf8.read(this._buf, this._pos, strByteLength);
         this._pos += strByteLength;
         return str;
     }

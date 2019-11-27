@@ -18,7 +18,7 @@ export class Utf8Util {
         return len;
     }
 
-    static encode(str: string, buf: Uint8Array, pos: number): number {
+    static write(str: string, buf: Uint8Array, pos: number): number {
         let start = pos,
             c1, // character 1
             c2; // character 2
@@ -45,7 +45,7 @@ export class Utf8Util {
         return pos - start;
     }
 
-    static decode(buf: Uint8Array, pos: number, length: number): string {
+    static read(buf: Uint8Array, pos: number, length: number): string {
         if (length < 1)
             return "";
         let parts: string[] | undefined = undefined,

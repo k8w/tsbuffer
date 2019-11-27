@@ -4,6 +4,7 @@ import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 import { TSBufferSchema } from "tsbuffer-schema";
+import { Utf8Util } from './models/Utf8Util';
 
 export interface EncodeOptions {
     skipValidate?: boolean
@@ -13,6 +14,16 @@ export interface DecodeOptions {
     skipValidate?: boolean
 }
 
+export interface TSBufferOptions {
+    validatorOptions?: Partial<TSBufferValidatorOptions>;
+    utf8: {
+        measureLength: (str: string) => number,
+        /** 返回编码后的长度 */
+        write: (str: string, buf: Uint8Array, pos: number) => number,
+        read: (buf: Uint8Array, pos: number, length: number) => string
+    }
+}
+
 export class TSBuffer {
 
     protected _validator: TSBufferValidator;
@@ -20,9 +31,15 @@ export class TSBuffer {
     protected _decoder: Decoder;
     protected _proto: TSBufferProto;
 
-    constructor(proto: TSBufferProto) {
+    options: TSBufferOptions = {
+        utf8: Utf8Util
+    }
+
+    constructor(proto: TSBufferProto, options?: Partial<TSBufferOptions>) {
+        Object.assign(this.options, options);
+
         this._proto = proto;
-        this._validator = new TSBufferValidator(proto);
+        this._validator = new TSBufferValidator(proto, this.options.validatorOptions);
         this._encoder = new Encoder(this._validator);
         this._decoder = new Decoder(this._validator);
     }
