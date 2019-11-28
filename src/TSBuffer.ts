@@ -5,6 +5,7 @@ import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 import { TSBufferSchema } from "tsbuffer-schema";
 import { Utf8Util } from './models/Utf8Util';
+import { TSBufferValidatorOptions } from "tsbuffer-validator/src/TSBufferValidator";
 
 export interface EncodeOptions {
     skipValidate?: boolean
