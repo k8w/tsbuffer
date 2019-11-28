@@ -1,8 +1,8 @@
 import { Utf8Util } from '../src/models/Utf8Util';
 
-console.log('字符串UTF8编码，JS VS NodeJS原生');
+console.log('字符串UTF8编码，JS VS NodeJS原生\n');
 
-let str = 'test'.repeat(1000);
+let str = 'a'.repeat(20);
 
 const N = 10000;
 
@@ -17,6 +17,7 @@ for (let i = 0; i < N; ++i) {
     Buffer.byteLength(str);
 }
 console.timeEnd('NodeJS measureLength')
+console.log('\n')
 
 let length = Buffer.byteLength(str);
 let toWrite = new Uint8Array(length);
@@ -31,6 +32,7 @@ for (let i = 0; i < N; ++i) {
     Buffer.from(toWrite.buffer, toWrite.byteOffset, toWrite.byteLength).write(str, 'utf-8');
 }
 console.timeEnd('NodeJS write')
+console.log('\n')
 
 let writedBuf = Buffer.from(str, 'utf-8');
 console.time('Utf8Util.read')
