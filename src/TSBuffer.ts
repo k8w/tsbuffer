@@ -4,7 +4,6 @@ import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
 import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 import { TSBufferSchema } from "tsbuffer-schema";
-import { TSBufferValidatorOptions } from "tsbuffer-validator/src/TSBufferValidator";
 import { Utf8Util } from './models/Utf8Util';
 
 export interface EncodeOptions {
@@ -16,7 +15,12 @@ export interface DecodeOptions {
 }
 
 export interface TSBufferOptions {
-    validatorOptions?: Partial<TSBufferValidatorOptions>;
+    /** 
+     * 是否严格检查，不允许出现协议中定义外的字段
+     * 由于编解码都是严格遵照协议，类型安全，所以默认为false
+     */
+    strictExcessCheck: boolean;
+
     utf8: {
         measureLength: (str: string) => number,
         /** 返回编码后的长度 */
@@ -32,15 +36,19 @@ export class TSBuffer {
     protected _decoder: Decoder;
     protected _proto: TSBufferProto;
 
+    /** 默认配置 */
     options: TSBufferOptions = {
-        utf8: Utf8Util
+        strictExcessCheck: false,
+        utf8: Utf8Util,
     }
 
     constructor(proto: TSBufferProto, options?: Partial<TSBufferOptions>) {
         Object.assign(this.options, options);
 
         this._proto = proto;
-        this._validator = new TSBufferValidator(proto, this.options.validatorOptions);
+        this._validator = new TSBufferValidator(proto, {
+            skipExcessCheck: !this.options.strictExcessCheck
+        });
         this._encoder = new Encoder(this._validator, this.options.utf8);
         this._decoder = new Decoder(this._validator, this.options.utf8);
     }
