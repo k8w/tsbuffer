@@ -27,7 +27,10 @@ export class Decoder {
         return this._read(schema);
     }
 
-    private _read(schema: TSBufferSchema): unknown {
+    private _read(schema: TSBufferSchema, options?: {
+        omitFields?: string[],
+        pickFields?: string[]
+    }): unknown {
         switch (schema.type) {
             case 'Boolean':
                 return this._reader.readBoolean();
@@ -103,7 +106,7 @@ export class Decoder {
             case 'Literal':
                 return schema.literal;
             case 'Interface':
-                return this._readInterface(schema);
+                return this._readInterface(schema, options);
             case 'Buffer':
                 let uint8Arr = this._reader.readBuffer();
                 if (schema.arrayType) {
@@ -134,11 +137,35 @@ export class Decoder {
                 }
             case 'IndexedAccess':
             case 'Reference':
-                return this._read(this._validator.protoHelper.parseReference(schema));
-            case 'Pick':
+                return this._read(this._validator.protoHelper.parseReference(schema), options);
             case 'Partial':
+                return this._read(schema.target, options);
+            case 'Pick':
+                if (!options) {
+                    options = {};
+                }
+                // 已存在取交集
+                if (options.pickFields) {
+                    options.pickFields = options.pickFields.filter(v => schema.keys.indexOf(v) > -1)
+                }
+                // 不存在则初始化
+                else {
+                    options.pickFields = schema.keys.slice();
+                }
+                return this._read(schema.target, options);
             case 'Omit':
-                return this._read(schema.target);
+                if (!options) {
+                    options = {};
+                }
+                // 已存在取并集
+                if (options.omitFields) {
+                    options.omitFields = options.omitFields.concat(schema.keys).distinct();
+                }
+                // 不存在初始化
+                else {
+                    options.omitFields = schema.keys.slice();
+                }
+                return this._read(schema.target, options);
             case 'Overwrite':
                 return this._readOverwrite(schema);
             case 'Union':
@@ -167,7 +194,10 @@ export class Decoder {
         }
     }
 
-    private _readInterface(schema: InterfaceTypeSchema): unknown {
+    private _readInterface(schema: InterfaceTypeSchema, options?: {
+        omitFields?: string[],
+        pickFields?: string[]
+    }): unknown {
         let output: any = {};
         let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
 
@@ -235,6 +265,24 @@ export class Decoder {
             let parsedType = this._validator.protoHelper.parseReference(property.type);
             if (parsedType.type === 'Literal') {
                 output[property.name] = parsedType.literal;
+            }
+        }
+
+        if (options?.pickFields) {
+            let pickOutput: any = {};
+            for (let field of options.pickFields) {
+                if (output[field] !== undefined) {
+                    pickOutput[field] = output[field];
+                }
+            }
+            output = pickOutput;
+        }
+
+        if (options?.omitFields) {
+            for (let field of options.omitFields) {
+                if (output[field] !== undefined) {
+                    delete output[field];
+                }
             }
         }
 

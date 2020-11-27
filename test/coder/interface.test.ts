@@ -44,6 +44,114 @@ describe('Interface', function () {
         assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxxx', b: undefined }, 'a/b'), 'a/b'), { a: 'xxxx' });
     })
 
+    it('完整性检查', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string;
+                    b: string;
+                }
+
+                export type b1 = Partial<b>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        assert.throws(() => {
+            tsb.encode({ a: 'aaa' }, 'a/b');
+        });
+        tsb.encode({ a: 'aaa' }, 'a/b1');
+        tsb.encode({ b: 'bbb' }, 'a/b1');
+
+        let proto1 = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string;
+                }
+
+                export type b1 = Partial<b>;
+            `
+        }).generate('a.ts');
+        let tsb1 = new TSBuffer(proto1);
+        let buf = tsb1.encode({ a: 'aaa' }, 'a/b');
+        assert.throws(() => {
+            tsb.decode(buf, 'a/b')
+        })
+        assert.deepStrictEqual(tsb.decode(buf, 'a/b1'), { a: 'aaa' });
+    })
+
+    it('Pick/Omit加字段，Decoder协议未更新仍旧不读', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string;
+                    b: string;
+                    c: string;
+                }
+
+                export type b1 = Pick<b, 'a'|'b'>;
+                export type b2 = Omit<b, 'c'>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        let proto1 = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string;
+                    b: string;
+                    c: string;
+                }
+
+                export type b1 = Pick<b, 'a'>;
+                export type b2 = Omit<b, 'b'|'c'>;
+            `
+        }).generate('a.ts');
+        let tsb1 = new TSBuffer(proto1);
+
+        let bufB1 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b1');
+        let bufB2 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b2');
+        assert.deepStrictEqual(tsb1.decode(bufB1, 'a/b1'), { a: 'aaa' });
+        assert.deepStrictEqual(tsb1.decode(bufB2, 'a/b2'), { a: 'aaa' });
+    });
+
+    it('Pick/Omit嵌套', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface b {
+                    a: string;
+                    b: string;
+                    c: string;
+                }
+
+                export type b1 = Pick<Pick<b, 'a'|'b'>, 'a'>;
+                export type b2 = Omit<Omit<b,'b'>, 'c'>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            a: 'aaa',
+            b: 'aaa',
+            c: 'aaa'
+        }, 'a/b1'), 'a/b1'), { a: 'aaa' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            a: 'aaa',
+            b: 'aaa',
+            c: 'aaa'
+        }, 'a/b2'), 'a/b2'), { a: 'aaa' });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            a: 'aaa',
+            b: 'aaa',
+            c: 'aaa'
+        }, 'a/b'), 'a/b1'), { a: 'aaa' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            a: 'aaa',
+            b: 'aaa',
+            c: 'aaa'
+        }, 'a/b'), 'a/b2'), { a: 'aaa' });
+    });
+
     it('indexSignature', async function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `
@@ -195,6 +303,16 @@ describe('Interface', function () {
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
         });
+
+        assert.
+            deepStrictEqual(tsb.decode(tsb.encode({
+                a: 'str',
+                b: 123,
+                c: { value: 'ccc' }
+            }, 'a/b'), 'a/b'), {
+                a: 'str',
+                c: { value: 'ccc' }
+            });
     })
 
     it('Omit', async function () {
@@ -223,6 +341,16 @@ describe('Interface', function () {
             { a: 'xxx' }
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+        });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            a: 'str',
+            b: 123,
+            c: { value: 'ccc' },
+            d: [true, false]
+        }, 'a/b'), 'a/b'), {
+            a: 'str',
+            b: 123
         });
     })
 
