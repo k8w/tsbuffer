@@ -464,4 +464,117 @@ describe('Interface', function () {
             assert.deepStrictEqual(tsb.decode(tsb1.encode(v2, 'a/b'), 'a/b'), v);
         });
     })
+
+    it('Pick<A|B>', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface a1 {
+                    type: 'a1',
+                    a1?: string,
+                    common1?: string,
+                    common2?: string,
+                }
+
+                export interface a2 {
+                    type: 'a2',
+                    a2?: string,
+                    common1?: string,
+                    common2?: string,
+                }
+
+                type union = a1 | a2;
+                export type TestPick = Pick<union, 'type'>;
+                export type TestOmit = Omit<union, 'common1'>;
+                export type PickOmit = Pick<TestOmit, 'type'|'common2'>
+            `
+        }).generate('a.ts');
+
+        let tsb = new TSBuffer(proto);
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gdasee',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/TestPick'), 'a/TestPick'), { type: 'a1' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a2',
+            a1: 'asdg',
+            a2: 'gdasee',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/union'), 'a/TestPick'), { type: 'a2' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a2',
+            a1: 'asdg',
+            a2: 'gdasee',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/TestPick'), 'a/union'), { type: 'a2' });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/TestOmit'), 'a/TestOmit'), {
+            type: 'a1',
+            a1: 'asdg',
+            common2: 'asdgasdg'
+        });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/union'), 'a/TestOmit'), {
+            type: 'a1',
+            a1: 'asdg',
+            common2: 'asdgasdg'
+        });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/TestOmit'), 'a/union'), {
+            type: 'a1',
+            a1: 'asdg',
+            common2: 'asdgasdg'
+        });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/PickOmit'), 'a/PickOmit'), {
+            type: 'a1',
+            common2: 'asdgasdg'
+        });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/union'), 'a/PickOmit'), {
+            type: 'a1',
+            common2: 'asdgasdg'
+        });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({
+            type: 'a1',
+            a1: 'asdg',
+            a2: 'gegasdgasdg',
+            common1: 'asdgasdg',
+            common2: 'asdgasdg'
+        }, 'a/PickOmit'), 'a/union'), {
+            type: 'a1',
+            common2: 'asdgasdg'
+        });
+    });
 })

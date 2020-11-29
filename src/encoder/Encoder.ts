@@ -3,7 +3,6 @@ import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
-import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
@@ -15,6 +14,9 @@ import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { BufferWriter } from './BufferWriter';
 import { TSBufferOptions } from '../TSBuffer';
+import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
+import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
+import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
 
 export class Encoder {
 
@@ -121,48 +123,16 @@ export class Encoder {
                 this._write(value, this._validator.protoHelper.parseReference(schema), options);
                 break;
             case 'Partial':
-                this._writeInterface(value, schema.target, options);
-                break;
             case 'Pick':
-                // 已存在 取交集
-                if (options?.pickFields) {
-                    let newPickFields: { [key: string]: 1 } = {};
-                    for (let v of schema.keys) {
-                        if (options.pickFields[v]) {
-                            newPickFields[v] = 1;
-                        }
-                    }
-                    options.pickFields = newPickFields;
-                }
-                // 不存在 初始化
-                else {
-                    if (!options) {
-                        options = {};
-                    }
-                    options.pickFields = {};
-                    for (let v of schema.keys) {
-                        options.pickFields[v] = 1;
-                    }
-                }
-                this._writeInterface(value, schema.target, options);
-                break;
             case 'Omit':
-                // 跳过Omit指定的字段
-                // 不存在 初始化
-                if (!options?.skipFields) {
-                    if (!options) {
-                        options = {};
-                    }
-                    options.skipFields = {};
-                }
-                // 取并集                
-                for (let v of schema.keys) {
-                    options.skipFields[v] = 1;
-                }
-                this._writeInterface(value, schema.target, options);
-                break;
             case 'Overwrite':
-                this._writeOverwrite(value, schema, options);
+                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                if (parsed.type === 'Interface') {
+                    this._writePureMappedType(value, schema, options);
+                }
+                else {
+                    this._writeUnion(value, parsed, options?.skipFields);
+                }
                 break;
             case 'Union':
                 this._writeUnion(value, schema, options?.skipFields);
@@ -172,6 +142,66 @@ export class Encoder {
                 break;
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
+        }
+    }
+
+    private _writePureMappedType(value: any, schema: MappedTypeSchema, options?: {
+        skipFields?: { [fieldName: string]: 1 },
+        pickFields?: { [fieldName: string]: 1 },
+    }) {
+        if (!options) {
+            options = {};
+        }
+
+        if (schema.type === 'Pick') {
+            // 已存在 取交集
+            if (options.pickFields) {
+                let newPickFields: { [key: string]: 1 } = {};
+                for (let v of schema.keys) {
+                    if (options.pickFields[v]) {
+                        newPickFields[v] = 1;
+                    }
+                }
+                options.pickFields = newPickFields;
+            }
+            // 不存在 初始化
+            else {
+                options.pickFields = {};
+                for (let v of schema.keys) {
+                    options.pickFields[v] = 1;
+                }
+            }
+        }
+        else if (schema.type === 'Omit') {
+            // 不存在 初始化
+            if (!options?.skipFields) {
+                if (!options) {
+                    options = {};
+                }
+                options.skipFields = {};
+            }
+            // 取并集                
+            for (let v of schema.keys) {
+                options.skipFields[v] = 1;
+            }
+        }
+        else if (schema.type === 'Overwrite') {
+            let parsed = this._parseOverwrite(value, schema);
+            // 写入Overwrite部分
+            this._write(parsed.overwriteValue, parsed.overwrite, options);
+        }
+        else if (schema.type === 'Partial') {}
+        else {
+            throw new Error('Invalid PureMappedType child: ' + (schema as any).type);
+        }
+
+        // Write Interface
+        let parsedTarget = this._validator.protoHelper.parseReference(schema.target);
+        if (parsedTarget.type === 'Interface') {
+            this._writeInterface(value, parsedTarget, options);
+        }
+        else {
+            this._writePureMappedType(value, parsedTarget as MappedTypeSchema, options);
         }
     }
 
@@ -196,7 +226,7 @@ export class Encoder {
         }
     }
 
-    private _writeInterface(value: any, schema: InterfaceTypeSchema | InterfaceReference, options?: {
+    private _writeInterface(value: any, schema: InterfaceTypeSchema, options?: {
         skipFields?: { [fieldName: string]: 1 },
         pickFields?: { [fieldName: string]: 1 },
         skipIndexSignature?: boolean
@@ -213,29 +243,15 @@ export class Encoder {
         let opStartOps = this._writer.ops.length;
         let blockIdCount = 0;
 
-        let parsedSchema = this._validator.protoHelper.parseReference(schema) as Exclude<InterfaceTypeSchema | InterfaceReference, TypeReference>;
-
-        // MappedType
-        switch (parsedSchema.type) {
-            case 'Overwrite':
-                this._writeOverwrite(value, parsedSchema, options);
-                return;
-            case 'Pick':
-            case 'Omit':
-            case 'Partial':
-                this._write(value, parsedSchema.target, options);
-                return;
-        }
-
         // 以下，interface
         // extends
-        if (parsedSchema.extends) {
+        if (schema.extends) {
             // 支持的继承数量有上限
-            if (parsedSchema.extends.length > Config.interface.maxExtendsNum) {
-                throw new Error(`Max support ${Config.interface.maxExtendsNum} extends, actual: ${parsedSchema.extends.length}`);
+            if (schema.extends.length > Config.interface.maxExtendsNum) {
+                throw new Error(`Max support ${Config.interface.maxExtendsNum} extends, actual: ${schema.extends.length}`);
             }
 
-            for (let extend of parsedSchema.extends) {
+            for (let extend of schema.extends) {
                 // BlockID = extend.id + 1
                 let blockId = extend.id + 1;
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
@@ -245,10 +261,11 @@ export class Encoder {
                 let opsLengthBeforeWrite = this._writer.ops.length;
 
                 // extend Block
-                this._writeInterface(value, extend.type, {
+                let parsedExtend = this._validator.protoHelper.parseReference(extend.type) as InterfaceTypeSchema;
+                this._writeInterface(value, parsedExtend, {
                     ...options,
                     // 确保indexSignature是在最小层级编码
-                    skipIndexSignature: !!parsedSchema.indexSignature || options.skipIndexSignature // 如果父级有indexSignature 或 父级跳过 则跳过indexSignature
+                    skipIndexSignature: !!schema.indexSignature || options.skipIndexSignature // 如果父级有indexSignature 或 父级跳过 则跳过indexSignature
                 });
 
                 // 写入前后writeOps只增加了一个（block length），说明该extend并未写入任何property字段，取消编码这个block
@@ -265,8 +282,8 @@ export class Encoder {
         }
 
         // property
-        if (parsedSchema.properties) {
-            for (let property of parsedSchema.properties) {
+        if (schema.properties) {
+            for (let property of schema.properties) {
                 let parsedType = this._validator.protoHelper.parseReference(property.type);
 
                 // PickFields
@@ -306,7 +323,7 @@ export class Encoder {
 
         // indexSignature
         if (!options.skipIndexSignature) {
-            let flat = this._validator.protoHelper.getFlatInterfaceSchema(parsedSchema);
+            let flat = this._validator.protoHelper.getFlatInterfaceSchema(schema);
             if (flat.indexSignature) {
                 for (let key in value) {
                     if (value[key] === undefined) {
@@ -344,23 +361,14 @@ export class Encoder {
         this._writer.ops.splice(opStartOps, 0, this._writer.req2op({ type: 'varint', value: Varint64.from(blockIdCount) }));
     }
 
-    private _writeOverwrite(value: any, schema: OverwriteTypeSchema, options?: {
-        skipFields?: { [fieldName: string]: 1 },
-        pickFields?: { [fieldName: string]: 1 }
-    }) {
-        if (!options) {
-            options = {};
-        }
-        if (!options.skipFields) {
-            options.skipFields = {};
-        }
+    private _parseOverwrite(value: any, schema: OverwriteTypeSchema) {
+        let skipFields: { [key: string]: 1 } = {};
 
         // 解引用
         let target = this._validator.protoHelper.parseReference(schema.target) as Exclude<OverwriteTypeSchema['target'], TypeReference>;
         let overwrite = this._validator.protoHelper.parseReference(schema.overwrite) as Exclude<OverwriteTypeSchema['overwrite'], TypeReference>;
         let flatTarget = this._validator.protoHelper.getFlatInterfaceSchema(target);
         let flatOverwrite = this._validator.protoHelper.getFlatInterfaceSchema(overwrite);
-
 
         // 先区分哪些字段进入Target块，哪些字段进入Overwrite块
         let overwriteValue: any = {};
@@ -371,9 +379,9 @@ export class Encoder {
             // 只要Overwrite中有此Property，即在Overwrite块编码
             for (let property of flatOverwrite.properties) {
                 // undefined不编码，跳过SkipFIelds
-                if (value[property.name] !== undefined && !options.skipFields[property.name]) {
+                if (value[property.name] !== undefined && !skipFields[property.name]) {
                     overwriteValue[property.name] = value[property.name];
-                    options.skipFields[property.name] = 1;
+                    skipFields[property.name] = 1;
                 }
             }
         }
@@ -382,9 +390,9 @@ export class Encoder {
         if (flatTarget.properties) {
             for (let property of flatTarget.properties) {
                 // undefined不编码，跳过SkipFields
-                if (value[property.name] !== undefined && !options.skipFields[property.name]) {
+                if (value[property.name] !== undefined && !skipFields[property.name]) {
                     targetValue[property.name] = value[property.name];
-                    options.skipFields[property.name] = 1;
+                    skipFields[property.name] = 1;
                 }
             }
         }
@@ -403,18 +411,22 @@ export class Encoder {
         }
         if (indexSignature) {
             for (let key in value) {
-                if (options.skipFields[key]) {
+                if (skipFields[key]) {
                     continue;
                 }
 
                 indexSignatureWriteValue[key] = value[key];
-                options.skipFields[key] = 1;
+                skipFields[key] = 1;
             }
         }
 
         // 编码，此处不再需要SkipFields，因为已经筛选过
-        this._writeInterface(overwriteValue, overwrite, { ...options, skipFields: {} });
-        this._writeInterface(targetValue, target, { ...options, skipFields: {} });
+        return {
+            target: target,
+            targetValue: targetValue,
+            overwrite: overwrite,
+            overwriteValue: overwriteValue
+        }
     }
 
     private _writeUnion(value: any, schema: UnionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}, unionFields?: string[]) {
@@ -568,3 +580,4 @@ export interface IDBlockItem {
     schema: TSBufferSchema
 }
 
+export type MappedTypeSchema = PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema;
