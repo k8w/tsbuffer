@@ -401,6 +401,7 @@ describe('Interface', function () {
 
                 export type b = Overwrite<base, {b: {value: uint}}>;
                 export type b1 = Overwrite<b, {a: boolean[], [key: string]: any}>;
+                export type b2 = Overwrite<base, {b?: string}>[];
             `
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
@@ -424,6 +425,15 @@ describe('Interface', function () {
             },
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+        });
+
+        [
+            [{
+                a: 'sss', b: 'xxx'
+            }],
+            [{ a: 'xxx' }]
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
         });
     })
 
