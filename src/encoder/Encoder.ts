@@ -190,7 +190,7 @@ export class Encoder {
             // 写入Overwrite部分
             this._write(parsed.overwriteValue, parsed.overwrite, options);
         }
-        else if (schema.type === 'Partial') {}
+        else if (schema.type === 'Partial') { }
         else {
             throw new Error('Invalid PureMappedType child: ' + (schema as any).type);
         }
@@ -298,7 +298,7 @@ export class Encoder {
                 }
 
                 // 只编码已定义的字段
-                if (value[property.name] === undefined) {
+                if (value[property.name] === undefined || !this._validator._options.strictNullCheck && value[property.name] == undefined) {
                     continue;
                 }
 

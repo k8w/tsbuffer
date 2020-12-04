@@ -18,8 +18,12 @@ export interface TSBufferOptions {
     /** 
      * 是否严格检查，不允许出现协议中定义外的字段
      * 由于编解码都是严格遵照协议，类型安全，所以默认为false
+     * 为false时，即编解码不会编解码出额外的字段，但也不会对输入的额外字段进行验证报错
      */
     strictExcessCheck: boolean;
+
+    /** 是否将null与undefined区别对待（等同于tsconfig中的strictNullChecks），默认为true */
+    strictNullCheck: boolean;
 
     utf8: {
         measureLength: (str: string) => number,
@@ -39,6 +43,7 @@ export class TSBuffer {
     /** 默认配置 */
     options: TSBufferOptions = {
         strictExcessCheck: false,
+        strictNullCheck: true,
         utf8: Utf8Util,
     }
 
@@ -47,7 +52,8 @@ export class TSBuffer {
 
         this._proto = proto;
         this._validator = new TSBufferValidator(proto, {
-            skipExcessCheck: !this.options.strictExcessCheck
+            skipExcessCheck: !this.options.strictExcessCheck,
+            strictNullCheck: this.options.strictNullCheck,
         });
         this._encoder = new Encoder(this._validator, this.options.utf8);
         this._decoder = new Decoder(this._validator, this.options.utf8);
