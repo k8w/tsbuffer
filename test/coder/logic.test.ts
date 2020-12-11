@@ -8,7 +8,9 @@ describe('LogicTypes', function () {
             readFile: () => `
                 export type b = {a:string}|{b:number}|{c:boolean};
                 export type b1 = ({a:string}|{b:number})|{c:boolean};
-                export type b2 = {a:string} | ( {b:number} | {c:boolean} );
+                export type b2 = {a:string} | ( {b:number} | {c:boolean} ) | null;
+                export type item = {a:string} | null;
+                export type arr = item[];
             `
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
@@ -29,6 +31,9 @@ describe('LogicTypes', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
         });
+
+        assert.deepStrictEqual(tsb.decode(tsb.encode(null, 'a/b2'), 'a/b2'), null);
+        assert.deepStrictEqual(tsb.decode(tsb.encode([null], 'a/arr'), 'a/arr'), [null]);
     })
 
     it('Mutual exclustion', async function () {

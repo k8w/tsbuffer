@@ -445,7 +445,7 @@ export class Encoder {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this._validator.protoHelper.isInterface(member.type)) {
-                vRes = this._validator.validateInterfaceReference(value, member.type, unionFields);
+                vRes = this._validator.validateBySchema(value, member.type, { unionFields: unionFields });
             }
             // LogicType 递归unionFields
             else if (member.type.type === 'Union') {
