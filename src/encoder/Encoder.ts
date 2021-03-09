@@ -1,22 +1,22 @@
 import { TSBufferSchema } from 'tsbuffer-schema';
-import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
-import { TSBufferValidator } from 'tsbuffer-validator';
-import { Config } from '../models/Config';
-import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
-import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
-import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
-import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
-import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
-import { Varint64 } from '../models/Varint64';
-import { TypedArrays, TypedArray } from '../TypedArrays';
 import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
-import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
-import { IdBlockUtil } from '../models/IdBlockUtil';
-import { BufferWriter } from './BufferWriter';
-import { TSBufferOptions } from '../TSBuffer';
+import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
+import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
+import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
 import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
+import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
+import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
+import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
+import { TSBufferValidator } from 'tsbuffer-validator';
+import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
+import { Config } from '../models/Config';
+import { IdBlockUtil } from '../models/IdBlockUtil';
+import { Varint64 } from '../models/Varint64';
+import { TSBufferOptions } from '../TSBuffer';
+import { TypedArray, TypedArrays } from '../TypedArrays';
+import { BufferWriter } from './BufferWriter';
 
 export class Encoder {
 
@@ -298,7 +298,7 @@ export class Encoder {
                 }
 
                 // 只编码已定义的字段
-                if (value[property.name] === undefined || !this._validator._options.strictNullCheck && value[property.name] == undefined) {
+                if (value[property.name] === undefined || !this._validator.options.strictNullCheck && value[property.name] == undefined) {
                     continue;
                 }
 
@@ -448,11 +448,8 @@ export class Encoder {
                 vRes = this._validator.validateBySchema(value, member.type, { unionFields: unionFields });
             }
             // LogicType 递归unionFields
-            else if (member.type.type === 'Union') {
-                vRes = this._validator.validateUnionType(value, member.type, unionFields);
-            }
-            else if (member.type.type === 'Intersection') {
-                vRes = this._validator.validateIntersectionType(value, member.type, unionFields);
+            else if (member.type.type === 'Union' || member.type.type === 'Intersection') {
+                vRes = this._validator.validateBySchema(value, member.type, { unionFields: unionFields });
             }
             // 其它类型 直接validate
             else {

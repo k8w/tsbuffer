@@ -1,8 +1,12 @@
 {
   "name": "tsbuffer",
-  "version": "1.3.5",
+  "version": "1.4.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.cjs",
+  "exports": {
+    "require": "./index.cjs",
+    "import": "./index.mjs"
+  },
   "directories": {
     "doc": "docs"
   },
@@ -13,14 +17,15 @@
   },
   "devDependencies": {
     "rollup": "^1.16.6",
-    "rollup-plugin-typescript2": "^0.21.2",
-    "rollup-plugin-uglify": "^6.0.4",
-    "typescript": "^4.1.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
   },
   "scripts": {
     "build": "rm -rf dist && npx rollup -c && cp package.json LICENSE README.md dist/",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd..",
-    "test": "cd test && npx mocha **\\*.test.ts & cd ..",
+    "test": "cd test && TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' && npx mocha **/*.test.ts & cd ..",
     "us": "npm install tsbuffer-schema@* tsbuffer-validator@*"
   },
   "repository": {
