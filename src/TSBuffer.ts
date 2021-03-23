@@ -1,8 +1,7 @@
 import { TSBufferProto } from "tsbuffer-schema";
 import { Encoder } from './encoder/Encoder';
-import { TSBufferValidator } from 'tsbuffer-validator';
+import { TSBufferValidator, ValidatorOutput } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
-import { ValidateResult } from "tsbuffer-validator/src/ValidateResult";
 import { TSBufferSchema } from "tsbuffer-schema";
 import { Utf8Util } from './models/Utf8Util';
 
@@ -125,7 +124,7 @@ export class TSBuffer {
         return value;
     }
 
-    validate(value: any, idOrSchema: string | TSBufferSchema): ValidateResult {
+    validate(value: any, idOrSchema: string | TSBufferSchema): ValidatorOutput {
         let schema: TSBufferSchema;
         if (typeof idOrSchema === 'string') {
             schema = this._proto[idOrSchema];
