@@ -1,35 +1,57 @@
-import { TSBufferProto } from "tsbuffer-schema";
-import { Encoder } from './encoder/Encoder';
-import { TSBufferValidator, ValidatorOutput } from 'tsbuffer-validator';
+import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
+import { TSBufferValidator, TSBufferValidatorOptions, ValidatorOutput } from 'tsbuffer-validator';
 import { Decoder } from "./decoder/Decoder";
-import { TSBufferSchema } from "tsbuffer-schema";
-import { Utf8Util } from './models/Utf8Util';
+import { Encoder } from './encoder/Encoder';
+import { Utf8Coder, Utf8Util } from './models/Utf8Util';
 
 export interface EncodeOptions {
+    /**
+     * 跳过校验步骤直接编码
+     * 能提升性能，但需确保值的类型合法，否则可能异常
+     */
     skipValidate?: boolean
 }
 
 export interface DecodeOptions {
+    /**
+    * 跳过校验步骤直接解码
+    * 能提升性能，但需确保值的类型合法，否则可能异常
+    */
     skipValidate?: boolean
 }
 
 export interface TSBufferOptions {
-    /** 
-     * 是否严格检查，不允许出现协议中定义外的字段
-     * 由于编解码都是严格遵照协议，类型安全，所以默认为false
-     * 为false时，即编解码不会编解码出额外的字段，但也不会对输入的额外字段进行验证报错
+    /**
+     * 校验阶段的配置，与编码过程配置相互独立（先校验，再编码）。
+     * 将 `Object.assign` 到默认设置上
      */
-    strictExcessCheck: boolean;
+    validatorOptions: Partial<TSBufferValidatorOptions>,
 
-    /** 是否将null与undefined区别对待（等同于tsconfig中的strictNullChecks），默认为true */
-    strictNullCheck: boolean;
+    /**
+     * 编解码阶段，`null` 可编码为 `undefined`。
+     * 注意：但不允许 `undefined` 视为 `null`。
+     * 在类型允许的情况下优先编码为本值，仅在类型无法兼容的情况下，尝试编码为 `undefined` 或 `null`。     *
+     * ```
+     * var value: undefined | null = null;  // 编码为 null
+     * var value: undefined | null = undefined;  // 编码为 undefined
+     * var value: undefined = null;  // 编码为 undefined
+     * var value: null = undefined;  // 编码为 null
+     * var value: { v?: string } = { v: null };    // 编码为 {}
+     * ```
+     * 
+     * 例如使用 MongoDB 时，如果 `db.XXX.insertOne({ a: 'AAA', b: undefined })`，
+     * 插入的记录会被转换为 `{ a: 'AAA', b: null }`
+     * 如果类型定义为 `{ a: string, b?: string }`，那么在编码时就会报错，因为 MongoDB 自动将 `undefined` 转换为了 `null`，
+     * 不符合类型定义，可能导致编码失败。
+     * 当开启 `encodeNullAsUndefined` 后，则可避免这种问题。
+     */
+    nullAsUndefined: boolean;
 
-    utf8: {
-        measureLength: (str: string) => number,
-        /** 返回编码后的长度 */
-        write: (str: string, buf: Uint8Array, pos: number) => number,
-        read: (buf: Uint8Array, pos: number, length: number) => string
-    }
+    /**
+     * 自定义 UTF8 编解码器
+     * 默认使用 NodeJS 或自带方法
+     */
+    utf8Coder: Utf8Coder;
 }
 
 export class TSBuffer {
@@ -40,22 +62,22 @@ export class TSBuffer {
     protected _proto: TSBufferProto;
 
     /** 默认配置 */
-    options: TSBufferOptions = {
-        strictExcessCheck: false,
-        strictNullCheck: true,
-        utf8: Utf8Util,
+    private _options: TSBufferOptions = {
+        validatorOptions: {},
+        encodeNullAsUndefined: false,
+        utf8Coder: Utf8Util,
     }
 
     constructor(proto: TSBufferProto, options?: Partial<TSBufferOptions>) {
-        Object.assign(this.options, options);
+        if (options?.validatorOptions) {
+            options.validatorOptions = Object.assign(this._options.validatorOptions, options?.validatorOptions);
+        }
+        Object.assign(this._options, options);
 
         this._proto = proto;
-        this._validator = new TSBufferValidator(proto, {
-            skipExcessCheck: !this.options.strictExcessCheck,
-            strictNullCheck: this.options.strictNullCheck,
-        });
-        this._encoder = new Encoder(this._validator, this.options.utf8);
-        this._decoder = new Decoder(this._validator, this.options.utf8);
+        this._validator = new TSBufferValidator(proto, this._options.validatorOptions);
+        this._encoder = new Encoder(this._validator, this._options.utf8Coder);
+        this._decoder = new Decoder(this._validator, this._options.utf8Coder);
     }
 
     /**
@@ -77,9 +99,20 @@ export class TSBuffer {
         }
 
         if (!options || !options.skipValidate) {
-            let vRes = this._validator.validateBySchema(value, schema);
+            // change validator options temporaryly
+            let oriExcessPropertyChecks = this._validator.options.excessPropertyChecks;
+            let oriStrictNullChecks = this._validator.options.strictNullChecks;
+            this._validator.options.excessPropertyChecks = false;
+            this._validator.options.strictNullChecks = oriStrictNullChecks && this._options.encodeNullAsUndefined ? false : true;
+
+            let vRes = this._validator.validate(value, schema);
+
+            // revert validator options
+            this._validator.options.excessPropertyChecks = oriExcessPropertyChecks;
+            this._validator.options.strictNullChecks = oriStrictNullChecks;
+
             if (!vRes.isSucc) {
-                throw new Error(vRes.originalError.message)
+                throw new Error(vRes.errMsg)
             }
         }
 

@@ -1,19 +1,26 @@
-import { TSBufferSchema } from "tsbuffer-schema";
-import { BufferReader } from './BufferReader';
-import { NumberTypeSchema } from "tsbuffer-schema/src/schemas/NumberTypeSchema";
+import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from "tsbuffer-validator";
-import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
-import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
-import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
-import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
-import { TypedArrays } from '../TypedArrays';
+import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
+import { Utf8Coder } from "../models/Utf8Util";
 import { Varint64 } from '../models/Varint64';
-import { LengthType, IdBlockUtil } from '../models/IdBlockUtil';
-import { TypeReference } from "tsbuffer-schema/src/TypeReference";
 import { TSBufferOptions } from '../TSBuffer';
-import { PickTypeSchema } from "tsbuffer-schema/src/schemas/PickTypeSchema";
-import { OmitTypeSchema } from "tsbuffer-schema/src/schemas/OmitTypeSchema";
-import { PartialTypeSchema } from "tsbuffer-schema/src/schemas/PartialTypeSchema";
+import { TypedArrays } from '../TypedArrays';
+import { BufferReader } from './BufferReader';
+
+export interface DecoderOptions {
+    /**
+     * 自定义 UTF8 编解码器
+     * 默认使用内置JS方法
+     * 在 NodeJS 下可传入 Node 提供的 Native 方法以提升性能
+     */
+    utf8: Utf8Coder;
+
+    /**
+     * Can treat `undefined` as `null`
+     * 例如对 `type A = string | null`, 值 `undefined` 可被兼容解码为 `null`
+     */
+    undefinedAsNull?: boolean;
+}
 
 export class Decoder {
 

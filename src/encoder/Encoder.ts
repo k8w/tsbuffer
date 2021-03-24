@@ -1,31 +1,51 @@
-import { TSBufferSchema } from 'tsbuffer-schema';
-import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
-import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
-import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
-import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
-import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
-import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
-import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
-import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
-import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
-import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
+import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { TSBufferValidator } from 'tsbuffer-validator';
-import { ValidateResult } from 'tsbuffer-validator/src/ValidateResult';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
+import { Utf8Coder } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
-import { TSBufferOptions } from '../TSBuffer';
 import { TypedArray, TypedArrays } from '../TypedArrays';
 import { BufferWriter } from './BufferWriter';
+
+export interface EncoderOptions {
+    validator: TSBufferValidator;
+
+    /**
+     * 自定义 UTF8 编解码器
+     * 默认使用 NodeJS 或自带方法
+     */
+    utf8Coder?: Utf8Coder;
+
+    /**
+     * 编解码阶段，`null` 可编码为 `undefined`。
+     * 在类型允许的情况下优先编码为值本身，仅在类型无法兼容的情况下，尝试编码为 `undefined`。     * 
+     * ```
+     * let value1: undefined | null = null;  // 编码为 null
+     * let value2: undefined = null;  // 编码为 undefined
+     * let value3: { v?: string } = { v: null };    // 编码为 {}
+     * ```
+     * 
+     * 例如使用 MongoDB 时，如果 `db.XXX.insertOne({ a: 'AAA', b: undefined })`，
+     * 插入的记录会被转换为 `{ a: 'AAA', b: null }`
+     * 如果类型定义为 `{ a: string, b?: string }`，那么在编码时就会报错，因为 MongoDB 自动将 `undefined` 转换为了 `null`，
+     * 不符合类型定义，可能导致编码失败。
+     * 当开启 `encodeNullAsUndefined` 后，则可避免这种问题。
+     * 
+     * 默认为 `false`
+     */
+    nullAsUndefined?: boolean;
+}
 
 export class Encoder {
 
     protected _writer: BufferWriter;
     protected _validator: TSBufferValidator;
+    private _options: EncoderOptions;
 
-    constructor(validator: TSBufferValidator, utf8: TSBufferOptions['utf8']) {
-        this._writer = new BufferWriter(utf8);
-        this._validator = validator;
+    constructor(options: EncoderOptions) {
+        this._options = options;
+        this._writer = new BufferWriter(options.utf8Coder);
+        this._validator = options.validator;
     }
 
     encode(value: any, schema: TSBufferSchema): Uint8Array {
@@ -285,6 +305,7 @@ export class Encoder {
         if (schema.properties) {
             for (let property of schema.properties) {
                 let parsedType = this._validator.protoHelper.parseReference(property.type);
+                let propValue = value[property.name];
 
                 // PickFields
                 if (options.pickFields && !options.pickFields[property.name]) {
@@ -297,8 +318,13 @@ export class Encoder {
                     continue;
                 }
 
-                // 只编码已定义的字段
-                if (value[property.name] === undefined || !this._validator.options.strictNullCheck && value[property.name] == undefined) {
+                // null as undefined
+                if (this._nullAsUndefined(propValue, property.type)) {
+                    propValue = undefined;
+                }
+
+                // undefined不编码
+                if (propValue === undefined) {
                     continue;
                 }
 
@@ -314,7 +340,7 @@ export class Encoder {
                 let blockIdPos = this._writer.ops.length - 1;
 
                 // Value Payload
-                this._write(value[property.name], parsedType);
+                this._write(propValue, parsedType);
 
                 ++blockIdCount;
                 this._processIdWithLengthType(blockIdPos, parsedType);
@@ -359,6 +385,26 @@ export class Encoder {
         }
 
         this._writer.ops.splice(opStartOps, 0, this._writer.req2op({ type: 'varint', value: Varint64.from(blockIdCount) }));
+    }
+
+    /** @internal 是否该null值小于当做undefined编码 */
+    private _nullAsUndefined(value: any, type: TSBufferSchema) {
+        return value === null
+            && this._options.nullAsUndefined
+            && !this._canBeLiteral(type, null);
+    }
+
+    /** @internal type类型是否能编码为该literal */
+    private _canBeLiteral(schema: TSBufferSchema, literal: any): boolean {
+        if (schema.type === SchemaType.Union) {
+            return schema.members.some(v => this._canBeLiteral(v.type, literal))
+        }
+
+        if (schema.type === SchemaType.Literal && schema.literal === literal) {
+            return true;
+        }
+
+        return false;
     }
 
     private _parseOverwrite(value: any, schema: OverwriteTypeSchema) {
@@ -434,7 +480,9 @@ export class Encoder {
         if (!unionFields) {
             unionFields = skipFields ? Object.keys(skipFields) : [];
         }
-        this._validator.protoHelper.extendsUnionFields(unionFields, schema.members.map(v => v.type));
+        this._validator.protoHelper.getUnionProperties(schema).forEach(v => {
+            unionFields?.binaryInsert(v, true);
+        })
 
         // 记住编码起点
         let encodeStartPos = this._writer.ops.length;

@@ -1,5 +1,5 @@
+import { Utf8Coder, Utf8Util } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
-import { TSBufferOptions } from '../TSBuffer';
 
 /**
  * 用Op来串联 next
@@ -12,10 +12,10 @@ import { TSBufferOptions } from '../TSBuffer';
 export class BufferWriter {
 
     private _ops: WriteOp[] = [];
-    private _utf8: TSBufferOptions['utf8'];
+    private _utf8: Utf8Coder;
 
-    constructor(utf8: TSBufferOptions['utf8']) {
-        this._utf8 = utf8;
+    constructor(utf8?: Utf8Coder) {
+        this._utf8 = utf8 || Utf8Util;
     }
 
     get ops(): WriteOp[] {

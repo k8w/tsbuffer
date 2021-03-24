@@ -79,3 +79,10 @@ export class Utf8Util {
     }
 
 }
+
+export interface Utf8Coder {
+    measureLength: (str: string) => number,
+    /** 返回编码后的长度 */
+    write: (str: string, buf: Uint8Array, pos: number) => number,
+    read: (buf: Uint8Array, pos: number, length: number) => string
+}

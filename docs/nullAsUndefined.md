@@ -1,0 +1,44 @@
+- null as undefined enabled
+    - encode
+        - null
+            - canBeNull ?
+                - Y: null
+                - N: undefined
+                - 都是 literal 不编码
+        - undefined
+            - canBeUndefined ?
+                - Y: undefined
+                - N: null (因为类型验证已通过，所以必然是literal)
+                - 都是 literal 不编码
+    - decode
+        - null
+            - 解码为 null
+        - undefined
+            - canBeUndefined ？
+                - undefined
+                - canBeNull ? null
+
+- 编码
+    - 值
+    - IdBlock结构（undefined不编码）
+        - optional
+            - 不编码ID
+        - | undefined
+            - 编码ID
+    - null as undefined 触发条件
+        - value === null
+        - nullAsUndefined 启用
+        - !canBeNull(type)
+    - interface
+        - optional
+            - null as undefined 不编码ID
+        - | undefined
+            - null as undefined 当做undefined编码
+    - union
+        - | undefined
+            - null as undefined 当做undefined编码
+    - tuple
+        - optional
+            - null as undefined 不编码ID
+        - | undefined
+            - null as undefined 当做undefined编码
