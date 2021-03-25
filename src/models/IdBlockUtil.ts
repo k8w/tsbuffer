@@ -1,6 +1,6 @@
-import { TSBufferSchema } from "tsbuffer-schema";
-import { TypeReference } from "tsbuffer-schema/src/TypeReference";
+import { TSBufferSchema, TypeReference } from "tsbuffer-schema";
 
+/** @internal */
 export class IdBlockUtil {
     static getPayloadLengthInfo(parsedSchema: Exclude<TSBufferSchema, TypeReference>): {
         lengthType: LengthType,
@@ -50,6 +50,7 @@ export class IdBlockUtil {
     }
 }
 
+/** @internal */
 export enum LengthType {
     LengthDelimited = 0,
     Varint = 1,

@@ -1,35 +1,39 @@
 import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from "tsbuffer-validator";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
-import { Utf8Coder } from "../models/Utf8Util";
+import { SchemaUtil } from "../models/SchemaUtil";
+import { Utf8Coder, Utf8Util } from "../models/Utf8Util";
 import { Varint64 } from '../models/Varint64';
-import { TSBufferOptions } from '../TSBuffer';
 import { TypedArrays } from '../TypedArrays';
 import { BufferReader } from './BufferReader';
 
+/** @internal */
 export interface DecoderOptions {
-    /**
-     * 自定义 UTF8 编解码器
-     * 默认使用内置JS方法
-     * 在 NodeJS 下可传入 Node 提供的 Native 方法以提升性能
-     */
-    utf8: Utf8Coder;
+    validator: TSBufferValidator;
 
     /**
-     * Can treat `undefined` as `null`
-     * 例如对 `type A = string | null`, 值 `undefined` 可被兼容解码为 `null`
+     * 自定义 UTF8 编解码器
+     * 默认使用 NodeJS 或自带方法
+     */
+    utf8Coder: Utf8Coder;
+
+    /**
+     * 如对于类型 `string | null`，当值为 `undefined` 时，是否自动将值解码时转换为 `null`
      */
     undefinedAsNull?: boolean;
 }
 
+/** @internal */
 export class Decoder {
 
     private _reader: BufferReader;
     protected _validator: TSBufferValidator;
+    private _options: DecoderOptions;
 
-    constructor(validator: TSBufferValidator, utf8: TSBufferOptions['utf8']) {
-        this._reader = new BufferReader(utf8);
-        this._validator = validator;
+    constructor(options: DecoderOptions) {
+        this._options = options;
+        this._reader = new BufferReader(options.utf8Coder);
+        this._validator = options.validator;
     }
 
     decode(buffer: Uint8Array, schema: TSBufferSchema): unknown {
@@ -91,6 +95,13 @@ export class Decoder {
                     }
                     else {
                         output[i] = undefined;
+                    }
+                }
+
+                // undefined as null
+                for (let i = 0; i < schema.elementTypes.length; ++i) {
+                    if (this._undefinedAsNull(output[i], schema.elementTypes[i], schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex)) {
+                        output[i] = null;
                     }
                 }
 
@@ -292,17 +303,35 @@ export class Decoder {
         }
 
         // Literal property 由于不编码 将其补回
+        // undefined as null
         for (let property of flatSchema.properties) {
             if (output.hasOwnProperty(property.name)) {
                 continue;
             }
+
+            // Literal
             let parsedType = this._validator.protoHelper.parseReference(property.type);
             if (parsedType.type === 'Literal') {
                 output[property.name] = parsedType.literal;
+                continue;
+            }
+
+            // undefined as null
+            if (this._undefinedAsNull(output[property.name], parsedType, property.optional)) {
+                output[property.name] = null;
+                continue;
             }
         }
 
         return output;
+    }
+
+    /** @internal 是否该null值小于当做undefined编码 */
+    private _undefinedAsNull(value: any, type: TSBufferSchema, isOptional?: boolean) {
+        return value === undefined
+            && this._options.undefinedAsNull
+            && !SchemaUtil.canBeLiteral(type, undefined) && !isOptional
+            && SchemaUtil.canBeLiteral(type, null);
     }
 
     private _skipIdLengthPrefix(parsedSchema: Exclude<TSBufferSchema, TypeReference>) {
@@ -337,6 +366,10 @@ export class Decoder {
             else {
                 output = value;
             }
+        }
+
+        if (this._undefinedAsNull(output, schema)) {
+            output = null;
         }
 
         return output;

@@ -1,3 +1,4 @@
+/** @internal */
 export class Varint64 {
     // [high, low]
     uint32s: Uint32Array;

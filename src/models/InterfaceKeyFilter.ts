@@ -1,3 +1,4 @@
+/** @internal */
 export class InterfaceKeyFilter {
     pick?: string[];
     omit?: string[];

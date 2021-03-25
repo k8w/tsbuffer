@@ -1,3 +1,4 @@
+/** @internal */
 export class Utf8Util {
 
     static measureLength(str: string): number {

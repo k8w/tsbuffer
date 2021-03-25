@@ -8,6 +8,7 @@ import { Varint64 } from '../models/Varint64';
  * 一次性编码
  * 使用BufferPool
  * writer.uint32(xx).string(xxx).finish();
+ * @internal
  */
 export class BufferWriter {
 
@@ -118,26 +119,38 @@ export class BufferWriter {
  * BigInt64 64位int机器码
  * BigUint64 64位uint机器码
  * Boolean 1或0 （1字节）
+ * @internal
  */
 export interface WriteNumberReq {
     type: 'double',
     value: number
 }
+
+/** @internal */
 export interface WriteStringReq {
     type: 'string',
     value: string
 }
+
+/** @internal */
 export interface WriteBufferReq {
     type: 'buffer',
     value: Uint8Array
 }
+
+/** @internal */
 export interface WriteBooleanReq {
     type: 'boolean',
     value: boolean
 }
+
+/** @internal */
 export interface WriteVarintReq {
     type: 'varint',
     value: Varint64
 }
+
+/** @internal */
 export type WriteReq = WriteNumberReq | WriteStringReq | WriteBufferReq | WriteBooleanReq | WriteVarintReq;
+/** @internal */
 export type WriteOp = WriteReq & { length: number }

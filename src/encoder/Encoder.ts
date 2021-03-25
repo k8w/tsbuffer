@@ -1,12 +1,14 @@
-import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
-import { TSBufferValidator } from 'tsbuffer-validator';
+import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
+import { TSBufferValidator, ValidateOutput } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
+import { SchemaUtil } from '../models/SchemaUtil';
 import { Utf8Coder } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
 import { TypedArray, TypedArrays } from '../TypedArrays';
 import { BufferWriter } from './BufferWriter';
 
+/** @internal */
 export interface EncoderOptions {
     validator: TSBufferValidator;
 
@@ -14,7 +16,7 @@ export interface EncoderOptions {
      * 自定义 UTF8 编解码器
      * 默认使用 NodeJS 或自带方法
      */
-    utf8Coder?: Utf8Coder;
+    utf8Coder: Utf8Coder;
 
     /**
      * 编解码阶段，`null` 可编码为 `undefined`。
@@ -36,6 +38,7 @@ export interface EncoderOptions {
     nullAsUndefined?: boolean;
 }
 
+/** @internal */
 export class Encoder {
 
     protected _writer: BufferWriter;
@@ -89,9 +92,13 @@ export class Encoder {
                 // 计算maskPos（要编码的值的index）
                 let maskIndices: number[] = [];
                 for (let i = 0; i < _v.length; ++i) {
-                    if (_v[i] !== undefined) {
-                        maskIndices.push(i);
+                    // undefined 不编码
+                    // null as undefined
+                    if (_v[i] === undefined || this._nullAsUndefined(_v[i], schema.elementTypes[i])) {
+                        continue;
                     }
+
+                    maskIndices.push(i);
                 }
                 // 生成PayloadMask：Varint64
                 let lo = 0;
@@ -352,7 +359,7 @@ export class Encoder {
             let flat = this._validator.protoHelper.getFlatInterfaceSchema(schema);
             if (flat.indexSignature) {
                 for (let key in value) {
-                    if (value[key] === undefined) {
+                    if (value[key] === undefined || this._nullAsUndefined(value[key], flat.indexSignature.type)) {
                         continue;
                     }
 
@@ -391,20 +398,8 @@ export class Encoder {
     private _nullAsUndefined(value: any, type: TSBufferSchema) {
         return value === null
             && this._options.nullAsUndefined
-            && !this._canBeLiteral(type, null);
-    }
-
-    /** @internal type类型是否能编码为该literal */
-    private _canBeLiteral(schema: TSBufferSchema, literal: any): boolean {
-        if (schema.type === SchemaType.Union) {
-            return schema.members.some(v => this._canBeLiteral(v.type, literal))
-        }
-
-        if (schema.type === SchemaType.Literal && schema.literal === literal) {
-            return true;
-        }
-
-        return false;
+            && !SchemaUtil.canBeLiteral(type, null);
+        // && SchemaUtil.canBeLiteral(type, undefined)  一定为true 因为先validate过了
     }
 
     private _parseOverwrite(value: any, schema: OverwriteTypeSchema) {
@@ -475,34 +470,28 @@ export class Encoder {
         }
     }
 
-    private _writeUnion(value: any, schema: UnionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}, unionFields?: string[]) {
-        // 计算UnionFields
-        if (!unionFields) {
-            unionFields = skipFields ? Object.keys(skipFields) : [];
-        }
-        this._validator.protoHelper.getUnionProperties(schema).forEach(v => {
-            unionFields?.binaryInsert(v, true);
-        })
+    private _writeUnion(value: any, schema: UnionTypeSchema, skipFields: { [fieldName: string]: 1 } = {}, unionProperties?: string[]) {
+        // 计算unionProperties
+        // if (!unionProperties) {
+        //     unionProperties = skipFields ? Object.keys(skipFields) : [];
+        // }
+        // this._validator.protoHelper.getUnionProperties(schema).forEach(v => {
+        //     unionProperties!.binaryInsert(v, true);
+        // })
 
         // 记住编码起点
         let encodeStartPos = this._writer.ops.length;
         let idNum = 0;
 
+        // null as undefined
+        if (this._nullAsUndefined(value, schema)) {
+            value = undefined;
+        }
+
         for (let member of schema.members) {
             // 验证该member是否可以编码
-            let vRes: ValidateResult;
-            // interface 加入unionFIelds去validate
-            if (this._validator.protoHelper.isInterface(member.type)) {
-                vRes = this._validator.validateBySchema(value, member.type, { unionFields: unionFields });
-            }
-            // LogicType 递归unionFields
-            else if (member.type.type === 'Union' || member.type.type === 'Intersection') {
-                vRes = this._validator.validateBySchema(value, member.type, { unionFields: unionFields });
-            }
-            // 其它类型 直接validate
-            else {
-                vRes = this._validator.validateBySchema(value, member.type);
-            }
+            // 暂时禁用excessPropertyChecks（TSBuffer外层调用处转换）
+            let vRes = this._validator.validate(value, member.type);
 
             if (vRes.isSucc) {
                 // 编码
@@ -512,7 +501,7 @@ export class Encoder {
 
                 // Part3: Payload
                 if (member.type.type === 'Union') {
-                    this._writeUnion(value, member.type, skipFields, unionFields)
+                    this._writeUnion(value, member.type, skipFields)
                 }
                 else {
                     this._write(value, member.type, skipFields);
@@ -619,10 +608,12 @@ export class Encoder {
 
 }
 
+/** @internal */
 export interface IDBlockItem {
     id: number,
     value: any,
     schema: TSBufferSchema
 }
 
+/** @internal */
 export type MappedTypeSchema = PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema;

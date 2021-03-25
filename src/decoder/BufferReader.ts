@@ -1,14 +1,14 @@
-import { Varint64 } from '../models/Varint64';
 import { LengthType } from '../models/IdBlockUtil';
-import { TSBufferOptions } from '../TSBuffer';
+import { Utf8Coder } from '../models/Utf8Util';
+import { Varint64 } from '../models/Varint64';
 export class BufferReader {
 
     private _pos: number = 0;
     private _buf!: Uint8Array;
     private _view!: DataView;
-    private _utf8: TSBufferOptions['utf8'];
+    private _utf8: Utf8Coder;
 
-    constructor(utf8: TSBufferOptions['utf8']) {
+    constructor(utf8: Utf8Coder) {
         this._utf8 = utf8;
     }
 
