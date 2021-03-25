@@ -5,7 +5,7 @@ import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
 import { Utf8Coder } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
-import { TypedArray, TypedArrays } from '../TypedArrays';
+import { TypedArray, TypedArrays } from '../models/TypedArrays';
 import { BufferWriter } from './BufferWriter';
 
 /** @internal */

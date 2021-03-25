@@ -1,5 +1,5 @@
-import * as assert from 'assert';
-import { TSBuffer } from '../../src/TSBuffer';
+import assert from 'assert';
+import { TSBuffer } from '../../src/index';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
 
 describe('Basic Encode', function () {
@@ -10,12 +10,12 @@ describe('Basic Encode', function () {
             }
         });
 
-        assert.deepStrictEqual(tsb.encode(true, 'a/b'), Uint8Array.from([255]));
-        assert.deepStrictEqual(tsb.encode(false, 'a/b'), Uint8Array.from([0]));
+        assert.deepStrictEqual(tsb.encode(true, 'a/b').buf, Uint8Array.from([255]));
+        assert.deepStrictEqual(tsb.encode(false, 'a/b').buf, Uint8Array.from([0]));
 
         // decode
         [true, false].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -32,12 +32,12 @@ describe('Basic Encode', function () {
             [0, 123.45678, 1.234567890123456e288, NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY].forEach(v => {
                 let answer = new Uint8Array(8);
                 new DataView(answer.buffer).setFloat64(0, v);
-                assert.deepStrictEqual(tsb.encode(v, 'a/b'), answer);
+                assert.deepStrictEqual(tsb.encode(v, 'a/b').buf, answer);
             });
 
             // decode
             [0, 123.45678, 1.234e64, NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY].forEach(v => {
-                assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+                assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
             });
         }
     });
@@ -74,11 +74,11 @@ describe('Basic Encode', function () {
             }
         });
 
-        assert.equal(tsb.encode(60, 'a/b').length, 1);
-        assert.equal(tsb.encode(-60, 'a/b').length, 1);
+        assert.equal(tsb.encode(60, 'a/b').buf!.length, 1);
+        assert.equal(tsb.encode(-60, 'a/b').buf!.length, 1);
 
         [0, 1234567890123, -1234567890123].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -90,11 +90,11 @@ describe('Basic Encode', function () {
             }
         });
 
-        assert.equal(tsb.encode(60, 'a/b').length, 1);
-        assert.equal(tsb.encode(-60, 'a/b', { skipValidate: true }).length, 10);
+        assert.equal(tsb.encode(60, 'a/b').buf!.length, 1);
+        assert.equal(tsb.encode(-60, 'a/b', { skipValidate: true }).buf!.length, 10);
 
         [0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER - 1].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -105,12 +105,12 @@ describe('Basic Encode', function () {
             }
         });
 
-        assert.equal(tsb.encode('', 'a/b').length, 1);
-        assert.equal(tsb.encode('a', 'a/b').length, 2);
-        assert.equal(tsb.encode('啊啊a1', 'a/b').length, 9);
+        assert.equal(tsb.encode('', 'a/b').buf!.length, 1);
+        assert.equal(tsb.encode('a', 'a/b').buf!.length, 2);
+        assert.equal(tsb.encode('啊啊a1', 'a/b').buf!.length, 9);
 
         ['', 'abc', '啊啊啊啊啊', '你好中国\nTest123\n~!@@#!%!@#$^&#%*^%&\u1234\u2234'].forEach(v => {
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -131,8 +131,8 @@ describe('Basic Encode', function () {
         let tsb = new TSBuffer(proto);
 
         [TestEnum.v0, TestEnum.v1, TestEnum.v100, TestEnum.v101, TestEnum.vabc, TestEnum.vf100, TestEnum.vf99].forEach(v => {
-            assert.equal(tsb.encode(v, 'a/TestEnum').length, 1);
-            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/TestEnum'), 'a/TestEnum'), v);
+            assert.equal(tsb.encode(v, 'a/TestEnum').buf!.length, 1);
+            assert.strictEqual(tsb.decode(tsb.encode(v, 'a/TestEnum').buf!, 'a/TestEnum').value, v);
         });
     });
 
@@ -144,7 +144,7 @@ describe('Basic Encode', function () {
         });
 
         [0, 123, 'abc', true, null, undefined, { a: 1, b: '测试', c: [1, 2, 3] }, [1, 2, '3a', 'adf3']].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -156,7 +156,7 @@ describe('Basic Encode', function () {
         });
 
         [{ a: 1, b: '测试', c: [1, 2, 3] }, [1, 2, '3a', 'adf3']].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     });
 
@@ -181,8 +181,8 @@ describe('Basic Encode', function () {
         });
 
         ([['v123', 123], ['vabc', 'abc'], ['vnull', null], ['vundef', undefined]] as const).forEach(v => {
-            assert.equal(tsb.encode(v[1], 'a/' + v[0]), 0);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v[1], 'a/' + v[0]), 'a/' + v[0]), v[1]);
+            assert.equal(tsb.encode(v[1], 'a/' + v[0]).buf!.length, 0);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v[1], 'a/' + v[0]).buf!, 'a/' + v[0]).value, v[1]);
         });
     });
 
@@ -194,8 +194,8 @@ describe('Basic Encode', function () {
             }
         });
         let buf = new Uint8Array([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
-        assert.equal(tsb.encode(buf.buffer, 'a/b').length, 11);
-        assert.deepStrictEqual(tsb.decode(tsb.encode(buf.buffer, 'a/b'), 'a/b'), buf.buffer);
+        assert.equal(tsb.encode(buf.buffer, 'a/b').buf!.length, 11);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(buf.buffer, 'a/b').buf!, 'a/b').value, buf.buffer);
 
         // TypedArray
         const typedArrays = {
@@ -243,8 +243,8 @@ describe('Basic Encode', function () {
 
             // 完整的ArrayBuffer试一遍
             let arr1 = new arrItem.type([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
-            assert.equal(tsb.encode(arr1, 'a/b').length, 1 + 10 * arrItem.itemByteLength);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(arr1, 'a/b'), 'a/b'), arr1, key + ' failed');
+            assert.equal(tsb.encode(arr1, 'a/b').buf!.length, 1 + 10 * arrItem.itemByteLength);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(arr1, 'a/b').buf!, 'a/b').value, arr1, key + ' failed');
 
             // 使用subarray生成数组
             let value = [1, 3, 5, 7, 9, 2, 4, 6, 8, 0];
@@ -253,8 +253,8 @@ describe('Basic Encode', function () {
             let arr = wholeTyped.subarray(7, 7 + value.length);
             assert.deepStrictEqual(arr, new arrItem.type(value));
             // subarray 测试
-            assert.equal(tsb.encode(arr, 'a/b').length, 1 + 10 * arrItem.itemByteLength);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(arr, 'a/b'), 'a/b'), arr, key + ' failed');
+            assert.equal(tsb.encode(arr, 'a/b').buf!.length, 1 + 10 * arrItem.itemByteLength);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(arr, 'a/b').buf!, 'a/b').value, arr, key + ' failed');
         }
     });
 });
