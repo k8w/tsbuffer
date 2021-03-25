@@ -1,4 +1,3 @@
 import 'k8w-extend-native';
-import { TSBuffer } from './models/TSBuffer';
-
-export { TSBuffer };
+export { Utf8Coder } from './models/Utf8Util';
+export { TSBuffer, TSBufferOptions, EncodeOptions, EncodeOutput, DecodeOptions, DecodeOutput } from './models/TSBuffer';

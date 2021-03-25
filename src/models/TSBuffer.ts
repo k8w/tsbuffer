@@ -4,36 +4,18 @@ import { Decoder } from "../decoder/Decoder";
 import { Encoder } from '../encoder/Encoder';
 import { Utf8Coder, Utf8Util } from './Utf8Util';
 
+/** @public */
 export interface TSBufferOptions {
     /**
      * 校验阶段的配置，与编码过程配置相互独立（先校验，再编码）。
      * 将 `Object.assign` 到默认设置上
+     * 默认：`{}`
      */
     validatorOptions: Partial<TSBufferValidatorOptions>,
 
     /**
-     * 编解码阶段，`null` 可编码为 `undefined`。
-     * 注意：但不允许 `undefined` 视为 `null`。
-     * 在类型允许的情况下优先编码为本值，仅在类型无法兼容的情况下，尝试编码为 `undefined` 或 `null`。     *
-     * ```
-     * var value: undefined | null = null;  // 编码为 null
-     * var value: undefined | null = undefined;  // 编码为 undefined
-     * var value: undefined = null;  // 编码为 undefined
-     * var value: null = undefined;  // 编码为 null
-     * var value: { v?: string } = { v: null };    // 编码为 {}
-     * ```
-     * 
-     * 例如使用 MongoDB 时，如果 `db.XXX.insertOne({ a: 'AAA', b: undefined })`，
-     * 插入的记录会被转换为 `{ a: 'AAA', b: null }`
-     * 如果类型定义为 `{ a: string, b?: string }`，那么在编码时就会报错，因为 MongoDB 自动将 `undefined` 转换为了 `null`，
-     * 不符合类型定义，可能导致编码失败。
-     * 当开启 `encodeNullAsUndefined` 后，则可避免这种问题。
-     */
-    // nullAsUndefined: boolean;
-
-    /**
      * 自定义 UTF8 编解码器
-     * 默认使用 NodeJS 或自带方法
+     * 默认：本项目自带JS方法
      */
     utf8Coder: Utf8Coder;
 
@@ -41,38 +23,47 @@ export interface TSBufferOptions {
      * 正常编码流程是：先校验value类型合法，再进行编码
      * 此值为 `true` 时，将跳过校验步骤以提升性能
      * 但需要自行确保值类型合法，否则可能引发不确定的问题
+     * 默认为 `false`
      */
-    skipEncodeValidate?: boolean;
+    skipEncodeValidate: boolean;
 
     /**
      * 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义
      * 此值为 `true` 时，将跳过校验步骤以提升性能
      * 但需要自行确保值类型合法，否则可能引发不确定的问题
+     * 默认为 `false`
      */
-    skipDecodeValidate?: boolean;
+    skipDecodeValidate: boolean;
 }
 
 /** @public */
 export interface EncodeOptions {
+    /** Skip validate value *before* encode */
     skipValidate?: boolean;
 }
 
 /** @public */
 export interface DecodeOptions {
+    /** Skip validate value *after* decode */
     skipValidate?: boolean;
 }
 
+/**
+ * @public
+ */
 export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
-    protected _validator: TSBufferValidator<Proto>;
-    protected _encoder: Encoder;
-    protected _decoder: Decoder;
-    protected _proto: Proto;
+    private _validator: TSBufferValidator<Proto>;
+    private _encoder: Encoder;
+    private _decoder: Decoder;
+    private _proto: Proto;
 
-    /** 默认配置 */
+    /** @internal 默认配置 */
     private _options: TSBufferOptions = {
         validatorOptions: {},
         utf8Coder: Utf8Util,
+        skipEncodeValidate: false,
+        skipDecodeValidate: false,
     }
 
     constructor(proto: Proto, options?: Partial<TSBufferOptions>) {

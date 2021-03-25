@@ -1,4 +1,4 @@
-import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
+import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from "tsbuffer-validator";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
@@ -43,13 +43,13 @@ export class Decoder {
 
     private _read(schema: TSBufferSchema): unknown {
         switch (schema.type) {
-            case 'Boolean':
+            case SchemaType.Boolean:
                 return this._reader.readBoolean();
-            case 'Number':
+            case SchemaType.Number:
                 return this._readNumber(schema);
-            case 'String':
+            case SchemaType.String:
                 return this._reader.readString();
-            case 'Array': {
+            case SchemaType.Array: {
                 let output: any[] = [];
                 // 数组长度：Varint
                 let length = this._reader.readUint();
@@ -59,7 +59,7 @@ export class Decoder {
                 }
                 return output;
             }
-            case 'Tuple': {
+            case SchemaType.Tuple: {
                 if (schema.elementTypes.length > 64) {
                     throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
                 }
@@ -107,25 +107,25 @@ export class Decoder {
 
                 return output;
             }
-            case 'Enum':
+            case SchemaType.Enum:
                 let enumId = this._reader.readVarint().toNumber();
                 let enumItem = schema.members.find(v => v.id === enumId);
                 if (!enumItem) {
                     throw new Error(`Invalid enum encoding: unexpected id ${enumId}`);
                 }
                 return enumItem.value;
-            case 'Any':
-            case 'NonPrimitive':
+            case SchemaType.Any:
+            case SchemaType.NonPrimitive:
                 let jsonStr = this._reader.readString();
                 if (jsonStr === 'undefined') {
                     return undefined;
                 }
                 return JSON.parse(jsonStr);
-            case 'Literal':
+            case SchemaType.Literal:
                 return schema.literal;
-            case 'Interface':
+            case SchemaType.Interface:
                 return this._readInterface(schema);
-            case 'Buffer':
+            case SchemaType.Buffer:
                 let uint8Arr = this._reader.readBuffer();
                 if (schema.arrayType) {
                     if (schema.arrayType === 'BigInt64Array' || schema.arrayType === 'BigUint64Array') {
@@ -153,13 +153,13 @@ export class Decoder {
                     // ArrayBuffer涉及内存拷贝，性能较低，不建议用
                     return uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
                 }
-            case 'IndexedAccess':
-            case 'Reference':
+            case SchemaType.IndexedAccess:
+            case SchemaType.Reference:
                 return this._read(this._validator.protoHelper.parseReference(schema));
-            case 'Partial':
-            case 'Pick':
-            case 'Omit':
-            case 'Overwrite':
+            case SchemaType.Partial:
+            case SchemaType.Pick:
+            case SchemaType.Omit:
+            case SchemaType.Overwrite:
                 let parsed = this._validator.protoHelper.parseMappedType(schema);
                 if (parsed.type === 'Interface') {
                     return this._readPureMappedType(schema);
@@ -168,8 +168,8 @@ export class Decoder {
                     return this._readUnionOrIntersection(parsed);
                 }
                 break;
-            case 'Union':
-            case 'Intersection':
+            case SchemaType.Union:
+            case SchemaType.Intersection:
                 return this._readUnionOrIntersection(schema);
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);

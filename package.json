@@ -16,9 +16,12 @@
     "tsbuffer-validator": "^1.1.10"
   },
   "devDependencies": {
+    "@microsoft/api-documenter": "^7.12.14",
+    "@microsoft/api-extractor": "^7.13.2",
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.35",
     "mocha": "^8.3.2",
+    "nyc": "^15.1.0",
     "rollup": "^1.32.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
@@ -28,10 +31,12 @@
     "typescript": "^4.2.3"
   },
   "scripts": {
-    "build": "rm -rf dist && npx rollup -c && cp package.json LICENSE README.md dist/",
-    "bp": "npm version patch && npm run build && cd dist && npm publish & cd..",
     "test": "npx mocha",
-    "us": "npm install tsbuffer-schema@* tsbuffer-validator@*"
+    "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
+    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
+    "build:js": "rm -rf dist && npx rollup -c",
+    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
+    "build:doc": "rm -rf docs/references && npx api-documenter markdown --input temp --output docs/references"
   },
   "repository": {
     "type": "git",

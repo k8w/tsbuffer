@@ -1,4 +1,4 @@
-import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
+import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
@@ -63,16 +63,16 @@ export class Encoder {
         skipIndexSignature?: boolean
     }) {
         switch (schema.type) {
-            case 'Boolean':
+            case SchemaType.Boolean:
                 this._writer.push({ type: 'boolean', value: value });
                 break;
-            case 'Number':
+            case SchemaType.Number:
                 this._writeNumber(value, schema);
                 break;
-            case 'String':
+            case SchemaType.String:
                 this._writer.push({ type: 'string', value: value });
                 break;
-            case 'Array': {
+            case SchemaType.Array: {
                 let _v = value as any[];
                 // 数组长度：Varint
                 this._writer.push({ type: 'varint', value: Varint64.from(_v.length) });
@@ -82,7 +82,7 @@ export class Encoder {
                 }
                 break;
             }
-            case 'Tuple': {
+            case SchemaType.Tuple: {
                 if (schema.elementTypes.length > 64) {
                     throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
                 }
@@ -119,14 +119,14 @@ export class Encoder {
                 }
                 break;
             }
-            case 'Enum':
+            case SchemaType.Enum:
                 let enumItem = schema.members.find(v => v.value === value);
                 if (!enumItem) {
                     throw new Error(`Unexpect enum value: ${value}`);
                 }
                 this._writer.push({ type: 'varint', value: Varint64.from(enumItem.id) });
                 break;
-            case 'Any':
+            case SchemaType.Any:
                 if (value === undefined) {
                     this._writer.push({ type: 'string', value: 'undefined' });
                 }
@@ -134,25 +134,25 @@ export class Encoder {
                     this._writer.push({ type: 'string', value: JSON.stringify(value) });
                 }
                 break;
-            case 'NonPrimitive':
+            case SchemaType.NonPrimitive:
                 this._writer.push({ type: 'string', value: JSON.stringify(value) });
                 break;
-            case 'Literal':
+            case SchemaType.Literal:
                 break;
-            case 'Interface':
+            case SchemaType.Interface:
                 this._writeInterface(value, schema, options);
                 break;
-            case 'Buffer':
+            case SchemaType.Buffer:
                 this._writeBuffer(value, schema);
                 break;
-            case 'IndexedAccess':
-            case 'Reference':
+            case SchemaType.IndexedAccess:
+            case SchemaType.Reference:
                 this._write(value, this._validator.protoHelper.parseReference(schema), options);
                 break;
-            case 'Partial':
-            case 'Pick':
-            case 'Omit':
-            case 'Overwrite':
+            case SchemaType.Partial:
+            case SchemaType.Pick:
+            case SchemaType.Omit:
+            case SchemaType.Overwrite:
                 let parsed = this._validator.protoHelper.parseMappedType(schema);
                 if (parsed.type === 'Interface') {
                     this._writePureMappedType(value, schema, options);
@@ -161,10 +161,10 @@ export class Encoder {
                     this._writeUnion(value, parsed, options?.skipFields);
                 }
                 break;
-            case 'Union':
+            case SchemaType.Union:
                 this._writeUnion(value, schema, options?.skipFields);
                 break;
-            case 'Intersection':
+            case SchemaType.Intersection:
                 this._writeIntersection(value, schema, options?.skipFields);
                 break;
             default:

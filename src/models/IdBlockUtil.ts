@@ -1,4 +1,4 @@
-import { TSBufferSchema, TypeReference } from "tsbuffer-schema";
+import { SchemaType, TSBufferSchema, TypeReference } from "tsbuffer-schema";
 
 /** @internal */
 export class IdBlockUtil {
@@ -7,10 +7,10 @@ export class IdBlockUtil {
         needLengthPrefix?: boolean
     } {
         switch (parsedSchema.type) {
-            case 'Boolean':
-            case 'Enum':
+            case SchemaType.Boolean:
+            case SchemaType.Enum:
                 return { lengthType: LengthType.Varint };
-            case 'Number':
+            case SchemaType.Number:
                 if (!parsedSchema.scalarType || parsedSchema.scalarType.includes('64') || parsedSchema.scalarType === 'double') {
                     return { lengthType: LengthType.Bit64 }
                 }
@@ -20,26 +20,26 @@ export class IdBlockUtil {
                 else {
                     return { lengthType: LengthType.Varint };
                 }            
-            case 'Buffer':
-            case 'String':
-            case 'Any':
-            case 'NonPrimitive':
+            case SchemaType.Buffer:
+            case SchemaType.String:
+            case SchemaType.Any:
+            case SchemaType.NonPrimitive:
                 return { lengthType: LengthType.LengthDelimited };
-            case 'Interface':
-            case 'Pick':
-            case 'Partial':
-            case 'Omit':
-            case 'Union':
-            case 'Intersection':
+            case SchemaType.Interface:
+            case SchemaType.Pick:
+            case SchemaType.Partial:
+            case SchemaType.Omit:
+            case SchemaType.Union:
+            case SchemaType.Intersection:
                 return { lengthType: LengthType.IdBlock };
-            case 'Array':            
-            case 'Overwrite':
-            case 'Tuple':            
+            case SchemaType.Array:            
+            case SchemaType.Overwrite:
+            case SchemaType.Tuple:            
                 return {
                     lengthType: LengthType.LengthDelimited,
                     needLengthPrefix: true
                 };
-            case 'Literal':
+            case SchemaType.Literal:
                 return {
                     lengthType: LengthType.LengthDelimited,
                     needLengthPrefix: false

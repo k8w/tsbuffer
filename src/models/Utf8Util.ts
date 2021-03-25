@@ -81,6 +81,10 @@ export class Utf8Util {
 
 }
 
+/**
+ * Customized UTF8 encoder / decoder
+ * @public
+ */
 export interface Utf8Coder {
     measureLength: (str: string) => number,
     /** 返回编码后的长度 */
