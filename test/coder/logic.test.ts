@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
-import { TSBuffer } from '../..';
+import { TSBuffer } from '../../src/index';
 
 describe('LogicTypes', function () {
     it('A | B', async function () {
@@ -15,9 +15,9 @@ describe('LogicTypes', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'abc' }, 'a/b').length, 8);
-        assert.equal(tsb.encode({ b: 23 }, 'a/b').length, 12);
-        assert.equal(tsb.encode({ b: 23, c: true }, 'a/b').length, 16);
+        assert.equal(tsb.encode({ a: 'abc' }, 'a/b').buf!.length, 8);
+        assert.equal(tsb.encode({ b: 23 }, 'a/b').buf!.length, 12);
+        assert.equal(tsb.encode({ b: 23, c: true }, 'a/b').buf!.length, 16);
 
         tsb.encode({ a: 'asdg', b: 12412, c: false }, 'a/b2');
 
@@ -27,13 +27,13 @@ describe('LogicTypes', function () {
             { c: true },
             { a: 'asdg', b: 12412, c: false }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2').buf!, 'a/b2').value, v);
         });
 
-        assert.deepStrictEqual(tsb.decode(tsb.encode(null, 'a/b2'), 'a/b2'), null);
-        assert.deepStrictEqual(tsb.decode(tsb.encode([null], 'a/arr'), 'a/arr'), [null]);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(null, 'a/b2').buf!, 'a/b2').value, null);
+        assert.deepStrictEqual(tsb.decode(tsb.encode([null], 'a/arr').buf!, 'a/arr').value, [null]);
     })
 
     it('Mutual exclustion', async function () {
@@ -53,7 +53,7 @@ describe('LogicTypes', function () {
             { type: 'cccc', valueC: 'asdgasdg' },
             { type: 'cccc', valueC: 'asdgasdg', valueBC: 'asdgasdg' },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -70,14 +70,14 @@ describe('LogicTypes', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'abc', b: 123, c: 'asdfasdf' }, 'a/b').length, 21);
+        assert.equal(tsb.encode({ a: 'abc', b: 123, c: 'asdfasdf' }, 'a/b').buf!.length, 21);
 
         [
             { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2').buf!, 'a/b2').value, v);
         });
     });
 
@@ -96,7 +96,7 @@ describe('LogicTypes', function () {
             { a: 'asdgasdg', b: 1234567890 },
             { a: 'asdgasdg', c: 'asdfasdf' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -117,8 +117,8 @@ describe('LogicTypes', function () {
             { c: 'asdfasdf' },
             { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf' },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
     })
 
@@ -143,9 +143,9 @@ describe('LogicTypes', function () {
             { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf', d: null },
             { a: 'asdgasdg', b: 1234567890, c: 'asdfasdf', d: false },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2').buf!, 'a/b2').value, v);
         });
     })
 
@@ -164,10 +164,10 @@ describe('LogicTypes', function () {
             { c: true },
             { a: 'asdg', b: 12412, c: false }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a'), 'a/a1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a').buf!, 'a/a1').value, v);
 
             let v1 = Object.assign({}, v, { d: [true, false] });
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1'), 'a/a'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1').buf!, 'a/a').value, v);
         });
     })
 
@@ -183,8 +183,8 @@ describe('LogicTypes', function () {
         let v = { a: 'asdg', b: 12412, c: false };
         let v1 = { a: 'asdg', b: 12412, c: false, d: [true, false] };
 
-        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a'), 'a/a1'), v);
-        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a1'), 'a/a'), v);
-        assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1'), 'a/a'), v);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a').buf!, 'a/a1').value, v);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a1').buf!, 'a/a').value, v);
+        assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1').buf!, 'a/a').value, v);
     })
 })

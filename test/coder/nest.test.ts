@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TSBuffer } from '../..';
+import { TSBuffer } from '../../src/index';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
 
 describe('Nest', function () {
@@ -14,15 +14,15 @@ describe('Nest', function () {
         let tsb = new TSBuffer(proto);
 
         [[], [1, 2, 3]].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [[], ['a/b', 'c']].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c').buf!, 'a/c').value, v);
         });
 
         [[], [['a'], ['b', 'b'], ['c', 'c', 'c']]].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/d'), 'a/d'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/d').buf!, 'a/d').value, v);
         });
     })
 
@@ -36,19 +36,19 @@ describe('Nest', function () {
         let tsb = new TSBuffer(proto);
 
         [[1, 0, 'asdg'], [-123, 123.456, '']].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [[123, 'asbc'], [123, 'asdg', 'sgdasdg'], [123.124, 'asdg', 'asdg', 412]].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c').buf!, 'a/c').value, v);
         });
 
         [[123.124, 'asdg', 'asdg', 412, true]].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c'), 'a/c'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/c').buf!, 'a/c').value, v);
         });
 
-        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c'), 'a/c'), [123.124, 'asdg']);
-        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, 123, undefined], 'a/c'), 'a/c'), [123.124, 'asdg', undefined, 123]);
-        assert.equal(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c').length, tsb.encode([123.124, 'asdg'], 'a/c').length);
+        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c').buf!, 'a/c').value, [123.124, 'asdg']);
+        assert.deepStrictEqual(tsb.decode(tsb.encode([123.124, 'asdg', undefined, 123, undefined], 'a/c').buf!, 'a/c').value, [123.124, 'asdg', undefined, 123]);
+        assert.equal(tsb.encode([123.124, 'asdg', undefined, undefined], 'a/c').buf!.length, tsb.encode([123.124, 'asdg'], 'a/c').buf!.length);
     })
 })
