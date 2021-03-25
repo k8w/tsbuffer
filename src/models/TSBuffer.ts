@@ -121,7 +121,10 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
         // validate before encode
         if (!(options?.skipValidate ?? this._options.skipEncodeValidate)) {
-            let vRes = this._validator.validate(value, schema);
+            let vRes = this._validator.validate(value, schema, {
+                // 禁用excessPropertyChecks，因为不会编码excess property
+                excessPropertyChecks: false
+            });
             if (!vRes.isSucc) {
                 return vRes;
             }

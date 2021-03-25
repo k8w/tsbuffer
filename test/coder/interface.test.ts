@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
-import { TSBuffer } from '../..';
+import { TSBuffer } from '../../src/index';
 
 describe('Interface', function () {
     it('property', async function () {
@@ -21,11 +21,11 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b', { skipValidate: true }).length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').length, 12);
-        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').length, 20);
-        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').length, 21);
+        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b', { skipValidate: true }).buf!.length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: undefined }, 'a/b').buf!.length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'random' }, 'a/b').buf!.length, 12);
+        assert.equal(tsb.encode({ a: '哈哈', b: 123456 }, 'a/b').buf!.length, 20);
+        assert.equal(tsb.encode({ a: '哈哈', e: { a: '0'.repeat(1000), b: '哈哈' } }, 'a/b').buf!.length, 21);
 
         [
             { a: 'xx' },
@@ -39,9 +39,9 @@ describe('Interface', function () {
             { a: 'xxxx', e: { a: '1'.repeat(1000), b: 60 } },
             { a: 'xxxx', f: { a: 'xxx', b: 'xxx' } },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
-        assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxxx', b: undefined }, 'a/b'), 'a/b'), { a: 'xxxx' });
+        assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxxx', b: undefined }, 'a/b').buf!, 'a/b').value, { a: 'xxxx' });
     })
 
     it('完整性检查', async function () {
@@ -57,9 +57,7 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.throws(() => {
-            tsb.encode({ a: 'aaa' }, 'a/b');
-        });
+        assert.strictEqual(tsb.encode({ a: 'aaa' }, 'a/b').isSucc, false)
         tsb.encode({ a: 'aaa' }, 'a/b1');
         tsb.encode({ b: 'bbb' }, 'a/b1');
 
@@ -73,11 +71,9 @@ describe('Interface', function () {
             `
         }).generate('a.ts');
         let tsb1 = new TSBuffer(proto1);
-        let buf = tsb1.encode({ a: 'aaa' }, 'a/b');
-        assert.throws(() => {
-            tsb.decode(buf, 'a/b')
-        })
-        assert.deepStrictEqual(tsb.decode(buf, 'a/b1'), { a: 'aaa' });
+        let buf = tsb1.encode({ a: 'aaa' }, 'a/b').buf!;
+        assert.strictEqual(tsb.decode(buf, 'a/b').isSucc, false)
+        assert.deepStrictEqual(tsb.decode(buf, 'a/b1').value, { a: 'aaa' });
     })
 
     it('Pick/Omit加字段，Decoder协议未更新仍旧不读', async function () {
@@ -109,10 +105,10 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb1 = new TSBuffer(proto1);
 
-        let bufB1 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b1');
-        let bufB2 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b2');
-        assert.deepStrictEqual(tsb1.decode(bufB1, 'a/b1'), { a: 'aaa' });
-        assert.deepStrictEqual(tsb1.decode(bufB2, 'a/b2'), { a: 'aaa' });
+        let bufB1 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b1').buf!;
+        let bufB2 = tsb.encode({ a: 'aaa', b: 'bbb' }, 'a/b2').buf!;
+        assert.deepStrictEqual(tsb1.decode(bufB1, 'a/b1').value, { a: 'aaa' });
+        assert.deepStrictEqual(tsb1.decode(bufB2, 'a/b2').value, { a: 'aaa' });
     });
 
     it('Pick/Omit嵌套', async function () {
@@ -133,23 +129,23 @@ describe('Interface', function () {
             a: 'aaa',
             b: 'aaa',
             c: 'aaa'
-        }, 'a/b1'), 'a/b1'), { a: 'aaa' });
+        }, 'a/b1').buf!, 'a/b1').value, { a: 'aaa' });
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             a: 'aaa',
             b: 'aaa',
             c: 'aaa'
-        }, 'a/b2'), 'a/b2'), { a: 'aaa' });
+        }, 'a/b2').buf!, 'a/b2').value, { a: 'aaa' });
 
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             a: 'aaa',
             b: 'aaa',
             c: 'aaa'
-        }, 'a/b'), 'a/b1'), { a: 'aaa' });
+        }, 'a/b').buf!, 'a/b1').value, { a: 'aaa' });
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             a: 'aaa',
             b: 'aaa',
             c: 'aaa'
-        }, 'a/b'), 'a/b2'), { a: 'aaa' });
+        }, 'a/b').buf!, 'a/b2').value, { a: 'aaa' });
     });
 
     it('indexSignature', async function () {
@@ -163,16 +159,16 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b').length, 9);
-        assert.equal(tsb.encode({ a: '哈哈', b: 'a' }, 'a/b').length, 14);
-        assert.equal(tsb.encode({ a: '哈哈', abc: 'a' }, 'a/b').length, 16);
+        assert.equal(tsb.encode({ a: '哈哈' }, 'a/b').buf!.length, 9);
+        assert.equal(tsb.encode({ a: '哈哈', b: 'a' }, 'a/b').buf!.length, 14);
+        assert.equal(tsb.encode({ a: '哈哈', abc: 'a' }, 'a/b').buf!.length, 16);
 
         [
             { a: 'xx' },
             { a: 'xx', b: '' },
             { a: 'xx', b: 'xx', c: 'xxx', zxvzxcvzxv: 'xxxx' },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -192,7 +188,7 @@ describe('Interface', function () {
             { type: 'abcabc', a: 'xxx' },
             { type: 'abcabc', a: 'xxx', b: 'bbb' },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -216,9 +212,9 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a/b').length, 6);
-        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').length, 15);
-        assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a/b'), new Uint8Array([
+        assert.equal(tsb.encode({ v1: 'base1', v2: 'base2', a: 'xxx' }, 'a/b').buf!.length, 6);
+        assert.equal(tsb.encode({ v1: 'base1', abc: 'abc', v2: 'base2', a: 'xxx' }, 'a/b').buf!.length, 15);
+        assert.deepStrictEqual(tsb.encode({ v1: 'base1', v2: 'base2', xx: 'xx', a: 'xxx', }, 'a/b').buf, new Uint8Array([
             2,
             40,
             3, 120, 120, 120,
@@ -231,7 +227,7 @@ describe('Interface', function () {
             { v1: 'base1', v2: 'base2', a: 'xxx' },
             // { v1: 'base1', v2: 'base2', a: 'xxx', b: 'ccc' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -272,7 +268,7 @@ describe('Interface', function () {
                 }
             }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -295,13 +291,13 @@ describe('Interface', function () {
             { a: 'xxx' },
             { a: 'xxx', c: { value: 'xxx' } }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [
             { a: 'xxx' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
 
         assert.
@@ -309,7 +305,7 @@ describe('Interface', function () {
                 a: 'str',
                 b: 123,
                 c: { value: 'ccc' }
-            }, 'a/b'), 'a/b'), {
+            }, 'a/b').buf!, 'a/b').value, {
                 a: 'str',
                 c: { value: 'ccc' }
             });
@@ -334,13 +330,13 @@ describe('Interface', function () {
         [
             { a: 'xxx', b: 123 }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [
             { a: 'xxx' }
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
 
         assert.deepStrictEqual(tsb.decode(tsb.encode({
@@ -348,7 +344,7 @@ describe('Interface', function () {
             b: 123,
             c: { value: 'ccc' },
             d: [true, false]
-        }, 'a/b'), 'a/b'), {
+        }, 'a/b').buf!, 'a/b').value, {
             a: 'str',
             b: 123
         });
@@ -377,7 +373,7 @@ describe('Interface', function () {
             { a: 'xxx', b: 123, c: { value: 'xxx' } },
             { a: 'xxx', b: 123, c: { value: 'xxx' }, d: [true, false] },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [
@@ -387,7 +383,7 @@ describe('Interface', function () {
             { a: 'xxx', b: 123, c: { value: 'xxx' } },
             { a: 'xxx', b: 123, c: { value: 'xxx' }, d: [true, false] },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
     })
 
@@ -406,12 +402,12 @@ describe('Interface', function () {
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
-        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').length, 11);
+        assert.equal(tsb.encode({ a: 'xxx', b: { value: 123 } }, 'a/b').buf!.length, 11);
 
         [
             { a: 'xxx', b: { value: 1234 } },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
         });
 
         [
@@ -424,7 +420,7 @@ describe('Interface', function () {
                 ff: null
             },
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1'), 'a/b1'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
 
         [
@@ -433,7 +429,7 @@ describe('Interface', function () {
             }],
             [{ a: 'xxx' }]
         ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2'), 'a/b2'), v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b2').buf!, 'a/b2').value, v);
         });
     })
 
@@ -470,8 +466,8 @@ describe('Interface', function () {
         ].forEach(v => {
             let v1 = Object.assign({}, v, { a1: ['asdf'], b1: [1, 2, 3] });
             let v2 = Object.assign({}, v, { a1: ['asdf'], b1: [1, 2, 3], c1: [true, false] });
-            assert.deepStrictEqual(tsb.decode(tsb1.encode(v1, 'a/b'), 'a/b'), v);
-            assert.deepStrictEqual(tsb.decode(tsb1.encode(v2, 'a/b'), 'a/b'), v);
+            assert.deepStrictEqual(tsb.decode(tsb1.encode(v1, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb1.encode(v2, 'a/b').buf!, 'a/b').value, v);
         });
     })
 
@@ -506,21 +502,21 @@ describe('Interface', function () {
             a2: 'gdasee',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/TestPick'), 'a/TestPick'), { type: 'a1' });
+        }, 'a/TestPick').buf!, 'a/TestPick').value, { type: 'a1' });
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             type: 'a2',
             a1: 'asdg',
             a2: 'gdasee',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/union'), 'a/TestPick'), { type: 'a2' });
+        }, 'a/union').buf!, 'a/TestPick').value, { type: 'a2' });
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             type: 'a2',
             a1: 'asdg',
             a2: 'gdasee',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/TestPick'), 'a/union'), { type: 'a2' });
+        }, 'a/TestPick').buf!, 'a/union').value, { type: 'a2' });
 
         assert.deepStrictEqual(tsb.decode(tsb.encode({
             type: 'a1',
@@ -528,7 +524,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/TestOmit'), 'a/TestOmit'), {
+        }, 'a/TestOmit').buf!, 'a/TestOmit').value, {
             type: 'a1',
             a1: 'asdg',
             common2: 'asdgasdg'
@@ -539,7 +535,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/union'), 'a/TestOmit'), {
+        }, 'a/union').buf!, 'a/TestOmit').value, {
             type: 'a1',
             a1: 'asdg',
             common2: 'asdgasdg'
@@ -550,7 +546,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/TestOmit'), 'a/union'), {
+        }, 'a/TestOmit').buf!, 'a/union').value, {
             type: 'a1',
             a1: 'asdg',
             common2: 'asdgasdg'
@@ -562,7 +558,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/PickOmit'), 'a/PickOmit'), {
+        }, 'a/PickOmit').buf!, 'a/PickOmit').value, {
             type: 'a1',
             common2: 'asdgasdg'
         });
@@ -572,7 +568,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/union'), 'a/PickOmit'), {
+        }, 'a/union').buf!, 'a/PickOmit').value, {
             type: 'a1',
             common2: 'asdgasdg'
         });
@@ -582,7 +578,7 @@ describe('Interface', function () {
             a2: 'gegasdgasdg',
             common1: 'asdgasdg',
             common2: 'asdgasdg'
-        }, 'a/PickOmit'), 'a/union'), {
+        }, 'a/PickOmit').buf!, 'a/union').value, {
             type: 'a1',
             common2: 'asdgasdg'
         });

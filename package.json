@@ -13,7 +13,7 @@
   "dependencies": {
     "k8w-extend-native": "^1.4.5",
     "tsbuffer-schema": "~1.4.0",
-    "tsbuffer-validator": "^1.1.9"
+    "tsbuffer-validator": "^1.1.10"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.2",
