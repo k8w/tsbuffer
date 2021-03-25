@@ -1,5 +1,5 @@
-import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
+import typescript from 'rollup-plugin-typescript2';
 
 export default {
     input: './index.ts',
@@ -14,7 +14,13 @@ export default {
         }
     ],
     plugins: [
-        typescript(),
+        typescript({
+            tsconfigOverride: {
+                compilerOptions: {
+                    module: 'esnext'
+                }
+            }
+        }),
         terser({
             mangle: {
                 properties: {

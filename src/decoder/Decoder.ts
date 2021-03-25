@@ -2,7 +2,7 @@ import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitType
 import { TSBufferValidator } from "tsbuffer-validator";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
-import { Utf8Coder, Utf8Util } from "../models/Utf8Util";
+import { Utf8Coder } from "../models/Utf8Util";
 import { Varint64 } from '../models/Varint64';
 import { TypedArrays } from '../TypedArrays';
 import { BufferReader } from './BufferReader';

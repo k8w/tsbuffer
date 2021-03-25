@@ -1,5 +1,5 @@
 import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
-import { TSBufferValidator, ValidateOutput } from 'tsbuffer-validator';
+import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
@@ -489,9 +489,13 @@ export class Encoder {
         }
 
         for (let member of schema.members) {
-            // 验证该member是否可以编码
-            // 暂时禁用excessPropertyChecks（TSBuffer外层调用处转换）
-            let vRes = this._validator.validate(value, member.type);
+            // 验证该member是否可以编码            
+            let vRes = this._validator.validate(value, member.type, {
+                // 禁用excessPropertyChecks（以代替unionProperties）
+                excessPropertyChecks: false,
+                // 启用strictNullChecks（null as undefined已经前置处理）
+                strictNullChecks: true
+            });
 
             if (vRes.isSucc) {
                 // 编码

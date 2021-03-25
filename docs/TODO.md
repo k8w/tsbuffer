@@ -1,0 +1,1 @@
+- null as undefined test

@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "1.4.0",
+  "version": "1.4.5",
   "description": "",
   "main": "index.cjs",
   "exports": {
@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.4.5",
-    "tsbuffer-schema": "^1.4.0",
-    "tsbuffer-validator": "^1.1.5"
+    "tsbuffer-schema": "~1.4.0",
+    "tsbuffer-validator": "^1.1.7"
   },
   "devDependencies": {
     "rollup": "^1.32.1",
@@ -25,7 +25,7 @@
   "scripts": {
     "build": "rm -rf dist && npx rollup -c && cp package.json LICENSE README.md dist/",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd..",
-    "test": "cd test && TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' && npx mocha **/*.test.ts & cd ..",
+    "test": "cd test && npx mocha **/*.test.ts & cd ..",
     "us": "npm install tsbuffer-schema@* tsbuffer-validator@*"
   },
   "repository": {

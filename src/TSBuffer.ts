@@ -29,7 +29,7 @@ export interface TSBufferOptions {
      * 不符合类型定义，可能导致编码失败。
      * 当开启 `encodeNullAsUndefined` 后，则可避免这种问题。
      */
-    nullAsUndefined: boolean;
+    // nullAsUndefined: boolean;
 
     /**
      * 自定义 UTF8 编解码器
@@ -52,28 +52,31 @@ export interface TSBufferOptions {
     skipDecodeValidate?: boolean;
 }
 
-export class TSBuffer {
+/** @public */
+export interface EncodeOptions {
+    skipValidate?: boolean;
+}
 
-    protected _validator: TSBufferValidator;
+/** @public */
+export interface DecodeOptions {
+    skipValidate?: boolean;
+}
+
+export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
+
+    protected _validator: TSBufferValidator<Proto>;
     protected _encoder: Encoder;
     protected _decoder: Decoder;
-    protected _proto: TSBufferProto;
+    protected _proto: Proto;
 
     /** 默认配置 */
     private _options: TSBufferOptions = {
         validatorOptions: {},
-        nullAsUndefined: false,
         utf8Coder: Utf8Util,
     }
 
-    constructor(proto: TSBufferProto, options?: Partial<TSBufferOptions>) {
-        if (options?.validatorOptions) {
-            options.validatorOptions = {
-                ...this._options.validatorOptions,
-                ...options.validatorOptions
-            }
-        }
-
+    constructor(proto: Proto, options?: Partial<TSBufferOptions>) {
+        // but `options.validatorOptions` has higher priority to validate process (don't affect encode)
         this._options = {
             ...this._options,
             ...options
@@ -81,65 +84,44 @@ export class TSBuffer {
 
         this._proto = proto;
         this._validator = new TSBufferValidator(proto, this._options.validatorOptions);
+        this.validate = this._validator.validate.bind(this._validator);
+        this.prune = this._validator.prune.bind(this._validator);
 
         this._encoder = new Encoder({
             validator: this._validator,
             utf8Coder: this._options.utf8Coder,
-            nullAsUndefined: this._options.nullAsUndefined
+            // if !strictNullChecks, then encoder can convert null to undefined
+            nullAsUndefined: !this._options.validatorOptions.strictNullChecks
         });
 
         this._decoder = new Decoder({
             validator: this._validator,
             utf8Coder: this._options.utf8Coder,
-            undefinedAsNull: this._options.nullAsUndefined
+            // if !strictNullChecks, then decoder can convert undefined to null
+            undefinedAsNull: !this._options.validatorOptions.strictNullChecks
         });
     }
 
     /**
      * 编码
-     * @param value 要编码的值
-     * @param schemaOrId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
+     * @param value - 要编码的值
+     * @param schemaOrId - Schema 或 SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      */
-    encode(value: any, schemaOrId: string | TSBufferSchema): EncodeOutput {
+    encode(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions): EncodeOutput {
         let schema: TSBufferSchema;
         if (typeof schemaOrId === 'string') {
             schema = this._proto[schemaOrId];
             if (!schema) {
-                throw new Error(`Cannot find schema： ${schemaOrId}`)
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` };
             }
         }
         else {
             schema = schemaOrId
         }
 
-        // // change validator options temporaryly
-        let oriValidatorOptions = this._validator.options;
-        let tempValidatorOptions: TSBufferValidatorOptions = {
-            ...this._validator.options,
-            excessPropertyChecks: false,
-        }
-
-        // excessPropertyChecks
-        //      - validate  false（因为不会编码多余字段）
-        //      - encode    false（不会编码多余字段，不需要计算unionProperties）
-        // strictNullChecks  当 null as undefined
-        //      - validate  false
-        //      - encode    改true (union validate 因为有null as undefined 会转化propValue)
-
         // validate before encode
-        if (!this._options.skipEncodeValidate) {
-            // change validator options temporaryly
-            let oriExcessPropertyChecks = this._validator.options.excessPropertyChecks;
-            let oriStrictNullChecks = this._validator.options.strictNullChecks;
-            this._validator.options.excessPropertyChecks = false;
-            this._validator.options.strictNullChecks = oriStrictNullChecks && this._options.nullAsUndefined ? false : true;
-
+        if (!(options?.skipValidate ?? this._options.skipEncodeValidate)) {
             let vRes = this._validator.validate(value, schema);
-
-            // revert validator options
-            this._validator.options.excessPropertyChecks = oriExcessPropertyChecks;
-            this._validator.options.strictNullChecks = oriStrictNullChecks;
-
             if (!vRes.isSucc) {
                 return vRes;
             }
@@ -150,32 +132,27 @@ export class TSBuffer {
             buf = this._encoder.encode(value, schema);
         }
         catch (e) {
-            // revert validator options
-            this._validator.options = oriValidatorOptions;
             return { isSucc: false, errMsg: e.message }
         }
 
-        // revert validator options
-        this._validator.options = oriValidatorOptions;
         return { isSucc: true, buf: buf };
     }
 
     /**
      * 解码
-     * @param buf 二进制数据
-     * @param schemaId SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
-     * @param options.skipValidate 跳过解码后的验证步骤（不安全）
+     * @param buf - 待解码的二进制数据
+     * @param schemaOrId - Schema 或 SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      */
-    decode(buf: Uint8Array, idOrSchema: string | TSBufferSchema, options?: DecodeOptions): unknown {
+    decode(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput {
         let schema: TSBufferSchema;
-        if (typeof idOrSchema === 'string') {
-            schema = this._proto[idOrSchema];
+        if (typeof schemaOrId === 'string') {
+            schema = this._proto[schemaOrId];
             if (!schema) {
-                throw new Error(`Cannot find schema： ${idOrSchema}`)
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` }
             }
         }
         else {
-            schema = idOrSchema
+            schema = schemaOrId
         }
 
         let value: unknown;
@@ -183,35 +160,23 @@ export class TSBuffer {
             value = this._decoder.decode(buf, schema);
         }
         catch (e) {
-            let err = new Error('Invalid buffer encoding');
-            (err as any).encodingError = e;
-            throw err;
+            return { isSucc: false, errMsg: e.message };
         }
 
-        if (!options || !options.skipValidate) {
+        if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
             let vRes = this._validator.validate(value, schema);
             if (!vRes.isSucc) {
-                throw new Error(vRes.originalError.message)
+                return vRes;
             }
         }
 
-        return value;
+        return { isSucc: true, output: value };
     }
 
-    validate(value: any, idOrSchema: string | TSBufferSchema): ValidatorOutput {
-        let schema: TSBufferSchema;
-        if (typeof idOrSchema === 'string') {
-            schema = this._proto[idOrSchema];
-            if (!schema) {
-                throw new Error(`Cannot find schema： ${idOrSchema}`)
-            }
-        }
-        else {
-            schema = idOrSchema
-        }
+    validate: TSBufferValidator<Proto>['validate'];
 
-        return this._validator.validate(value, schema);
-    }
+    prune: TSBufferValidator<Proto>['prune'];
+
 }
 
 /** @public */
