@@ -42,6 +42,23 @@
     "type": "git",
     "url": "git+https://github.com/k8w/tsbuffer.git"
   },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "coverage",
+      "test",
+      "dist",
+      "benchmark",
+      "scripts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
+  },
   "author": "",
   "license": "ISC",
   "bugs": {
