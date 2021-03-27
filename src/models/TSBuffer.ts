@@ -1,5 +1,5 @@
 import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
-import { TSBufferValidator, TSBufferValidatorOptions } from 'tsbuffer-validator';
+import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "../decoder/Decoder";
 import { Encoder } from '../encoder/Encoder';
 import { Utf8Coder, Utf8Util } from './Utf8Util';
@@ -7,11 +7,23 @@ import { Utf8Coder, Utf8Util } from './Utf8Util';
 /** @public */
 export interface TSBufferOptions {
     /**
-     * 校验阶段的配置，与编码过程配置相互独立（先校验，再编码）。
-     * 将 `Object.assign` 到默认设置上
-     * 默认：`{}`
+     * 检查值中是否包含Schema定义之外多余的字段
+     * 仅对 `validate` 方法生效
+     * 是因为实现机制原因, `prune` `encode` `decode` 方法都会天然保证不会混入多余字段
+     *
+     * 默认：`true`
      */
-    validatorOptions: Partial<TSBufferValidatorOptions>,
+    excessPropertyChecks: boolean;
+
+    /**
+     * 同 `tsconfig.json` 中的 `strictNullChecks`
+     * 是否使用严格等于去判定 `undefined` 和 `null`
+     * 如果该值为 `false`，则在编码过程中，`null` 在类型不兼容时可编码为`undefined`，
+     * 解码过程中，`undefined` 在类型不兼容时可解码为 `null`。
+     *
+     * 默认为 `true`
+     */
+    strictNullChecks: boolean;
 
     /**
      * 自定义 UTF8 编解码器
@@ -60,7 +72,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
     /** @internal 默认配置 */
     private _options: TSBufferOptions = {
-        validatorOptions: {},
+        excessPropertyChecks: true,
+        strictNullChecks: true,
         utf8Coder: Utf8Util,
         skipEncodeValidate: false,
         skipDecodeValidate: false,
@@ -74,7 +87,10 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         this._proto = proto;
-        this._validator = new TSBufferValidator(proto, this._options.validatorOptions);
+        this._validator = new TSBufferValidator(proto, {
+            excessPropertyChecks: this._options.excessPropertyChecks,
+            strictNullChecks: this._options.strictNullChecks
+        });
         this.validate = this._validator.validate.bind(this._validator);
         this.prune = this._validator.prune.bind(this._validator);
 
@@ -82,14 +98,14 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             validator: this._validator,
             utf8Coder: this._options.utf8Coder,
             // if !strictNullChecks, then encoder can convert null to undefined
-            nullAsUndefined: !this._options.validatorOptions.strictNullChecks
+            nullAsUndefined: !this._options.strictNullChecks
         });
 
         this._decoder = new Decoder({
             validator: this._validator,
             utf8Coder: this._options.utf8Coder,
             // if !strictNullChecks, then decoder can convert undefined to null
-            undefinedAsNull: !this._options.validatorOptions.strictNullChecks
+            undefinedAsNull: !this._options.strictNullChecks
         });
     }
 
