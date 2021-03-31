@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-decode(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput;
+decode<T = unknown>(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T>;
 ```
 
 ## Parameters
@@ -22,5 +22,5 @@ decode(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOpt
 
 <b>Returns:</b>
 
-[DecodeOutput](./tsbuffer.decodeoutput.md)
+[DecodeOutput](./tsbuffer.decodeoutput.md)<!-- -->&lt;T&gt;
 

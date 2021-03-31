@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "description": "",
   "main": "index.cjs",
   "exports": {

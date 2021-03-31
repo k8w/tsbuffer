@@ -153,7 +153,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
      * @param buf - 待解码的二进制数据
      * @param schemaOrId - Schema 或 SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      */
-    decode(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput {
+    decode<T=unknown>(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T> {
         let schema: TSBufferSchema;
         if (typeof schemaOrId === 'string') {
             schema = this._proto[schemaOrId];
@@ -165,9 +165,9 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             schema = schemaOrId
         }
 
-        let value: unknown;
+        let value: T;
         try {
-            value = this._decoder.decode(buf, schema);
+            value = this._decoder.decode(buf, schema) as T;
         }
         catch (e) {
             return { isSucc: false, errMsg: e.message };
@@ -202,10 +202,10 @@ export type EncodeOutput = {
     buf?: undefined
 };
 /** @public */
-export type DecodeOutput = {
+export type DecodeOutput<T> = {
     isSucc: true,
     /** Decoded value */
-    value: unknown,
+    value: T,
     errMsg?: undefined
 } | {
     isSucc: false,

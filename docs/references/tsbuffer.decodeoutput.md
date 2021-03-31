@@ -8,9 +8,9 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type DecodeOutput = {
+export declare type DecodeOutput<T> = {
     isSucc: true;
-    value: unknown;
+    value: T;
     errMsg?: undefined;
 } | {
     isSucc: false;
