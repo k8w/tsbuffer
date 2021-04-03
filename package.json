@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "1.4.10",
+  "version": "2.0.0",
   "description": "",
   "main": "index.cjs",
   "exports": {
@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.4.5",
-    "tsbuffer-schema": "~1.4.0",
-    "tsbuffer-validator": "^1.1.13"
+    "tsbuffer-validator": "^2.0.0"
   },
   "devDependencies": {
     "@microsoft/api-documenter": "^7.12.14",
