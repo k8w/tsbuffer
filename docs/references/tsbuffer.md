@@ -17,7 +17,6 @@
 |  [DecodeOptions](./tsbuffer.decodeoptions.md) |  |
 |  [EncodeOptions](./tsbuffer.encodeoptions.md) |  |
 |  [TSBufferOptions](./tsbuffer.tsbufferoptions.md) |  |
-|  [Utf8Coder](./tsbuffer.utf8coder.md) | Customized UTF8 encoder / decoder |
 
 ## Type Aliases
 

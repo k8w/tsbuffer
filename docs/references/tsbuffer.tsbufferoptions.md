@@ -19,5 +19,4 @@ export interface TSBufferOptions
 |  [skipDecodeValidate](./tsbuffer.tsbufferoptions.skipdecodevalidate.md) | boolean | 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
 |  [skipEncodeValidate](./tsbuffer.tsbufferoptions.skipencodevalidate.md) | boolean | 正常编码流程是：先校验value类型合法，再进行编码 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
 |  [strictNullChecks](./tsbuffer.tsbufferoptions.strictnullchecks.md) | boolean | 同 <code>tsconfig.json</code> 中的 <code>strictNullChecks</code> 是否使用严格等于去判定 <code>undefined</code> 和 <code>null</code> 如果该值为 <code>false</code>，则在编码过程中，<code>null</code> 在类型不兼容时可编码为<code>undefined</code>， 解码过程中，<code>undefined</code> 在类型不兼容时可解码为 <code>null</code>。<!-- -->默认为 <code>true</code> |
-|  [utf8Coder](./tsbuffer.tsbufferoptions.utf8coder.md) | [Utf8Coder](./tsbuffer.utf8coder.md) | 自定义 UTF8 编解码器 默认：本项目自带JS方法 |
 
