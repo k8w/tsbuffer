@@ -1,15 +1,14 @@
 import { LengthType } from '../models/IdBlockUtil';
-import { Utf8Coder } from '../models/Utf8Util';
+import { Utf8Coder } from '../models/Utf8Coder';
 import { Varint64 } from '../models/Varint64';
 export class BufferReader {
 
     private _pos: number = 0;
     private _buf!: Uint8Array;
     private _view!: DataView;
-    private _utf8: Utf8Coder;
 
-    constructor(utf8: Utf8Coder) {
-        this._utf8 = utf8;
+    constructor() {
+        
     }
 
     load(buf: Uint8Array, pos: number = 0) {
@@ -40,7 +39,7 @@ export class BufferReader {
 
     readString(): string {
         let strByteLength = this.readUint();
-        let str = this._utf8.read(this._buf, this._pos, strByteLength);
+        let str = Utf8Coder.read(this._buf, this._pos, strByteLength);
         this._pos += strByteLength;
         return str;
     }

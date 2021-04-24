@@ -2,7 +2,6 @@ import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "../decoder/Decoder";
 import { Encoder } from '../encoder/Encoder';
-import { Utf8Coder, Utf8Util } from './Utf8Util';
 
 /** @public */
 export interface TSBufferOptions {
@@ -24,12 +23,6 @@ export interface TSBufferOptions {
      * 默认为 `true`
      */
     strictNullChecks: boolean;
-
-    /**
-     * 自定义 UTF8 编解码器
-     * 默认：本项目自带JS方法
-     */
-    utf8Coder: Utf8Coder;
 
     /**
      * 正常编码流程是：先校验value类型合法，再进行编码
@@ -74,7 +67,6 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
     private _options: TSBufferOptions = {
         excessPropertyChecks: true,
         strictNullChecks: true,
-        utf8Coder: Utf8Util,
         skipEncodeValidate: false,
         skipDecodeValidate: false,
     }
@@ -96,14 +88,12 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
         this._encoder = new Encoder({
             validator: this._validator,
-            utf8Coder: this._options.utf8Coder,
             // if !strictNullChecks, then encoder can convert null to undefined
             nullAsUndefined: !this._options.strictNullChecks
         });
 
         this._decoder = new Decoder({
             validator: this._validator,
-            utf8Coder: this._options.utf8Coder,
             // if !strictNullChecks, then decoder can convert undefined to null
             undefinedAsNull: !this._options.strictNullChecks
         });

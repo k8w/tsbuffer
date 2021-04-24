@@ -3,7 +3,6 @@ import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
-import { Utf8Coder } from '../models/Utf8Util';
 import { Varint64 } from '../models/Varint64';
 import { TypedArray, TypedArrays } from '../models/TypedArrays';
 import { BufferWriter } from './BufferWriter';
@@ -11,12 +10,6 @@ import { BufferWriter } from './BufferWriter';
 /** @internal */
 export interface EncoderOptions {
     validator: TSBufferValidator;
-
-    /**
-     * 自定义 UTF8 编解码器
-     * 默认使用 NodeJS 或自带方法
-     */
-    utf8Coder: Utf8Coder;
 
     /**
      * 编解码阶段，`null` 可编码为 `undefined`。
@@ -47,7 +40,7 @@ export class Encoder {
 
     constructor(options: EncoderOptions) {
         this._options = options;
-        this._writer = new BufferWriter(options.utf8Coder);
+        this._writer = new BufferWriter();
         this._validator = options.validator;
     }
 

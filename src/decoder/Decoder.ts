@@ -2,7 +2,6 @@ import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitType
 import { TSBufferValidator } from "tsbuffer-validator";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
-import { Utf8Coder } from "../models/Utf8Util";
 import { Varint64 } from '../models/Varint64';
 import { TypedArrays } from '../models/TypedArrays';
 import { BufferReader } from './BufferReader';
@@ -10,12 +9,6 @@ import { BufferReader } from './BufferReader';
 /** @internal */
 export interface DecoderOptions {
     validator: TSBufferValidator;
-
-    /**
-     * 自定义 UTF8 编解码器
-     * 默认使用 NodeJS 或自带方法
-     */
-    utf8Coder: Utf8Coder;
 
     /**
      * 如对于类型 `string | null`，当值为 `undefined` 时，是否自动将值解码时转换为 `null`
@@ -32,7 +25,7 @@ export class Decoder {
 
     constructor(options: DecoderOptions) {
         this._options = options;
-        this._reader = new BufferReader(options.utf8Coder);
+        this._reader = new BufferReader();
         this._validator = options.validator;
     }
 

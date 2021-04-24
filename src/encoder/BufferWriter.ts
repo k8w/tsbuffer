@@ -1,4 +1,4 @@
-import { Utf8Coder, Utf8Util } from '../models/Utf8Util';
+import { Utf8Coder } from '../models/Utf8Coder';
 import { Varint64 } from '../models/Varint64';
 
 /**
@@ -13,10 +13,8 @@ import { Varint64 } from '../models/Varint64';
 export class BufferWriter {
 
     private _ops: WriteOp[] = [];
-    private _utf8: Utf8Coder;
 
-    constructor(utf8?: Utf8Coder) {
-        this._utf8 = utf8 || Utf8Util;
+    constructor() {
     }
 
     get ops(): WriteOp[] {
@@ -57,7 +55,7 @@ export class BufferWriter {
             case 'varint':
                 return req.value.byteLength;
             case 'string':
-                return this._utf8.measureLength(req.value);
+                return Utf8Coder.measureLength(req.value);
             case 'buffer':
                 return req.value.byteLength;
             case 'double':
@@ -84,10 +82,10 @@ export class BufferWriter {
                     }
                     break;
                 case 'double':
-                    view.setFloat64(buf.byteOffset +pos, op.value);
+                    view.setFloat64(buf.byteOffset + pos, op.value);
                     break;
                 case 'string':
-                    let encLen = this._utf8.write(op.value, buf, pos);
+                    let encLen = Utf8Coder.write(op.value, buf, pos);
                     if (encLen !== op.length) {
                         throw new Error(`Expect ${op.length} bytes but encoded ${encLen} bytes`);
                     }
@@ -96,7 +94,7 @@ export class BufferWriter {
                     buf.subarray(pos, pos + op.length).set(op.value);
                     break;
                 case 'boolean':
-                    view.setUint8(buf.byteOffset +pos, op.value ? 255 : 0);
+                    view.setUint8(buf.byteOffset + pos, op.value ? 255 : 0);
                     break;
                 default:
                     break;
