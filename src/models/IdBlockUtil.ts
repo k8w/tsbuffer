@@ -19,11 +19,11 @@ export class IdBlockUtil {
                 }
                 else {
                     return { lengthType: LengthType.Varint };
-                }            
+                }
             case SchemaType.Buffer:
             case SchemaType.String:
             case SchemaType.Any:
-            case SchemaType.NonPrimitive:
+            case SchemaType.Object:
                 return { lengthType: LengthType.LengthDelimited };
             case SchemaType.Interface:
             case SchemaType.Pick:
@@ -32,9 +32,9 @@ export class IdBlockUtil {
             case SchemaType.Union:
             case SchemaType.Intersection:
                 return { lengthType: LengthType.IdBlock };
-            case SchemaType.Array:            
+            case SchemaType.Array:
             case SchemaType.Overwrite:
-            case SchemaType.Tuple:            
+            case SchemaType.Tuple:
                 return {
                     lengthType: LengthType.LengthDelimited,
                     needLengthPrefix: true

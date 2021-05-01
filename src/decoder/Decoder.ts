@@ -2,8 +2,8 @@ import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitType
 import { TSBufferValidator } from "tsbuffer-validator";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
-import { Varint64 } from '../models/Varint64';
 import { TypedArrays } from '../models/TypedArrays';
+import { Varint64 } from '../models/Varint64';
 import { BufferReader } from './BufferReader';
 
 /** @internal */
@@ -108,7 +108,7 @@ export class Decoder {
                 }
                 return enumItem.value;
             case SchemaType.Any:
-            case SchemaType.NonPrimitive:
+            case SchemaType.Object:
                 let jsonStr = this._reader.readString();
                 if (jsonStr === 'undefined') {
                     return undefined;

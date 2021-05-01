@@ -1,6 +1,6 @@
 import assert from 'assert';
-import { TSBuffer } from '../../src/index';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
+import { TSBuffer } from '../../src/index';
 
 describe('Basic Encode', function () {
     it('Boolean', function () {
@@ -148,10 +148,10 @@ describe('Basic Encode', function () {
         });
     });
 
-    it('NonPrimitive', function () {
+    it('Object', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'NonPrimitive'
+                type: 'Object'
             }
         });
 

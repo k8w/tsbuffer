@@ -3,8 +3,8 @@ import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
-import { Varint64 } from '../models/Varint64';
 import { TypedArray, TypedArrays } from '../models/TypedArrays';
+import { Varint64 } from '../models/Varint64';
 import { BufferWriter } from './BufferWriter';
 
 /** @internal */
@@ -127,7 +127,7 @@ export class Encoder {
                     this._writer.push({ type: 'string', value: JSON.stringify(value) });
                 }
                 break;
-            case SchemaType.NonPrimitive:
+            case SchemaType.Object:
                 this._writer.push({ type: 'string', value: JSON.stringify(value) });
                 break;
             case SchemaType.Literal:
