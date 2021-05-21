@@ -583,4 +583,41 @@ describe('Interface', function () {
             common2: 'asdgasdg'
         });
     });
+
+    it('NonNullable', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+export interface Wrapper {
+    time: Date,
+    value1?: string,
+    value2: null | string | undefined,
+    value4?: {
+        a?: {
+            b?: string | null
+        } | null
+    } | null
+}
+export type Value3 = string | null | undefined;
+export type NonNullable1 = NonNullable<Wrapper['value1']>;
+export type NonNullable2 = NonNullable<Wrapper['value2']>;
+export type NonNullable3 = NonNullable<Value3>;
+export type NonNullable4 = NonNullable<Wrapper['value4']>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        ['a/NonNullable1', 'a/NonNullable2', 'a/NonNullable3'].forEach(schemaId => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode('AAA', schemaId).buf!, schemaId).value, 'AAA');
+        });
+
+        [
+            {},
+            { a: null },
+            { a: {} },
+            { a: { b: null } },
+            { a: { b: 'ASDF' } },
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/NonNullable4').buf!, 'a/NonNullable4').value, v);
+        });
+    })
 })

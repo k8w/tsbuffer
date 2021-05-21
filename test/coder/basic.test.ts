@@ -257,6 +257,21 @@ describe('Basic Encode', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(arr, 'a/b').buf!, 'a/b').value, arr, key + ' failed');
         }
     });
+
+    it('Date', function () {
+        it('Date', function () {
+            let tsb = new TSBuffer({
+                'a/b': {
+                    type: 'Date'
+                }
+            });
+
+            let encodedBuf = tsb.encode(new Date('2021/5/21'), 'a/b').buf!;
+            let decoded = tsb.decode(encodedBuf, 'a/b').value as Date;
+            assert.ok(decoded instanceof Date);
+            assert.strictEqual(decoded.getTime(), new Date('2021/5/21').getTime())
+        });
+    })
 });
 
 export enum TestEnum {

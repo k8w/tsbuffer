@@ -160,6 +160,12 @@ export class Encoder {
             case SchemaType.Intersection:
                 this._writeIntersection(value, schema, options?.skipFields);
                 break;
+            case SchemaType.Date:
+                this._writer.push({ type: 'varint', value: Varint64.from((value as Date).getTime()) });
+                break;
+            case SchemaType.NonNullable:
+                this._write(value, schema.target, options);
+                break;
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }

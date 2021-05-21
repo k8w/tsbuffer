@@ -164,6 +164,12 @@ export class Decoder {
             case SchemaType.Union:
             case SchemaType.Intersection:
                 return this._readUnionOrIntersection(schema);
+            case SchemaType.Date:
+                return new Date(this._reader.readUint());
+                break;
+            case SchemaType.NonNullable:
+                return this._read(schema.target);
+                break;
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
