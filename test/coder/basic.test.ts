@@ -259,18 +259,38 @@ describe('Basic Encode', function () {
     });
 
     it('Date', function () {
-        it('Date', function () {
-            let tsb = new TSBuffer({
-                'a/b': {
-                    type: 'Date'
-                }
-            });
-
-            let encodedBuf = tsb.encode(new Date('2021/5/21'), 'a/b').buf!;
-            let decoded = tsb.decode(encodedBuf, 'a/b').value as Date;
-            assert.ok(decoded instanceof Date);
-            assert.strictEqual(decoded.getTime(), new Date('2021/5/21').getTime())
+        let tsb = new TSBuffer({
+            'a/b': {
+                type: 'Date'
+            }
         });
+
+        let encodedBuf = tsb.encode(new Date('2021/5/21'), 'a/b').buf!;
+        let decoded = tsb.decode(encodedBuf, 'a/b').value as Date;
+        assert.ok(decoded instanceof Date);
+        assert.strictEqual(decoded.getTime(), new Date('2021/5/21').getTime())
+    });
+
+    it('Date in interface', function () {
+        let tsb = new TSBuffer({
+            'a/b': {
+                type: 'Interface',
+                properties: [
+                    {
+                        id: 0,
+                        name: 'time',
+                        type: {
+                            type: 'Date'
+                        }
+                    }
+                ]
+            }
+        });
+
+        let encodedBuf = tsb.encode({ time: new Date('2021/5/21') }, 'a/b').buf!;
+        let decoded = tsb.decode(encodedBuf, 'a/b').value as { time: Date };
+        assert.ok(decoded.time instanceof Date);
+        assert.strictEqual(decoded.time.getTime(), new Date('2021/5/21').getTime())
     })
 });
 
