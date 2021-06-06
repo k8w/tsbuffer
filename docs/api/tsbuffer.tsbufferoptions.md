@@ -15,6 +15,7 @@ export interface TSBufferOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [cloneProto?](./tsbuffer.tsbufferoptions.cloneproto.md) | boolean | <i>(Optional)</i> Clone the proto, don't change this if you don't know what it is. |
 |  [excessPropertyChecks](./tsbuffer.tsbufferoptions.excesspropertychecks.md) | boolean | 检查值中是否包含Schema定义之外多余的字段 仅对 <code>validate</code> 方法生效 是因为实现机制原因, <code>prune</code> <code>encode</code> <code>decode</code> 方法都会天然保证不会混入多余字段<!-- -->默认：<code>true</code> |
 |  [skipDecodeValidate](./tsbuffer.tsbufferoptions.skipdecodevalidate.md) | boolean | 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
 |  [skipEncodeValidate](./tsbuffer.tsbufferoptions.skipencodevalidate.md) | boolean | 正常编码流程是：先校验value类型合法，再进行编码 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |

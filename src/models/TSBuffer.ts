@@ -39,6 +39,12 @@ export interface TSBufferOptions {
      * 默认为 `false`
      */
     skipDecodeValidate: boolean;
+
+    /**
+     * Clone the proto, don't change this if you don't know what it is.
+     * @defaultValue true
+     */
+    cloneProto?: boolean;
 }
 
 /** @public */
@@ -69,6 +75,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         strictNullChecks: true,
         skipEncodeValidate: false,
         skipDecodeValidate: false,
+        cloneProto: true,
     }
 
     constructor(proto: Proto, options?: Partial<TSBufferOptions>) {
@@ -78,8 +85,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             ...options
         }
 
-        this._proto = proto;
-        this._validator = new TSBufferValidator(proto, {
+        this._proto = this._options.cloneProto ? Object.merge({}, proto) : proto;
+        this._validator = new TSBufferValidator(this._proto, {
             excessPropertyChecks: this._options.excessPropertyChecks,
             strictNullChecks: this._options.strictNullChecks
         });
@@ -143,7 +150,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
      * @param buf - 待解码的二进制数据
      * @param schemaOrId - Schema 或 SchemaID，例如`a/b.ts`下的`Test`类型，其ID为`a/b/Test`
      */
-    decode<T=unknown>(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T> {
+    decode<T = unknown>(buf: Uint8Array, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T> {
         let schema: TSBufferSchema;
         if (typeof schemaOrId === 'string') {
             schema = this._proto[schemaOrId];
