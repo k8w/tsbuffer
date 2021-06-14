@@ -19,16 +19,16 @@ export default [
                     }
                 }
             }),
-            terser({
-                mangle: {
-                    properties: {
-                        regex: /^_/
-                    }
-                },
-                format: {
-                    comments: /^!/
-                }
-            })
+            // terser({
+            //     mangle: {
+            //         properties: {
+            //             regex: /^_/
+            //         }
+            //     },
+            //     format: {
+            //         comments: /^!/
+            //     }
+            // })
         ]
     },
     {
@@ -48,16 +48,16 @@ export default [
                     }
                 }
             }),
-            terser({
-                mangle: {
-                    properties: {
-                        regex: /^_/
-                    }
-                },
-                format: {
-                    comments: /^!/
-                }
-            })
+            // terser({
+            //     mangle: {
+            //         properties: {
+            //             regex: /^_/
+            //         }
+            //     },
+            //     format: {
+            //         comments: /^!/
+            //     }
+            // })
         ]
     }
 ]

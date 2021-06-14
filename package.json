@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "2.0.2-dev.4",
+  "version": "2.0.2",
   "description": "",
   "main": "index.cjs",
   "exports": {
@@ -26,7 +26,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
     "ts-node": "^10.0.0",
-    "tsbuffer-proto-generator": "^1.4.1-dev.4",
+    "tsbuffer-proto-generator": "^1.4.1",
     "tslib": "^2.3.0",
     "typescript": "^4.3.2"
   },
