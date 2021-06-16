@@ -1,4 +1,4 @@
-
+declare let Buffer: any;
 
 const Utf8CoderJS: IUtf8Coder = {
     measureLength: str => {
