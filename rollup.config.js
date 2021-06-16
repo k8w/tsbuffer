@@ -1,4 +1,3 @@
-import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
 
 export default [
@@ -18,18 +17,9 @@ export default [
                         module: "esnext"
                     }
                 }
-            }),
-            // terser({
-            //     mangle: {
-            //         properties: {
-            //             regex: /^_/
-            //         }
-            //     },
-            //     format: {
-            //         comments: /^!/
-            //     }
-            // })
-        ]
+            })
+        ],
+        external: ['tslib']
     },
     {
         input: './src/index.ts',
@@ -47,17 +37,8 @@ export default [
                         module: "esnext"
                     }
                 }
-            }),
-            // terser({
-            //     mangle: {
-            //         properties: {
-            //             regex: /^_/
-            //         }
-            //     },
-            //     format: {
-            //         comments: /^!/
-            //     }
-            // })
-        ]
+            })
+        ],
+        external: ['tslib']
     }
 ]
