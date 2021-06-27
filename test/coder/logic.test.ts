@@ -187,4 +187,40 @@ describe('LogicTypes', function () {
         assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/a1').buf!, 'a/a').value, v);
         assert.deepStrictEqual(tsb.decode(tsb.encode(v1, 'a/a1').buf!, 'a/a').value, v);
     })
+
+    it('Partial<Pick>> & { xxx: string }', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface Post {
+                    _id: string,
+                    author: string
+                    title: string,
+                    content: string,
+                    create: { time: Date, uid: string },
+                    update?: { time: Date, uid: string },
+                }
+
+                export type UpdatePost = Partial<Pick<Post, 'title' | 'content'>> & { _id: string };
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        let v = {
+            _id: 'aaa',
+            title: 'bbb',
+            content: 'ccc'
+        };
+
+        let enc = tsb.encode(v, 'a/UpdatePost');
+        let dec = tsb.decode(enc.buf!, 'a/UpdatePost')
+        assert.deepStrictEqual(dec.value, v);
+
+        let enc1 = tsb.encode({
+            title: 'xxx',
+            content: 'xxx'
+        }, 'a/UpdatePost');
+        assert.strictEqual(enc1.errMsg, 'Missing required property `_id`.');
+
+
+    })
 })

@@ -507,7 +507,9 @@ export class Encoder {
                     this._writeUnion(value, member.type, skipFields)
                 }
                 else {
-                    this._write(value, member.type, skipFields);
+                    this._write(value, member.type, {
+                        skipFields: skipFields
+                    });
                 }
                 idNum++;
 
@@ -543,7 +545,9 @@ export class Encoder {
             let idPos = this._writer.ops.length - 1;
 
             // 编码块
-            this._write(value, member.type, skipFields);
+            this._write(value, member.type, {
+                skipFields: skipFields
+            });
             this._processIdWithLengthType(idPos, member.type);
         }
     }
