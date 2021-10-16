@@ -45,6 +45,12 @@ export interface TSBufferOptions {
      * @defaultValue true
      */
     cloneProto?: boolean;
+
+    /**
+     * Custom type encoder & decoder for specific types.
+     * For example 'mongodb/ObjectId'
+     */
+    customTypes?: CustomTypeItem[];
 }
 
 /** @public */
@@ -210,3 +216,16 @@ export type DecodeOutput<T> = {
     errMsg: string,
     value?: undefined
 };
+
+export type CustomTypeItem = {
+    name: string | string[],
+    import?: string | string[],
+} & ({
+    validator?: any,
+    encoder?: any,
+    decoder?: any
+} | {
+    alias: TSBufferSchema,
+    encode?: (value: any) => any,
+    decode?: (value: any) => any
+})
