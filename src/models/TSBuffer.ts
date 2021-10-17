@@ -1,4 +1,4 @@
-import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
+import { CustomTypeSchema, TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Decoder } from "../decoder/Decoder";
 import { Encoder } from '../encoder/Encoder';
@@ -47,10 +47,11 @@ export interface TSBufferOptions {
     cloneProto?: boolean;
 
     /**
-     * Custom type encoder & decoder for specific types.
-     * For example 'mongodb/ObjectId'
+     * Append `CustomTypeSchema` to given schema,
+     * to customize validate & encode methods for specific types.
+     * For example 'mongodb/ObjectId'.
      */
-    customTypes?: CustomTypeItem[];
+    customTypes?: { [schemaId: string]: CustomTypeSchema };
 }
 
 /** @public */
@@ -92,6 +93,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         this._proto = this._options.cloneProto ? Object.merge({}, proto) : proto;
+        Object.assign(this._proto, Object.merge({}, options?.customTypes));
+
         this._validator = new TSBufferValidator(this._proto, {
             excessPropertyChecks: this._options.excessPropertyChecks,
             strictNullChecks: this._options.strictNullChecks
@@ -216,16 +219,3 @@ export type DecodeOutput<T> = {
     errMsg: string,
     value?: undefined
 };
-
-export type CustomTypeItem = {
-    name: string | string[],
-    import?: string | string[],
-} & ({
-    validator?: any,
-    encoder?: any,
-    decoder?: any
-} | {
-    alias: TSBufferSchema,
-    encode?: (value: any) => any,
-    decode?: (value: any) => any
-})

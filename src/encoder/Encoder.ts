@@ -1,4 +1,4 @@
-import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
+import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
@@ -136,7 +136,7 @@ export class Encoder {
                 this._writeInterface(value, schema, options);
                 break;
             case SchemaType.Buffer:
-                this._writeBuffer(value, schema);
+                this._writeBuffer(value);
                 break;
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
@@ -165,6 +165,14 @@ export class Encoder {
                 break;
             case SchemaType.NonNullable:
                 this._write(value, schema.target, options);
+                break;
+            case SchemaType.Custom:
+                if (!schema.encode) {
+                    throw new Error('Missing encode method for CustomTypeSchema');
+                }
+                let buf = schema.encode(value);
+                // 以 Buffer 形式写入
+                this._writeBuffer(buf);
                 break;
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -552,7 +560,7 @@ export class Encoder {
         }
     }
 
-    private _writeBuffer(value: ArrayBuffer | TypedArray, schema: BufferTypeSchema) {
+    private _writeBuffer(value: ArrayBuffer | TypedArray) {
         // ArrayBuffer 转为Uint8Array
         if (value instanceof ArrayBuffer) {
             this._writer.push({ type: 'buffer', value: new Uint8Array(value) });

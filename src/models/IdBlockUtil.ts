@@ -46,6 +46,8 @@ export class IdBlockUtil {
                 }
             case SchemaType.Date:
                 return { lengthType: LengthType.Varint };
+            case SchemaType.Custom:
+                return { lengthType: LengthType.LengthDelimited };
             default:
                 throw new Error(`Unrecognized schema type: ${parsedSchema.type}`);
         }

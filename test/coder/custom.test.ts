@@ -1,0 +1,77 @@
+import assert from 'assert';
+import { TSBuffer } from '../../src/index';
+
+describe('CustomType', function () {
+
+    const tsb = new TSBuffer({
+        'a/b': {
+            type: 'Interface',
+            properties: [
+                {
+                    id: 0,
+                    name: '_id',
+                    type: {
+                        type: 'Reference',
+                        target: '?bson/ObjectId'
+                    }
+                },
+                {
+                    id: 1,
+                    name: 'value',
+                    type: { type: 'String' }
+                }
+            ]
+        },
+        '?bson/ObjectId': {
+            type: 'Custom',
+            validate: value => {
+                if (typeof value === 'string' && value.length === 24) {
+                    return { isSucc: true }
+                }
+                else {
+                    return { isSucc: false, errMsg: 'Invalid ObjectId' }
+                }
+            },
+            encode: (value: string) => {
+                return new Uint8Array(Array.from({ length: 12 }, (_, i) => Number.parseInt('0x' + value.substr(i * 2, 2))))
+            },
+            decode: (buf: Uint8Array) => {
+                return Array.from(buf, v => {
+                    let str = v.toString(16);
+                    if (str.length === 1) {
+                        str = '0' + str;
+                    }
+                    return str;
+                }).join('')
+            }
+        }
+    });
+
+    it('succ', function () {
+        let objId = '61531914435b997af15dc382';
+
+        // encode
+        let resEncode = tsb.encode({
+            _id: objId,
+            value: 'ABC'
+        }, 'a/b');
+        assert.strictEqual(resEncode.isSucc, true);
+        assert.strictEqual(resEncode.buf?.length, 20);
+
+        // decode
+        let resDecode = tsb.decode(resEncode.buf!, 'a/b');
+        assert.deepStrictEqual(resDecode.value, {
+            _id: objId,
+            value: 'ABC'
+        })
+    });
+
+    it('failed', function () {
+        let resEncode = tsb.encode({
+            _id: 'XXX',
+            value: 'ABC'
+        }, 'a/b');
+        assert.strictEqual(resEncode.errMsg, 'Property `_id`: Invalid ObjectId');
+    })
+
+});

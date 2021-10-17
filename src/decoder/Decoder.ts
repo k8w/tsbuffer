@@ -166,10 +166,14 @@ export class Decoder {
                 return this._readUnionOrIntersection(schema);
             case SchemaType.Date:
                 return new Date(this._reader.readUint());
-                break;
             case SchemaType.NonNullable:
                 return this._read(schema.target);
-                break;
+            case SchemaType.Custom:
+                if (!schema.decode) {
+                    throw new Error('Missing decode method for CustomTypeSchema');
+                }
+                let buf = this._reader.readBuffer();
+                return schema.decode(buf);
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
