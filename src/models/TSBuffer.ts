@@ -189,6 +189,81 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         return { isSucc: true, value: value };
     }
 
+    /**
+     * 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式
+     * @param value 
+     * @param schemaOrId 
+     * @param options 
+     */
+    encodeJSON(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions): EncodeJsonOutput {
+        let schema: TSBufferSchema;
+        if (typeof schemaOrId === 'string') {
+            schema = this._proto[schemaOrId];
+            if (!schema) {
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` };
+            }
+        }
+        else {
+            schema = schemaOrId
+        }
+
+        // validate before encode
+        if (!(options?.skipValidate ?? this._options.skipEncodeValidate)) {
+            let vRes = this._validator.prune(value, schema);
+            if (!vRes.isSucc) {
+                return vRes;
+            }
+            value = vRes.pruneOutput;
+        }
+
+        let json: any | undefined;
+        try {
+            json = this._encoder.encodeJSON(value, schema);
+        }
+        catch (e) {
+            return { isSucc: false, errMsg: e.message }
+        }
+
+        return { isSucc: true, json: json };
+    }
+
+    /**
+     * 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原
+     * @param json - JSON Object (是 JSON 对象，而非 JSON 字符串)
+     * @param schemaOrId 
+     * @param options 
+     */
+    decodeJSON<T = unknown>(json: any, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T> {
+        let schema: TSBufferSchema;
+        if (typeof schemaOrId === 'string') {
+            schema = this._proto[schemaOrId];
+            if (!schema) {
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` }
+            }
+        }
+        else {
+            schema = schemaOrId
+        }
+
+        let value: T;
+        try {
+            value = this._decoder.decodeJSON(json, schema) as T;
+        }
+        catch (e) {
+            return { isSucc: false, errMsg: e.message };
+        }
+
+        if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
+            let vRes = this._validator.prune(value, schema);
+            if (!vRes.isSucc) {
+                return vRes;
+            }
+            return { isSucc: true, value: vRes.pruneOutput };
+        }
+
+        return { isSucc: true, value: value };
+    }
+
     validate: TSBufferValidator<Proto>['validate'];
 
     prune: TSBufferValidator<Proto>['prune'];
@@ -218,4 +293,17 @@ export type DecodeOutput<T> = {
     /** Error message */
     errMsg: string,
     value?: undefined
+};
+
+/** @public */
+export type EncodeJsonOutput = {
+    isSucc: true,
+    /** Encoded JSON Object */
+    json: any,
+    errMsg?: undefined
+} | {
+    isSucc: false,
+    /** Error message */
+    errMsg: string,
+    json?: undefined
 };

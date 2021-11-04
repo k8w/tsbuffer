@@ -29,5 +29,7 @@ export declare class TSBuffer<Proto extends TSBufferProto = TSBufferProto>
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [decode(buf, schemaOrId, options)](./tsbuffer.tsbuffer.decode.md) |  | 解码 |
+|  [decodeJSON(json, schemaOrId, options)](./tsbuffer.tsbuffer.decodejson.md) |  | 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原 |
 |  [encode(value, schemaOrId, options)](./tsbuffer.tsbuffer.encode.md) |  | 编码 |
+|  [encodeJSON(value, schemaOrId, options)](./tsbuffer.tsbuffer.encodejson.md) |  | 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式 |
 

@@ -8,6 +8,7 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [Base64Util](./tsbuffer.base64util.md) |  |
 |  [TSBuffer](./tsbuffer.tsbuffer.md) |  |
 
 ## Interfaces

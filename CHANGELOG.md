@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.0.6-dev.0] - 2021-11-04
+### Added
+- Add `encodeJSON` and `decodeJSON`
+
 ## [2.0.5] - 2021-10-17
 - `CustomTypeSchema` supports
 - `customTypes` support for constructor options of `TSBuffer`

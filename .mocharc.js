@@ -7,7 +7,8 @@ module.exports = {
     timeout: 999999,
     'preserve-symlinks': true,
     spec: [
-        './test/**/*.test.ts'
+        // './test/**/*.test.ts'
+        './test/coder_json/*.test.ts'
     ],
     parallel: false
 }

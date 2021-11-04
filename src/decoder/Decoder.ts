@@ -1,5 +1,6 @@
-import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
+import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from "tsbuffer-validator";
+import { Base64Util } from "../models/Base64Util";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
 import { TypedArrays } from '../models/TypedArrays';
@@ -32,6 +33,95 @@ export class Decoder {
     decode(buffer: Uint8Array, schema: TSBufferSchema): unknown {
         this._reader.load(buffer);
         return this._read(schema);
+    }
+
+    decodeJSON(json: any, schema: TSBufferSchema): any {
+        if (json === null) {
+            return json;
+        }
+
+        // 递归 只处理 ArrayBuffer、Date、ObjectId
+        switch (schema.type) {
+            case SchemaType.Array:
+                if (!Array.isArray(json)) {
+                    return json;
+                }
+                return (json as any[]).map(v => this.decodeJSON(v, schema.elementType));
+            case SchemaType.Tuple:
+                if (!Array.isArray(json)) {
+                    return json;
+                }
+                return (json as any[]).map((v, i) => this.decodeJSON(v, schema.elementTypes[i]));
+            case SchemaType.Interface:
+                if (json.constructor !== Object) {
+                    return json;
+                }
+                let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+                let output: { [key: string]: any } = {};
+                for (let key in json) {
+                    let property = flatSchema.properties.find(v => v.name === key);
+                    if (property) {
+                        output[key] = this.decodeJSON(json[key], property.type)
+                    }
+                    else if (flatSchema.indexSignature) {
+                        output[key] = this.decodeJSON(json[key], flatSchema.indexSignature.type);
+                    }
+                    else {
+                        output[key] = json[key]
+                    }
+                }
+                return output;
+            case SchemaType.Date:
+                if (typeof json !== 'string' && typeof json !== 'number') {
+                    return json;
+                }
+                return new Date(json);
+            case SchemaType.Partial:
+            case SchemaType.Pick:
+            case SchemaType.Omit:
+            case SchemaType.Overwrite:
+                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                return this.decodeJSON(json, parsed);
+            case SchemaType.Buffer:
+                if (typeof json !== 'string') {
+                    return json;
+                }
+                let uint8Arr = Base64Util.base64ToBuffer(json);
+                return this._getBufferValue(uint8Arr, schema);
+            case SchemaType.IndexedAccess:
+            case SchemaType.Reference:
+                return this.decodeJSON(json, this._validator.protoHelper.parseReference(schema));
+            case SchemaType.Union:
+            case SchemaType.Intersection: {
+                // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
+                let value = json;
+                for (let member of schema.members) {
+                    value = this.decodeJSON(value, member.type);
+                }
+                return value;
+            }
+            case SchemaType.NonNullable:
+                return this.decodeJSON(json, schema.target);
+            case SchemaType.Custom:
+                if (schema.decodeJSON) {
+                    return schema.decodeJSON(json);
+                }
+                else if (schema.decode && typeof json === 'string') {
+                    let buf = Base64Util.base64ToBuffer(json);
+                    return schema.decode(buf);
+                }
+                return json;
+            // case SchemaType.Boolean:
+            // case SchemaType.Number:
+            // case SchemaType.String:
+            // case SchemaType.Enum:
+            // case SchemaType.Any:
+            // case SchemaType.Literal:
+            // case SchemaType.Object:
+            default:
+                return json;
+        }
+        return {};
     }
 
     private _read(schema: TSBufferSchema): unknown {
@@ -120,32 +210,7 @@ export class Decoder {
                 return this._readInterface(schema);
             case SchemaType.Buffer:
                 let uint8Arr = this._reader.readBuffer();
-                if (schema.arrayType) {
-                    if (schema.arrayType === 'BigInt64Array' || schema.arrayType === 'BigUint64Array') {
-                        throw new Error('Unsupported arrayType: ' + schema.arrayType);
-                    }
-                    // Uint8Array 性能最高
-                    else if (schema.arrayType === 'Uint8Array') {
-                        return uint8Arr;
-                    }
-                    // 其余TypedArray 可能需要内存拷贝 性能次之
-                    else {
-                        let typedArr = TypedArrays[schema.arrayType];
-                        // 字节对齐，可以直接转，无需拷贝内存
-                        if (uint8Arr.byteOffset % typedArr.BYTES_PER_ELEMENT === 0) {
-                            return new typedArr(uint8Arr.buffer, uint8Arr.byteOffset, uint8Arr.byteLength / typedArr.BYTES_PER_ELEMENT);
-                        }
-                        // 字节不对齐，不能直接转，只能拷贝内存后再生成
-                        else {
-                            let arrBuf = uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
-                            return new typedArr(arrBuf);
-                        }
-                    }
-                }
-                else {
-                    // ArrayBuffer涉及内存拷贝，性能较低，不建议用
-                    return uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
-                }
+                return this._getBufferValue(uint8Arr, schema);
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
                 return this._read(this._validator.protoHelper.parseReference(schema));
@@ -380,6 +445,35 @@ export class Decoder {
 
     private _isObject(value: any): boolean {
         return typeof (value) === 'object' && value !== null;
+    }
+
+    private _getBufferValue(uint8Arr: Uint8Array, schema: BufferTypeSchema): ArrayBuffer | ArrayBufferView {
+        if (schema.arrayType) {
+            if (schema.arrayType === 'BigInt64Array' || schema.arrayType === 'BigUint64Array') {
+                throw new Error('Unsupported arrayType: ' + schema.arrayType);
+            }
+            // Uint8Array 性能最高
+            else if (schema.arrayType === 'Uint8Array') {
+                return uint8Arr;
+            }
+            // 其余TypedArray 可能需要内存拷贝 性能次之
+            else {
+                let typedArr = TypedArrays[schema.arrayType];
+                // 字节对齐，可以直接转，无需拷贝内存
+                if (uint8Arr.byteOffset % typedArr.BYTES_PER_ELEMENT === 0) {
+                    return new typedArr(uint8Arr.buffer, uint8Arr.byteOffset, uint8Arr.byteLength / typedArr.BYTES_PER_ELEMENT);
+                }
+                // 字节不对齐，不能直接转，只能拷贝内存后再生成
+                else {
+                    let arrBuf = uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
+                    return new typedArr(arrBuf);
+                }
+            }
+        }
+        else {
+            return uint8Arr.byteLength === uint8Arr.buffer.byteLength && uint8Arr.byteOffset === 0 ? uint8Arr.buffer
+                : uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);;
+        }
     }
 
 }

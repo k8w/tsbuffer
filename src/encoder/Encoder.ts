@@ -1,5 +1,6 @@
 import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { TSBufferValidator } from 'tsbuffer-validator';
+import { Base64Util } from '..';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
@@ -48,6 +49,111 @@ export class Encoder {
         this._writer.clear();
         this._write(value, schema);
         return this._writer.finish();
+    }
+
+    encodeJSON(value: any, schema: TSBufferSchema): any {
+        if (typeof value !== 'object' || value === null) {
+            return value;
+        }
+
+        switch (schema.type) {
+            case SchemaType.Array:
+                if (!Array.isArray(value)) {
+                    return value;
+                }
+                return (value as any[]).map(v => this.encodeJSON(v, schema.elementType));
+            case SchemaType.Tuple: {
+                if (!Array.isArray(value)) {
+                    return value;
+                }
+                let output = (value as any[]).map((v, i) => this.encodeJSON(v, schema.elementTypes[i]));
+                // 过滤尾部的 undefined
+                let lastNonUndefinedIndex = output.findLastIndex(v => v !== undefined);
+                if (lastNonUndefinedIndex !== output.length - 1) {
+                    output = output.slice(0, lastNonUndefinedIndex + 1);
+                }
+                return output;
+            }
+            case SchemaType.Interface: {
+                if (value.constructor !== Object) {
+                    return value;
+                }
+                let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+                let output: { [key: string]: any } = {};
+                for (let key in value) {
+                    let property = flatSchema.properties.find(v => v.name === key);
+                    if (property) {
+                        output[key] = this.encodeJSON(value[key], property.type);
+                    }
+                    else if (flatSchema.indexSignature) {
+                        output[key] = this.encodeJSON(value[key], flatSchema.indexSignature.type);
+                    }
+                    else {
+                        output[key] = value[key];
+                    }
+                }
+                return output;
+            }                
+            case SchemaType.Date:
+                if (!(value instanceof Date)) {
+                    return value;
+                }
+                return value.toJSON()
+            case SchemaType.Partial:
+            case SchemaType.Pick:
+            case SchemaType.Omit:
+            case SchemaType.Overwrite:
+                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                return this.encodeJSON(value, parsed);
+            case SchemaType.Buffer:
+                if (!(value instanceof ArrayBuffer) && !ArrayBuffer.isView(value)) {
+                    return value;
+                }
+
+                if (schema.arrayType) {
+                    if (schema.arrayType === 'Uint8Array') {
+                        return Base64Util.bufferToBase64(value as Uint8Array);
+                    }
+                    let view = value as ArrayBufferView;
+                    let buf = view.byteLength === view.buffer.byteLength && view.byteOffset === 0 ? view.buffer
+                        : view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+                    return Base64Util.bufferToBase64(new Uint8Array(buf));
+                }
+                else {
+                    return Base64Util.bufferToBase64(new Uint8Array(value as ArrayBuffer))
+                }
+            case SchemaType.IndexedAccess:
+            case SchemaType.Reference:
+                return this.encodeJSON(value, this._validator.protoHelper.parseReference(schema));
+            case SchemaType.Union:
+            case SchemaType.Intersection: {
+                // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
+                let json = value;
+                for (let member of schema.members) {
+                    json = this.encodeJSON(json, member.type);
+                }
+                return json;
+            }
+            case SchemaType.NonNullable:
+                return this.encodeJSON(value, schema.target);
+            case SchemaType.Custom:
+                if (schema.encodeJSON) {
+                    return schema.encodeJSON(value);
+                }
+                else if (schema.encode) {
+                    return this.encodeJSON(schema.encode(value), { type: 'Buffer', arrayType: 'Uint8Array' });
+                }
+                return value;
+            // case SchemaType.Boolean:
+            // case SchemaType.Number:
+            // case SchemaType.String:
+            // case SchemaType.Enum:
+            // case SchemaType.Any:
+            // case SchemaType.Literal:
+            // case SchemaType.Object:
+            default:
+                return value;
+        }
     }
 
     private _write(value: any, schema: TSBufferSchema, options?: {
