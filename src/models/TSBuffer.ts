@@ -216,6 +216,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             value = vRes.pruneOutput;
         }
 
+        // TODO schema 里没有 Buffer 和 Custom 的自动跳过
+
         let json: any | undefined;
         try {
             json = this._encoder.encodeJSON(value, schema);
@@ -244,6 +246,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         else {
             schema = schemaOrId
         }
+
+        // TODO schema 里没有 Buffer 和 Custom 的自动跳过
 
         let value: T;
         try {
