@@ -63,23 +63,18 @@ export class Encoder {
                 if (!Array.isArray(value)) {
                     break;
                 }
-                for (let i = 0; i < (value as any[]).length; ++i) {
-                    value[i] = this.encodeJSON(value[i], schema.elementType);
-                }
-                return value;
+                return (value as any[]).map(v => this.encodeJSON(v, schema.elementType));
             case SchemaType.Tuple: {
                 if (!Array.isArray(value)) {
                     break;
                 }
-                for (let i = 0; i < (value as any[]).length; ++i) {
-                    value[i] = this.encodeJSON(value[i], schema.elementTypes[i]);
-                }
-                return value;
+                return (value as any[]).map((v, i) => this.encodeJSON(v, schema.elementTypes[i]));
             }
             case SchemaType.Interface: {
                 if (value.constructor !== Object) {
                     break;
                 }
+                value = Object.assign({}, value);
                 let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
                 for (let key in value) {
                     let property = flatSchema.properties.find(v => v.name === key);

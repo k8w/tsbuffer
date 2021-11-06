@@ -47,22 +47,17 @@ export class Decoder {
                 if (!Array.isArray(json)) {
                     break;
                 }
-                for (let i = 0; i < json.length; ++i) {
-                    json[i] = this.decodeJSON(json[i], schema.elementType)
-                }
-                return json;
+                return (json as any[]).map(v => this.decodeJSON(v, schema.elementType));
             case SchemaType.Tuple:
                 if (!Array.isArray(json)) {
                     break;
                 }
-                for (let i = 0; i < json.length; ++i) {
-                    json[i] = this.decodeJSON(json[i], schema.elementTypes[i]);
-                }
-                return json;
+                return (json as any[]).map((v, i) => this.decodeJSON(v, schema.elementTypes[i]));
             case SchemaType.Interface:
                 if (json.constructor !== Object) {
                     break;
                 }
+                json = Object.assign({}, json);
                 let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
                 for (let key in json) {
                     let property = flatSchema.properties.find(v => v.name === key);
