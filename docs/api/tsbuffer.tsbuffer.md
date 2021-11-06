@@ -29,7 +29,7 @@ export declare class TSBuffer<Proto extends TSBufferProto = TSBufferProto>
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [decode(buf, schemaOrId, options)](./tsbuffer.tsbuffer.decode.md) |  | 解码 |
-|  [decodeJSON(json, schemaOrId, options)](./tsbuffer.tsbuffer.decodejson.md) |  | 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原 |
+|  [decodeJSON(json, schemaOrId, options)](./tsbuffer.tsbuffer.decodejson.md) |  | 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原 注意：性能起见，该操作会直接在原始 <code>value</code> 上进行修改；如不希望影响传入的原始 <code>value</code>，可以在传入前预先深拷贝。 |
 |  [encode(value, schemaOrId, options)](./tsbuffer.tsbuffer.encode.md) |  | 编码 |
-|  [encodeJSON(value, schemaOrId, options)](./tsbuffer.tsbuffer.encodejson.md) |  | 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式 |
+|  [encodeJSON(value, schemaOrId, options)](./tsbuffer.tsbuffer.encodejson.md) |  | 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式 注意：性能起见，该操作会直接在原始 <code>value</code> 上进行修改；如不希望影响传入的原始 <code>value</code>，可以在传入前预先深拷贝。 |
 

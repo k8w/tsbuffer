@@ -4,7 +4,7 @@
 
 ## TSBuffer.encodeJSON() method
 
-编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式
+编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式 注意：性能起见，该操作会直接在原始 `value` 上进行修改；如不希望影响传入的原始 `value`<!-- -->，可以在传入前预先深拷贝。
 
 <b>Signature:</b>
 

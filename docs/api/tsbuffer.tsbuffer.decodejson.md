@@ -4,7 +4,7 @@
 
 ## TSBuffer.decodeJSON() method
 
-从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原
+从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原 注意：性能起见，该操作会直接在原始 `value` 上进行修改；如不希望影响传入的原始 `value`<!-- -->，可以在传入前预先深拷贝。
 
 <b>Signature:</b>
 

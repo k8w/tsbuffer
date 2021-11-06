@@ -6,8 +6,6 @@
 
 同 `tsconfig.json` 中的 `strictNullChecks` 是否使用严格等于去判定 `undefined` 和 `null` 如果该值为 `false`<!-- -->，则在编码过程中，`null` 在类型不兼容时可编码为`undefined`<!-- -->， 解码过程中，`undefined` 在类型不兼容时可解码为 `null`<!-- -->。
 
-默认为 `true`
-
 <b>Signature:</b>
 
 ```typescript
