@@ -1,6 +1,7 @@
 import { InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { TSBufferValidator } from 'tsbuffer-validator';
 import { Base64Util } from '..';
+import { CoderUtil } from '../models/CoderUtil';
 import { Config } from '../models/Config';
 import { IdBlockUtil } from '../models/IdBlockUtil';
 import { SchemaUtil } from '../models/SchemaUtil';
@@ -53,7 +54,7 @@ export class Encoder {
 
     encodeJSON(value: any, schema: TSBufferSchema): any {
         // JSON 能直接传输的类型，直接跳过
-        if (typeof value !== 'object' || value === null) {
+        if (typeof value !== 'object' || value === null || CoderUtil.isJsonCompatible(schema, 'encode', this._validator.protoHelper)) {
             return value;
         }
 
@@ -91,11 +92,6 @@ export class Encoder {
                 }
                 return value;
             }
-            case SchemaType.Date:
-                if (!(value instanceof Date)) {
-                    break;
-                }
-                return value.toJSON()
             case SchemaType.Partial:
             case SchemaType.Pick:
             case SchemaType.Omit:
@@ -136,17 +132,7 @@ export class Encoder {
                 if (schema.encodeJSON) {
                     return schema.encodeJSON(value);
                 }
-                else if (schema.encode) {
-                    return this.encodeJSON(schema.encode(value), { type: 'Buffer', arrayType: 'Uint8Array' });
-                }
                 return value;
-            // case SchemaType.Boolean:
-            // case SchemaType.Number:
-            // case SchemaType.String:
-            // case SchemaType.Enum:
-            // case SchemaType.Any:
-            // case SchemaType.Literal:
-            // case SchemaType.Object:
         }
 
         return value;

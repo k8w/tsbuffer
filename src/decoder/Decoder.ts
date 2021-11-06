@@ -1,6 +1,7 @@
 import { BufferTypeSchema, InterfaceTypeSchema, IntersectionTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 import { TSBufferValidator } from "tsbuffer-validator";
 import { Base64Util } from "../models/Base64Util";
+import { CoderUtil } from "../models/CoderUtil";
 import { IdBlockUtil, LengthType } from '../models/IdBlockUtil';
 import { SchemaUtil } from "../models/SchemaUtil";
 import { TypedArrays } from '../models/TypedArrays';
@@ -36,7 +37,7 @@ export class Decoder {
     }
 
     decodeJSON(json: any, schema: TSBufferSchema): any {
-        if (json === null) {
+        if (json === null || CoderUtil.isJsonCompatible(schema, 'decode', this._validator.protoHelper)) {
             return json;
         }
 
@@ -107,18 +108,7 @@ export class Decoder {
                 if (schema.decodeJSON) {
                     return schema.decodeJSON(json);
                 }
-                else if (schema.decode && typeof json === 'string') {
-                    let buf = Base64Util.base64ToBuffer(json);
-                    return schema.decode(buf);
-                }
                 break;
-            // case SchemaType.Boolean:
-            // case SchemaType.Number:
-            // case SchemaType.String:
-            // case SchemaType.Enum:
-            // case SchemaType.Any:
-            // case SchemaType.Literal:
-            // case SchemaType.Object:
         }
 
         return json;

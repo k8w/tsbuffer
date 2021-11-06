@@ -96,7 +96,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
         this._validator = new TSBufferValidator(this._proto, {
             excessPropertyChecks: this._options.excessPropertyChecks,
-            strictNullChecks: this._options.strictNullChecks
+            strictNullChecks: this._options.strictNullChecks,
+            cloneProto: false
         });
         this.validate = this._validator.validate.bind(this._validator);
         this.prune = this._validator.prune.bind(this._validator);
