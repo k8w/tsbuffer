@@ -1,8 +1,11 @@
 # CHANGELOG
 
-## [2.0.6-dev.0] - 2021-11-04
+## [2.0.6-dev.1] - 2021-11-04
 ### Added
 - Add `encodeJSON` and `decodeJSON`
+### Changed
+- Default option of `strictNullChecks` changed to `false`
+
 
 ## [2.0.5] - 2021-10-17
 - `CustomTypeSchema` supports

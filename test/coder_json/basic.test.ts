@@ -100,7 +100,6 @@ describe('Basic Encode', function () {
         });
 
         [0, 123, 'abc', true, null, { a: 1, b: '测试', c: [1, 2, 3] }, [1, 2, '3a', 'adf3']].forEach(v => {
-            console.log('xxxx', v, tsb.encodeJSON(v, 'a/b').json)
             assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/b').json!)), 'a/b').value, v);
         });
     });

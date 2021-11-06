@@ -52,6 +52,7 @@ export class Encoder {
     }
 
     encodeJSON(value: any, schema: TSBufferSchema): any {
+        // JSON 能直接传输的类型，直接跳过
         if (typeof value !== 'object' || value === null) {
             return value;
         }
@@ -59,44 +60,40 @@ export class Encoder {
         switch (schema.type) {
             case SchemaType.Array:
                 if (!Array.isArray(value)) {
-                    return value;
+                    break;
                 }
-                return (value as any[]).map(v => this.encodeJSON(v, schema.elementType));
+                for (let i = 0; i < (value as any[]).length; ++i) {
+                    value[i] = this.encodeJSON(value[i], schema.elementType);
+                }
+                return value;
             case SchemaType.Tuple: {
                 if (!Array.isArray(value)) {
-                    return value;
+                    break;
                 }
-                let output = (value as any[]).map((v, i) => this.encodeJSON(v, schema.elementTypes[i]));
-                // 过滤尾部的 undefined
-                let lastNonUndefinedIndex = output.findLastIndex(v => v !== undefined);
-                if (lastNonUndefinedIndex !== output.length - 1) {
-                    output = output.slice(0, lastNonUndefinedIndex + 1);
+                for (let i = 0; i < (value as any[]).length; ++i) {
+                    value[i] = this.encodeJSON(value[i], schema.elementTypes[i]);
                 }
-                return output;
+                return value;
             }
             case SchemaType.Interface: {
                 if (value.constructor !== Object) {
-                    return value;
+                    break;
                 }
                 let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
-                let output: { [key: string]: any } = {};
                 for (let key in value) {
                     let property = flatSchema.properties.find(v => v.name === key);
                     if (property) {
-                        output[key] = this.encodeJSON(value[key], property.type);
+                        value[key] = this.encodeJSON(value[key], property.type);
                     }
                     else if (flatSchema.indexSignature) {
-                        output[key] = this.encodeJSON(value[key], flatSchema.indexSignature.type);
-                    }
-                    else {
-                        output[key] = value[key];
+                        value[key] = this.encodeJSON(value[key], flatSchema.indexSignature.type);
                     }
                 }
-                return output;
-            }                
+                return value;
+            }
             case SchemaType.Date:
                 if (!(value instanceof Date)) {
-                    return value;
+                    break;
                 }
                 return value.toJSON()
             case SchemaType.Partial:
@@ -107,7 +104,7 @@ export class Encoder {
                 return this.encodeJSON(value, parsed);
             case SchemaType.Buffer:
                 if (!(value instanceof ArrayBuffer) && !ArrayBuffer.isView(value)) {
-                    return value;
+                    break;
                 }
 
                 if (schema.arrayType) {
@@ -128,11 +125,10 @@ export class Encoder {
             case SchemaType.Union:
             case SchemaType.Intersection: {
                 // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
-                let json = value;
                 for (let member of schema.members) {
-                    json = this.encodeJSON(json, member.type);
+                    value = this.encodeJSON(value, member.type);
                 }
-                return json;
+                return value;
             }
             case SchemaType.NonNullable:
                 return this.encodeJSON(value, schema.target);
@@ -151,9 +147,9 @@ export class Encoder {
             // case SchemaType.Any:
             // case SchemaType.Literal:
             // case SchemaType.Object:
-            default:
-                return value;
         }
+
+        return value;
     }
 
     private _write(value: any, schema: TSBufferSchema, options?: {

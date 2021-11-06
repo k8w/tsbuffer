@@ -1,5 +1,9 @@
 export class Base64Util {
     static bufferToBase64(buf: Uint8Array): string {
+        if (typeof Buffer !== 'undefined') {
+            return Buffer.from(buf).toString('base64');
+        }
+
         let binary = '';
         let len = buf.byteLength;
         for (let i = 0; i < len; i++) {
@@ -9,6 +13,10 @@ export class Base64Util {
     }
 
     static base64ToBuffer(base64: string): Uint8Array {
+        if (typeof Buffer !== 'undefined') {
+            return new Uint8Array(Buffer.from(base64, 'base64'));
+        }
+
         let binary_string = this.base64Decode(base64);
         let len = binary_string.length;
         let buf = new Uint8Array(len);

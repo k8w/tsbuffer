@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "2.0.6-dev.0",
+  "version": "2.0.6-dev.1",
   "description": "",
   "main": "index.cjs",
   "exports": {
@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.4.6",
-    "tsbuffer-validator": "^2.0.7-dev.1",
+    "tsbuffer-validator": "^2.0.7-dev.2",
     "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.13.65",
-    "@microsoft/api-extractor": "^7.18.17",
+    "@microsoft/api-documenter": "^7.13.67",
+    "@microsoft/api-extractor": "^7.18.19",
     "@types/mocha": "^8.2.3",
     "@types/node": "^15.14.9",
     "mocha": "^9.1.3",

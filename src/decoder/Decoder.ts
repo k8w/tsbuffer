@@ -44,36 +44,38 @@ export class Decoder {
         switch (schema.type) {
             case SchemaType.Array:
                 if (!Array.isArray(json)) {
-                    return json;
+                    break;
                 }
-                return (json as any[]).map(v => this.decodeJSON(v, schema.elementType));
+                for (let i = 0; i < json.length; ++i) {
+                    json[i] = this.decodeJSON(json[i], schema.elementType)
+                }
+                return json;
             case SchemaType.Tuple:
                 if (!Array.isArray(json)) {
-                    return json;
+                    break;
                 }
-                return (json as any[]).map((v, i) => this.decodeJSON(v, schema.elementTypes[i]));
+                for (let i = 0; i < json.length; ++i) {
+                    json[i] = this.decodeJSON(json[i], schema.elementTypes[i]);
+                }
+                return json;
             case SchemaType.Interface:
                 if (json.constructor !== Object) {
-                    return json;
+                    break;
                 }
                 let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
-                let output: { [key: string]: any } = {};
                 for (let key in json) {
                     let property = flatSchema.properties.find(v => v.name === key);
                     if (property) {
-                        output[key] = this.decodeJSON(json[key], property.type)
+                        json[key] = this.decodeJSON(json[key], property.type)
                     }
                     else if (flatSchema.indexSignature) {
-                        output[key] = this.decodeJSON(json[key], flatSchema.indexSignature.type);
-                    }
-                    else {
-                        output[key] = json[key]
+                        json[key] = this.decodeJSON(json[key], flatSchema.indexSignature.type);
                     }
                 }
-                return output;
+                return json;
             case SchemaType.Date:
                 if (typeof json !== 'string' && typeof json !== 'number') {
-                    return json;
+                    break;
                 }
                 return new Date(json);
             case SchemaType.Partial:
@@ -84,7 +86,7 @@ export class Decoder {
                 return this.decodeJSON(json, parsed);
             case SchemaType.Buffer:
                 if (typeof json !== 'string') {
-                    return json;
+                    break;
                 }
                 let uint8Arr = Base64Util.base64ToBuffer(json);
                 return this._getBufferValue(uint8Arr, schema);
@@ -94,11 +96,10 @@ export class Decoder {
             case SchemaType.Union:
             case SchemaType.Intersection: {
                 // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
-                let value = json;
                 for (let member of schema.members) {
-                    value = this.decodeJSON(value, member.type);
+                    json = this.decodeJSON(json, member.type);
                 }
-                return value;
+                return json;
             }
             case SchemaType.NonNullable:
                 return this.decodeJSON(json, schema.target);
@@ -110,7 +111,7 @@ export class Decoder {
                     let buf = Base64Util.base64ToBuffer(json);
                     return schema.decode(buf);
                 }
-                return json;
+                break;
             // case SchemaType.Boolean:
             // case SchemaType.Number:
             // case SchemaType.String:
@@ -118,10 +119,9 @@ export class Decoder {
             // case SchemaType.Any:
             // case SchemaType.Literal:
             // case SchemaType.Object:
-            default:
-                return json;
         }
-        return {};
+
+        return json;
     }
 
     private _read(schema: TSBufferSchema): unknown {

@@ -47,7 +47,7 @@ describe('Nest', function () {
             assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/c').json!)), 'a/c').value, v);
         });
 
-        assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg']);
+        assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, undefined]);
         // assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, 123, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, 123]);
     })
 })

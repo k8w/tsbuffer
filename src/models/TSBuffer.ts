@@ -19,8 +19,7 @@ export interface TSBufferOptions {
      * 是否使用严格等于去判定 `undefined` 和 `null`
      * 如果该值为 `false`，则在编码过程中，`null` 在类型不兼容时可编码为`undefined`，
      * 解码过程中，`undefined` 在类型不兼容时可解码为 `null`。
-     *
-     * 默认为 `true`
+     * @defaultValue false
      */
     strictNullChecks: boolean;
 
@@ -79,7 +78,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
     /** @internal 默认配置 */
     private _options: TSBufferOptions = {
         excessPropertyChecks: true,
-        strictNullChecks: true,
+        strictNullChecks: false,
         skipEncodeValidate: false,
         skipDecodeValidate: false,
         cloneProto: true,
@@ -191,6 +190,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
     /**
      * 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式
+     * 注意：性能起见，该操作会直接在原始 `value` 上进行修改；如不希望影响传入的原始 `value`，可以在传入前预先深拷贝。
      * @param value 
      * @param schemaOrId 
      * @param options 
@@ -231,6 +231,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
     /**
      * 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原
+     * 注意：性能起见，该操作会直接在原始 `value` 上进行修改；如不希望影响传入的原始 `value`，可以在传入前预先深拷贝。
      * @param json - JSON Object (是 JSON 对象，而非 JSON 字符串)
      * @param schemaOrId 
      * @param options 
