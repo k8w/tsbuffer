@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.0.6-dev.1] - 2021-11-04
+## [2.1.0-dev.0] - 2021-11-04
 ### Added
 - Add `encodeJSON` and `decodeJSON`
 ### Changed
