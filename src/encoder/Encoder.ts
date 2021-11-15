@@ -127,7 +127,7 @@ export class Encoder {
                 if (schema.encodeJSON) {
                     return schema.encodeJSON(value);
                 }
-                return value;
+                return JSON.stringify(value);
         }
 
         return value;

@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## [2.1.0-dev.0] - 2021-11-04
+## [2.1.1] - 2021-11-15
+### Fixed
+- Fixed bug that `encodeJSON` not transform `ObjectId` to `string`
+
+## [2.1.0] - 2021-11-04
 ### Added
 - Add `encodeJSON` and `decodeJSON`
 ### Changed
