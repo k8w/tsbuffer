@@ -127,7 +127,13 @@ export class Encoder {
                 if (schema.encodeJSON) {
                     return schema.encodeJSON(value);
                 }
-                return JSON.stringify(value);
+                else if (typeof value?.toJSON === 'function') {
+                    return value.toJSON();
+                }
+                else if (typeof value?.toString === 'function') {
+                    return value.toString();
+                }
+                return value;
         }
 
         return value;

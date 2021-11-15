@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.1.1] - 2021-11-15
+## [2.1.2] - 2021-11-15
 ### Fixed
 - Fixed bug that `encodeJSON` not transform `ObjectId` to `string`
 
