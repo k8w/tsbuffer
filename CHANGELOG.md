@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.3] - 2021-11-17
+### Fixed
+- `encodeJSON` would convert `Date` to `string`
+
 ## [2.1.2] - 2021-11-15
 ### Fixed
 - Fixed bug that `encodeJSON` not transform `ObjectId` to `string`

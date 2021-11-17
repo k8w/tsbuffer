@@ -123,6 +123,11 @@ export class Encoder {
             }
             case SchemaType.NonNullable:
                 return this.encodeJSON(value, schema.target);
+            case SchemaType.Date:
+                if (!(value instanceof Date)) {
+                    break;
+                }
+                return value.toJSON();
             case SchemaType.Custom:
                 if (schema.encodeJSON) {
                     return schema.encodeJSON(value);
