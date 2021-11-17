@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.1.3] - 2021-11-17
+## [2.1.4] - 2021-11-17
 ### Fixed
 - `encodeJSON` would convert `Date` to `string`
 

@@ -43,11 +43,7 @@ export class CoderUtil {
                     break;
                 }
                 case SchemaType.Custom:
-                    schemaInfo[key] = !schema.decodeJSON;
-                    break;
                 case SchemaType.Date:
-                    schemaInfo[key] = type === 'encode';
-                    break;
                 case SchemaType.Buffer:
                     schemaInfo[key] = false;
                     break;
