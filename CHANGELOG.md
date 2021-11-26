@@ -2,8 +2,8 @@
 
 ## [2.1.5] - 2021-11-26
 ### Fixed
-- Remove unused code from `Base64Util`
-- Update `Utf8CoderJs` (from [protobuf.js](https://github.com/protobufjs/protobuf.js/blob/master/lib/utf8/index.js))
+- Remove unused code from `Base64Util` (Thanks @JasonZhou)
+- Update `Utf8CoderJs` from latest [protobuf.js](https://github.com/protobufjs/protobuf.js/blob/master/lib/utf8/index.js) (Thanks @JasonZhou)
 
 ## [2.1.4] - 2021-11-17
 ### Fixed
