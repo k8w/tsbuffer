@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.1.5] - 2021-11-26
+### Fixed
+- Remove unused code from `Base64Util`
+- Update `Utf8CoderJs` (from [protobuf.js](https://github.com/protobufjs/protobuf.js/blob/master/lib/utf8/index.js))
+
 ## [2.1.4] - 2021-11-17
 ### Fixed
 - `encodeJSON` would convert `Date` to `string`

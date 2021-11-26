@@ -14,8 +14,6 @@ export declare class Base64Util
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [base64Decode(str)](./tsbuffer.base64util.base64decode.md) | <code>static</code> |  |
-|  [base64Encode(str)](./tsbuffer.base64util.base64encode.md) | <code>static</code> |  |
 |  [base64ToBuffer(base64)](./tsbuffer.base64util.base64tobuffer.md) | <code>static</code> |  |
 |  [bufferToBase64(buf)](./tsbuffer.base64util.buffertobase64.md) | <code>static</code> |  |
 

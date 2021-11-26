@@ -1,5 +1,8 @@
 declare let Buffer: any;
 
+/**!
+ * From [protobuf.js](https://github.com/protobufjs/protobuf.js/blob/master/lib/utf8/index.js)
+ */
 const Utf8CoderJS: IUtf8Coder = {
     measureLength: str => {
         let len = 0,
@@ -45,36 +48,27 @@ const Utf8CoderJS: IUtf8Coder = {
         return pos - start;
     },
     read: (buf, pos, length) => {
-        if (length < 1)
+        if (length < 1) {
             return "";
-        let parts: string[] | undefined = undefined,
-            chunk = [],
-            i = 0, // char offset
-            t;     // temporary
-        let end = pos + length;
-        while (pos < end) {
-            t = buf[pos++];
-            if (t < 128)
-                chunk[i++] = t;
-            else if (t > 191 && t < 224)
-                chunk[i++] = (t & 31) << 6 | buf[pos++] & 63;
-            else if (t > 239 && t < 365) {
-                t = ((t & 7) << 18 | (buf[pos++] & 63) << 12 | (buf[pos++] & 63) << 6 | buf[pos++] & 63) - 0x10000;
-                chunk[i++] = 0xD800 + (t >> 10);
-                chunk[i++] = 0xDC00 + (t & 1023);
-            } else
-                chunk[i++] = (t & 15) << 12 | (buf[pos++] & 63) << 6 | buf[pos++] & 63;
-            if (i > 8191) {
-                (parts || (parts = [])).push(String.fromCharCode.apply(String, chunk));
-                i = 0;
+        }
+
+        let str = "";
+        for (let i = pos, end = pos + length; i < end;) {
+            let t = buf[i++];
+            if (t <= 0x7F) {
+                str += String.fromCharCode(t);
+            } else if (t >= 0xC0 && t < 0xE0) {
+                str += String.fromCharCode((t & 0x1F) << 6 | buf[i++] & 0x3F);
+            } else if (t >= 0xE0 && t < 0xF0) {
+                str += String.fromCharCode((t & 0xF) << 12 | (buf[i++] & 0x3F) << 6 | buf[i++] & 0x3F);
+            } else if (t >= 0xF0) {
+                let t2 = ((t & 7) << 18 | (buf[i++] & 0x3F) << 12 | (buf[i++] & 0x3F) << 6 | buf[i++] & 0x3F) - 0x10000;
+                str += String.fromCharCode(0xD800 + (t2 >> 10));
+                str += String.fromCharCode(0xDC00 + (t2 & 0x3FF));
             }
         }
-        if (parts) {
-            if (i)
-                parts.push(String.fromCharCode.apply(String, chunk.slice(0, i)));
-            return parts.join("");
-        }
-        return String.fromCharCode.apply(String, chunk.slice(0, i));
+
+        return str;
     }
 }
 const Utf8CoderNode: IUtf8Coder = {
