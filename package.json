@@ -1,10 +1,10 @@
 {
   "name": "tsbuffer",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "",
-  "main": "index.cjs",
+  "main": "index.js",
   "exports": {
-    "require": "./index.cjs",
+    "require": "./index.js",
     "import": "./index.mjs"
   },
   "typings": "./index.d.ts",
@@ -13,21 +13,21 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.4.6",
-    "tsbuffer-validator": "^2.0.7",
+    "tsbuffer-validator": "^2.0.8",
     "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.13.67",
-    "@microsoft/api-extractor": "^7.18.19",
+    "@microsoft/api-documenter": "^7.14.1",
+    "@microsoft/api-extractor": "^7.19.4",
     "@types/mocha": "^8.2.3",
     "@types/node": "^15.14.9",
     "mocha": "^9.1.3",
     "nyc": "^15.1.0",
-    "rollup": "^2.59.0",
-    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup": "^2.63.0",
+    "rollup-plugin-typescript2": "^0.31.1",
     "ts-node": "^10.4.0",
-    "tsbuffer-proto-generator": "^1.5.0",
-    "typescript": "^4.4.4"
+    "tsbuffer-proto-generator": "^1.6.0",
+    "typescript": "^4.5.4"
   },
   "scripts": {
     "test": "npx mocha",
