@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.2.0-dev.0] - 2022-02-08
+### Added
+- Support `keyof`
+- Support using type alias in `Pick` and `Omit`
+
 ## [2.1.7] - 2022-01-06
 ### Fixed
 - `cjs` to `js` to fix `react-scripts@5`

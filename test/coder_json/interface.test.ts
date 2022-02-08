@@ -290,6 +290,51 @@ describe('Interface', function () {
             });
     })
 
+    it('Pick keyof', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface base {
+                    a: string;
+                    b: number;
+                    c?: { value:string }
+                }
+
+                export interface obj {
+                    a: string,
+                    c: string
+                }
+
+                export type key1 = 'a' | 'c';
+                export type key2 = keyof obj;
+                export type key3 = ('a'|'b'|'c')&('a'|'c'|'d');
+                export type b = Pick<base, key1>;
+                export type b1 = Pick<base, key2>;
+                export type b2 = Pick<base, key3>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        [
+            { a: 'xxx' },
+            { a: 'xxx', c: { value: 'xxx' } }
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, 'a/b').json!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, 'a/b1').json!, 'a/b1').value, v);
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, 'a/b2').json!, 'a/b2').value, v);
+        });
+
+        ['a/b', 'a/b1', 'a/b2'].forEach(v => {
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON({
+                a: 'str',
+                b: 123,
+                c: { value: 'ccc' }
+            }, v).json!, v).value, {
+                a: 'str',
+                c: { value: 'ccc' }
+            });
+        })
+    })
+
     it('Omit', async function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `

@@ -1,12 +1,13 @@
 import assert from 'assert';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
+import { SchemaType } from 'tsbuffer-schema';
 import { TSBuffer } from '../../src/index';
 
 describe('Basic Encode', function () {
     it('Boolean', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Boolean'
+                type: SchemaType.Boolean
             }
         });
 
@@ -21,7 +22,7 @@ describe('Basic Encode', function () {
         for (let scalarType of scalarTypes) {
             let tsb = new TSBuffer({
                 'a/b': {
-                    type: 'Number',
+                    type: SchemaType.Number,
                     scalarType: scalarType
                 }
             });
@@ -36,7 +37,7 @@ describe('Basic Encode', function () {
     it('Number: int', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Number',
+                type: SchemaType.Number,
                 scalarType: 'int'
             }
         });
@@ -49,7 +50,7 @@ describe('Basic Encode', function () {
     it('Number: uint', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Number',
+                type: SchemaType.Number,
                 scalarType: 'uint'
             }
         });
@@ -62,7 +63,7 @@ describe('Basic Encode', function () {
     it('String', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'String'
+                type: SchemaType.String
             }
         });
 
@@ -95,7 +96,7 @@ describe('Basic Encode', function () {
     it('Any', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Any'
+                type: SchemaType.Any
             }
         });
 
@@ -107,7 +108,7 @@ describe('Basic Encode', function () {
     it('Object', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Object'
+                type: SchemaType.Object
             }
         });
 
@@ -120,15 +121,15 @@ describe('Basic Encode', function () {
     it('Literal', function () {
         let tsb = new TSBuffer({
             'a/v123': {
-                type: 'Literal',
+                type: SchemaType.Literal,
                 literal: 123
             },
             'a/vabc': {
-                type: 'Literal',
+                type: SchemaType.Literal,
                 literal: 'abc'
             },
             'a/vnull': {
-                type: 'Literal',
+                type: SchemaType.Literal,
                 literal: null
             }
         });
@@ -142,7 +143,7 @@ describe('Basic Encode', function () {
         // ArrayBuffer
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Buffer'
+                type: SchemaType.Buffer
             }
         });
         let buf = new Uint8Array([1, 3, 5, 7, 9, 2, 4, 6, 8, 0]);
@@ -188,7 +189,7 @@ describe('Basic Encode', function () {
         for (let key in typedArrays) {
             let tsb = new TSBuffer({
                 'a/b': {
-                    type: 'Buffer',
+                    type: SchemaType.Buffer,
                     arrayType: key as keyof typeof typedArrays
                 }
             });
@@ -212,7 +213,7 @@ describe('Basic Encode', function () {
     it('Date', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Date'
+                type: SchemaType.Date
             }
         });
 
@@ -225,13 +226,13 @@ describe('Basic Encode', function () {
     it('Date in interface', function () {
         let tsb = new TSBuffer({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         name: 'time',
                         type: {
-                            type: 'Date'
+                            type: SchemaType.Date
                         }
                     }
                 ]

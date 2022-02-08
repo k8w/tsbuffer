@@ -112,6 +112,7 @@ export class Encoder {
                 }
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
+            case SchemaType.Keyof:
                 return this.encodeJSON(value, this._validator.protoHelper.parseReference(schema));
             case SchemaType.Union:
             case SchemaType.Intersection: {
@@ -139,6 +140,8 @@ export class Encoder {
                     return value.toString();
                 }
                 return value;
+            default:
+                schema.type
         }
 
         return value;
@@ -234,6 +237,7 @@ export class Encoder {
                 break;
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
+            case SchemaType.Keyof:
                 this._write(value, this._validator.protoHelper.parseReference(schema), options);
                 break;
             case SchemaType.Partial:
@@ -269,7 +273,8 @@ export class Encoder {
                 this._writeBuffer(buf);
                 break;
             default:
-                throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
+                // @ts-expect-error
+                throw new Error(`Unrecognized schema type: ${schema.type}`);
         }
     }
 
@@ -320,7 +325,8 @@ export class Encoder {
         }
         else if (schema.type === 'Partial') { }
         else {
-            throw new Error('Invalid PureMappedType child: ' + (schema as any).type);
+            // @ts-expect-error
+            throw new Error('Invalid PureMappedType child: ' + schema.type);
         }
 
         // Write Interface

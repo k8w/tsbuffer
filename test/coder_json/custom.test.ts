@@ -1,29 +1,30 @@
 import assert from 'assert';
+import { SchemaType } from 'tsbuffer-schema';
 import { TSBuffer } from '../../src/index';
 
 describe('CustomType', function () {
 
     const tsb = new TSBuffer({
         'a/b': {
-            type: 'Interface',
+            type: SchemaType.Interface,
             properties: [
                 {
                     id: 0,
                     name: '_id',
                     type: {
-                        type: 'Reference',
+                        type: SchemaType.Reference,
                         target: '?bson/ObjectId'
                     }
                 },
                 {
                     id: 1,
                     name: 'value',
-                    type: { type: 'String' }
+                    type: { type: SchemaType.String }
                 }
             ]
         },
         '?bson/ObjectId': {
-            type: 'Custom',
+            type: SchemaType.Custom,
             validate: value => {
                 if (typeof value === 'string' && value.length === 24) {
                     return { isSucc: true }

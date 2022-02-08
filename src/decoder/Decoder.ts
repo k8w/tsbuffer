@@ -88,6 +88,7 @@ export class Decoder {
                 return this._getBufferValue(uint8Arr, schema);
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
+            case SchemaType.Keyof:
                 return this.decodeJSON(json, this._validator.protoHelper.parseReference(schema));
             case SchemaType.Union:
             case SchemaType.Intersection: {
@@ -104,6 +105,8 @@ export class Decoder {
                     return schema.decodeJSON(json);
                 }
                 break;
+            default:
+                schema.type
         }
 
         return json;
@@ -198,6 +201,7 @@ export class Decoder {
                 return this._getBufferValue(uint8Arr, schema);
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
+            case SchemaType.Keyof:
                 return this._read(this._validator.protoHelper.parseReference(schema));
             case SchemaType.Partial:
             case SchemaType.Pick:
@@ -225,7 +229,8 @@ export class Decoder {
                 let buf = this._reader.readBuffer();
                 return schema.decode(buf);
             default:
-                throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
+                // @ts-expect-error
+                throw new Error(`Unrecognized schema type: ${schema.type}`);
         }
     }
 
