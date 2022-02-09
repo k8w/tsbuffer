@@ -4,6 +4,7 @@
 ### Added
 - Support `keyof`
 - Support using type alias in `Pick` and `Omit`
+- Support `Pick<Intersection>` and `Omit<Intersection>`
 
 ## [2.1.7] - 2022-01-06
 ### Fixed

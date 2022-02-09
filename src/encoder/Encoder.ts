@@ -245,11 +245,14 @@ export class Encoder {
             case SchemaType.Omit:
             case SchemaType.Overwrite:
                 let parsed = this._validator.protoHelper.parseMappedType(schema);
-                if (parsed.type === 'Interface') {
+                if (parsed.type === SchemaType.Interface) {
                     this._writePureMappedType(value, schema, options);
                 }
-                else {
+                else if (parsed.type === SchemaType.Union) {
                     this._writeUnion(value, parsed, options?.skipFields);
+                }
+                else if (parsed.type === SchemaType.Intersection) {
+                    this._writeIntersection(value, parsed, options?.skipFields);
                 }
                 break;
             case SchemaType.Union:

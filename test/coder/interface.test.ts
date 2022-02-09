@@ -283,7 +283,9 @@ describe('Interface', function () {
 
                 export type b = Pick<base, 'a' | 'c'>;
                 export type b1 = Pick<Pick<base, 'a'|'b'>, 'a'>;
-            `
+                export type b3 = Pick<{a:string}&{b:number}&{c?:{value: string}}, 'a'|'c'>
+                export type b4 = Pick<({xx2:string}|{xx:string})&{a:string}&{b:number}&{c?:{value: string}}, 'a'|'c'>
+                `
         }).generate('a.ts');
         let tsb = new TSBuffer(proto);
 
@@ -292,6 +294,8 @@ describe('Interface', function () {
             { a: 'xxx', c: { value: 'xxx' } }
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b3').buf!, 'a/b3').value, v);
+            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b4').buf!, 'a/b4').value, v);
         });
 
         [
@@ -300,15 +304,16 @@ describe('Interface', function () {
             assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
         });
 
-        assert.
-            deepStrictEqual(tsb.decode(tsb.encode({
+        ['a/b', 'a/b3', 'a/b4'].forEach(v => {
+            assert.deepStrictEqual(tsb.decode(tsb.encode({
                 a: 'str',
                 b: 123,
                 c: { value: 'ccc' }
-            }, 'a/b').buf!, 'a/b').value, {
+            }, v).buf!, v).value, {
                 a: 'str',
                 c: { value: 'ccc' }
             });
+        })
     })
 
     it('Pick keyof', async function () {

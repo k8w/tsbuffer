@@ -208,10 +208,10 @@ export class Decoder {
             case SchemaType.Omit:
             case SchemaType.Overwrite:
                 let parsed = this._validator.protoHelper.parseMappedType(schema);
-                if (parsed.type === 'Interface') {
+                if (parsed.type === SchemaType.Interface) {
                     return this._readPureMappedType(schema);
                 }
-                else if (parsed.type === 'Union') {
+                else {
                     return this._readUnionOrIntersection(parsed);
                 }
                 break;
