@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.2.0-dev.0] - 2022-02-08
+## [2.2.0] - 2022-02-26
 ### Added
 - Support `keyof`
 - Support using type alias in `Pick` and `Omit`
