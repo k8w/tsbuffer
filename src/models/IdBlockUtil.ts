@@ -48,7 +48,7 @@ export class IdBlockUtil {
             case SchemaType.Date:
                 return { lengthType: LengthType.Varint };
             case SchemaType.NonNullable:
-                return this.getPayloadLengthInfo(protoHelper.parseReference(parsedSchema), protoHelper);
+                return this.getPayloadLengthInfo(protoHelper.parseReference(parsedSchema.target), protoHelper);
             case SchemaType.Custom:
                 return { lengthType: LengthType.LengthDelimited };
             default:

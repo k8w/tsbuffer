@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.2.1] - 2022-04-12
+## [2.2.2] - 2022-04-12
 ### Fixed
 - `NonNullable` cannot be encoded and decoded when as a property in interface
 
