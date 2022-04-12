@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.1] - 2022-04-12
+### Fixed
+- `NonNullable` cannot be encoded and decoded when as a property in interface
+
 ## [2.2.0] - 2022-02-26
 ### Added
 - Support `keyof`

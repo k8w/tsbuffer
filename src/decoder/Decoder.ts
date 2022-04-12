@@ -393,7 +393,7 @@ export class Decoder {
     }
 
     private _skipIdLengthPrefix(parsedSchema: Exclude<TSBufferSchema, TypeReference>) {
-        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema);
+        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
         if (lengthInfo.needLengthPrefix) {
             // skip length prefix
             this._reader.skipByLengthType(LengthType.Varint);

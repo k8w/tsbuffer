@@ -1,8 +1,9 @@
 import { SchemaType, TSBufferSchema, TypeReference } from "tsbuffer-schema";
+import { ProtoHelper } from "tsbuffer-validator";
 
 /** @internal */
 export class IdBlockUtil {
-    static getPayloadLengthInfo(parsedSchema: Exclude<TSBufferSchema, TypeReference>): {
+    static getPayloadLengthInfo(parsedSchema: Exclude<TSBufferSchema, TypeReference>, protoHelper: ProtoHelper): {
         lengthType: LengthType,
         needLengthPrefix?: boolean
     } {
@@ -46,9 +47,12 @@ export class IdBlockUtil {
                 }
             case SchemaType.Date:
                 return { lengthType: LengthType.Varint };
+            case SchemaType.NonNullable:
+                return this.getPayloadLengthInfo(protoHelper.parseReference(parsedSchema), protoHelper);
             case SchemaType.Custom:
                 return { lengthType: LengthType.LengthDelimited };
             default:
+                // @ts-expect-error
                 throw new Error(`Unrecognized schema type: ${parsedSchema.type}`);
         }
     }

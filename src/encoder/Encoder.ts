@@ -707,7 +707,7 @@ export class Encoder {
         // 解引用
         let parsedSchema = this._validator.protoHelper.parseReference(payloadType);
 
-        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema);
+        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
         let newId = (idOp.value.toNumber() << 2) + lengthInfo.lengthType;
         this._writer.ops[idPos] = this._writer.req2op({
             type: 'varint',
