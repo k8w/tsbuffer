@@ -604,7 +604,7 @@ export class Encoder {
                 // 禁用excessPropertyChecks（以代替unionProperties）
                 excessPropertyChecks: false,
                 // 启用strictNullChecks（null as undefined已经前置处理）
-                strictNullChecks: true
+                // strictNullChecks: true
             });
 
             if (vRes.isSucc) {

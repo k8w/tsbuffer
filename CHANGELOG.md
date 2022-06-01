@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.3] - 2022-06-01
+### Fixed
+- Fixed encode error when union type members has optional property
+
 ## [2.2.2] - 2022-04-12
 ### Fixed
 - `NonNullable` cannot be encoded and decoded when as a property in interface
