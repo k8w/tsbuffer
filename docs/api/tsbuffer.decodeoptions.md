@@ -13,7 +13,7 @@ export interface DecodeOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [skipValidate?](./tsbuffer.decodeoptions.skipvalidate.md) | boolean | <i>(Optional)</i> Skip validate value \*after\* decode |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [skipValidate?](./tsbuffer.decodeoptions.skipvalidate.md) |  | boolean | <i>(Optional)</i> Skip validate value \*after\* decode |
 

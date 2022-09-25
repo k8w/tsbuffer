@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.4] - 2022-09-25
+### Fixed
+- Support validate `keyof` types (by [@774653363](https://github.com/774653363)) 
+
 ## [2.2.3] - 2022-06-01
 ### Fixed
 - Fixed encode error when union type members has optional property
