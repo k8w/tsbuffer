@@ -164,7 +164,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         if (typeof schemaOrId === 'string') {
             schema = this._proto[schemaOrId];
             if (!schema) {
-                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` }
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}`, errPhase: undefined }
             }
         }
         else {
@@ -176,13 +176,13 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             value = this._decoder.decode(buf, schema) as T;
         }
         catch (e) {
-            return { isSucc: false, errMsg: e.message };
+            return { isSucc: false, errMsg: e.message, errPhase: 'decode' };
         }
 
         if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
             let vRes = this._validator.validate(value, schema);
             if (!vRes.isSucc) {
-                return vRes;
+                return { ...vRes, errPhase: 'validate' as const };
             }
         }
 
@@ -240,7 +240,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         if (typeof schemaOrId === 'string') {
             schema = this._proto[schemaOrId];
             if (!schema) {
-                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}` }
+                return { isSucc: false, errMsg: `Cannot find schema： ${schemaOrId}`, errPhase: undefined }
             }
         }
         else {
@@ -254,13 +254,13 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
             value = this._decoder.decodeJSON(json, schema) as T;
         }
         catch (e) {
-            return { isSucc: false, errMsg: e.message };
+            return { isSucc: false, errMsg: e.message, errPhase: 'decode' };
         }
 
         if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
             let vRes = this._validator.prune(value, schema);
             if (!vRes.isSucc) {
-                return vRes;
+                return { ...vRes, errPhase: 'validate' as const };
             }
             return { isSucc: true, value: vRes.pruneOutput };
         }
@@ -296,6 +296,7 @@ export type DecodeOutput<T> = {
     isSucc: false,
     /** Error message */
     errMsg: string,
+    errPhase: 'decode' | 'validate' | undefined,
     value?: undefined
 };
 

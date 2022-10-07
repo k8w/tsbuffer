@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.5] - 2022-10-07
+### Added
+- Add `errPhase` to return type of `decode` method
+
 ## [2.2.4] - 2022-09-25
 ### Fixed
 - Support validate `keyof` types (by [@774653363](https://github.com/774653363)) 
