@@ -13,7 +13,7 @@ export interface EncodeOptions
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [skipValidate?](./tsbuffer.encodeoptions.skipvalidate.md) |  | boolean | <i>(Optional)</i> Skip validate value \*before\* encode |
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [skipValidate?](./tsbuffer.encodeoptions.skipvalidate.md) | boolean | <i>(Optional)</i> Skip validate value \*before\* encode |
 

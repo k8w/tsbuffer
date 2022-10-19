@@ -18,7 +18,7 @@ encodeJSON(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOpti
 |  --- | --- | --- |
 |  value | any |  |
 |  schemaOrId | string \| TSBufferSchema |  |
-|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) | <i>(Optional)</i> |
+|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) |  |
 
 <b>Returns:</b>
 

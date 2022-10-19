@@ -17,5 +17,5 @@ constructor(proto: Proto, options?: Partial<TSBufferOptions>);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  proto | Proto |  |
-|  options | Partial&lt;[TSBufferOptions](./tsbuffer.tsbufferoptions.md)<!-- -->&gt; | <i>(Optional)</i> |
+|  options | Partial&lt;[TSBufferOptions](./tsbuffer.tsbufferoptions.md)<!-- -->&gt; |  |
 

@@ -18,7 +18,7 @@ decodeJSON<T = unknown>(json: any, schemaOrId: string | TSBufferSchema, options?
 |  --- | --- | --- |
 |  json | any | JSON Object (是 JSON 对象，而非 JSON 字符串) |
 |  schemaOrId | string \| TSBufferSchema |  |
-|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) | <i>(Optional)</i> |
+|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) |  |
 
 <b>Returns:</b>
 

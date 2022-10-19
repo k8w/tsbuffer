@@ -260,7 +260,8 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
             let vRes = this._validator.prune(value, schema);
             if (!vRes.isSucc) {
-                return { ...vRes, errPhase: 'validate' as const };
+                (vRes as DecodeOutput<T> & { isSucc: false }).errPhase = 'validate';
+                return vRes as DecodeOutput<T>;
             }
             return { isSucc: true, value: vRes.pruneOutput };
         }

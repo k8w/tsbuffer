@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.6] - 2022-10-19
+### Fixed
+- Missing `errMsg` on `decodeJSON`
+
 ## [2.2.5] - 2022-10-07
 ### Added
 - Add `errPhase` to return type of `decode` method

@@ -18,7 +18,7 @@ decode<T = unknown>(buf: Uint8Array, schemaOrId: string | TSBufferSchema, option
 |  --- | --- | --- |
 |  buf | Uint8Array | 待解码的二进制数据 |
 |  schemaOrId | string \| TSBufferSchema | Schema 或 SchemaID，例如<code>a/b.ts</code>下的<code>Test</code>类型，其ID为<code>a/b/Test</code> |
-|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) | <i>(Optional)</i> |
+|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) |  |
 
 <b>Returns:</b>
 

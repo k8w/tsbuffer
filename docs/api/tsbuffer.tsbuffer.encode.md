@@ -18,7 +18,7 @@ encode(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions)
 |  --- | --- | --- |
 |  value | any | 要编码的值 |
 |  schemaOrId | string \| TSBufferSchema | Schema 或 SchemaID，例如<code>a/b.ts</code>下的<code>Test</code>类型，其ID为<code>a/b/Test</code> |
-|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) | <i>(Optional)</i> |
+|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) |  |
 
 <b>Returns:</b>
 
