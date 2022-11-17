@@ -50,4 +50,28 @@ describe('Nest', function () {
         assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, undefined]);
         // assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, 123, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, 123]);
     })
+
+    it('Cycle Reference in interface', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export type Node = {
+                    name: string,
+                    children?: Node[]
+                }
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        type Node = {
+            name: string,
+            children: Node[]
+        }
+        let node1: Node = { name: '111', children: [] };
+        let node2: Node = { name: '222', children: [{ name: '222-1', children: [] }, { name: '222-2', children: [] }] }
+        let root: Node = { name: 'root', children: [node1, node2] };
+
+        const encode = tsb.encodeJSON(root, 'a/Node');
+        assert.ok(encode.json, encode.errMsg);
+        assert.deepStrictEqual(tsb.decodeJSON(encode.json!, 'a/Node').value, root);
+    })
 })

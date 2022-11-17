@@ -7,6 +7,9 @@ export class CoderUtil {
         const key = type === 'encode' ? 'isJsonEncodable' : 'isJsonDecodable';
 
         if (schemaInfo[key] === undefined) {
+            // Just for avoding circular recursive, the value should be overwriten below
+            schemaInfo[key] = true;
+
             switch (schema.type) {
                 case SchemaType.Array:
                     schemaInfo[key] = this.isJsonCompatible(schema.elementType, type, protoHelper);

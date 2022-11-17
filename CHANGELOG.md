@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.7] - 2022-11-17
+### Fixed
+- Infinite loop when using `encodeJSON` if there are circular reference in types.
+
 ## [2.2.6] - 2022-10-19
 ### Fixed
 - Missing `errMsg` on `decodeJSON`
