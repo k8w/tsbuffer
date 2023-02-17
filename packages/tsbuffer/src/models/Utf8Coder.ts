@@ -22,9 +22,9 @@ const Utf8CoderJS: IUtf8Coder = {
     return len;
   },
   write: (str, buf, pos) => {
-    let start = pos,
-      c1, // character 1
-      c2; // character 2
+    const start = pos;
+    let c1: number; // character 1
+    let c2: number; // character 2
     for (let i = 0; i < str.length; ++i) {
       c1 = str.charCodeAt(i);
       if (c1 < 128) {

@@ -72,7 +72,7 @@ export class Decoder {
         return (json as any[]).map((v, i) =>
           this.decodeJSON(v, schema.elementTypes[i])
         );
-      case SchemaType.Interface:
+      case SchemaType.Interface: {
         if (json.constructor !== Object) {
           break;
         }
@@ -91,6 +91,7 @@ export class Decoder {
           }
         }
         return json;
+      }
       case SchemaType.Date:
         if (typeof json !== 'string' && typeof json !== 'number') {
           break;
@@ -99,15 +100,17 @@ export class Decoder {
       case SchemaType.Partial:
       case SchemaType.Pick:
       case SchemaType.Omit:
-      case SchemaType.Overwrite:
+      case SchemaType.Overwrite: {
         const parsed = this._validator.protoHelper.parseMappedType(schema);
         return this.decodeJSON(json, parsed);
-      case SchemaType.Buffer:
+      }
+      case SchemaType.Buffer: {
         if (typeof json !== 'string') {
           break;
         }
         const uint8Arr = Base64Util.base64ToBuffer(json);
         return this._getBufferValue(uint8Arr, schema);
+      }
       case SchemaType.IndexedAccess:
       case SchemaType.Reference:
       case SchemaType.Keyof:
@@ -216,27 +219,30 @@ export class Decoder {
 
         return output;
       }
-      case SchemaType.Enum:
+      case SchemaType.Enum: {
         const enumId = this._reader.readVarint().toNumber();
         const enumItem = schema.members.find((v) => v.id === enumId);
         if (!enumItem) {
           throw new Error(`Invalid enum encoding: unexpected id ${enumId}`);
         }
         return enumItem.value;
+      }
       case SchemaType.Any:
-      case SchemaType.Object:
+      case SchemaType.Object: {
         const jsonStr = this._reader.readString();
         if (jsonStr === 'undefined') {
           return undefined;
         }
         return JSON.parse(jsonStr);
+      }
       case SchemaType.Literal:
         return schema.literal;
       case SchemaType.Interface:
         return this._readInterface(schema);
-      case SchemaType.Buffer:
+      case SchemaType.Buffer: {
         const uint8Arr = this._reader.readBuffer();
         return this._getBufferValue(uint8Arr, schema);
+      }
       case SchemaType.IndexedAccess:
       case SchemaType.Reference:
       case SchemaType.Keyof:
@@ -244,14 +250,14 @@ export class Decoder {
       case SchemaType.Partial:
       case SchemaType.Pick:
       case SchemaType.Omit:
-      case SchemaType.Overwrite:
+      case SchemaType.Overwrite: {
         const parsed = this._validator.protoHelper.parseMappedType(schema);
         if (parsed.type === SchemaType.Interface) {
           return this._readPureMappedType(schema);
         } else {
           return this._readUnionOrIntersection(parsed);
         }
-        break;
+      }
       case SchemaType.Union:
       case SchemaType.Intersection:
         return this._readUnionOrIntersection(schema);
@@ -259,14 +265,15 @@ export class Decoder {
         return new Date(this._reader.readUint());
       case SchemaType.NonNullable:
         return this._read(schema.target);
-      case SchemaType.Custom:
+      case SchemaType.Custom: {
         if (!schema.decode) {
           throw new Error('Missing decode method for CustomTypeSchema');
         }
         const buf = this._reader.readBuffer();
         return schema.decode(buf);
+      }
       default:
-        // @ts-expect-error
+        // @ts-expect-error Should cover all type above
         throw new Error(`Unrecognized schema type: ${schema.type}`);
     }
   }
@@ -418,7 +425,7 @@ export class Decoder {
     // Literal property 由于不编码 将其补回
     // undefined as null
     for (const property of flatSchema.properties) {
-      if (output.hasOwnProperty(property.name)) {
+      if (Object.hasOwnProperty.call(output, property.name)) {
         continue;
       }
 

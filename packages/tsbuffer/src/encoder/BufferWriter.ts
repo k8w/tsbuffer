@@ -13,8 +13,6 @@ import { Varint64 } from '../models/Varint64';
 export class BufferWriter {
   private _ops: WriteOp[] = [];
 
-  constructor() {}
-
   get ops(): WriteOp[] {
     return this._ops;
   }
@@ -72,7 +70,7 @@ export class BufferWriter {
 
     for (const op of this._ops) {
       switch (op.type) {
-        case 'varint':
+        case 'varint': {
           const newPos = op.value.writeToBuffer(buf, pos);
           if (newPos !== pos + op.length) {
             throw new Error(
@@ -82,10 +80,11 @@ export class BufferWriter {
             );
           }
           break;
+        }
         case 'double':
           view.setFloat64(buf.byteOffset + pos, op.value);
           break;
-        case 'string':
+        case 'string': {
           const encLen = Utf8Coder.write(op.value, buf, pos);
           if (encLen !== op.length) {
             throw new Error(
@@ -93,6 +92,7 @@ export class BufferWriter {
             );
           }
           break;
+        }
         case 'buffer':
           buf.subarray(pos, pos + op.length).set(op.value);
           break;

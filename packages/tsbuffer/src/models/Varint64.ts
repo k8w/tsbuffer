@@ -38,8 +38,8 @@ export class Varint64 {
 
   toNumber(unsigned?: boolean): number {
     if (!unsigned && this.uint32s[0] >>> 31) {
-      let low = (~this.uint32s[1] + 1) >>> 0,
-        high = ~this.uint32s[0] >>> 0;
+      const low = (~this.uint32s[1] + 1) >>> 0;
+      let high = ~this.uint32s[0] >>> 0;
       if (!low) high = (high + 1) >>> 0;
       return -(low + high * 4294967296);
     }

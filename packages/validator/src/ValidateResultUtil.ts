@@ -10,7 +10,7 @@ export interface ValidateResultSucc {
 
 /** @internal */
 export class ValidateResultError<T extends ErrorType = ErrorType> {
-  readonly isSucc: false = false;
+  readonly isSucc = false;
 
   // Atom Error
   error: {

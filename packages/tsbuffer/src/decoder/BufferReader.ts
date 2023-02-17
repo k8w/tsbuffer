@@ -6,8 +6,6 @@ export class BufferReader {
   private _buf!: Uint8Array;
   private _view!: DataView;
 
-  constructor() {}
-
   load(buf: Uint8Array, pos = 0) {
     this._buf = buf;
     this._pos = pos;

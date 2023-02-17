@@ -112,9 +112,10 @@ export class Encoder {
       case SchemaType.Partial:
       case SchemaType.Pick:
       case SchemaType.Omit:
-      case SchemaType.Overwrite:
+      case SchemaType.Overwrite: {
         const parsed = this._validator.protoHelper.parseMappedType(schema);
         return this.encodeJSON(value, parsed);
+      }
       case SchemaType.Buffer:
         if (!(value instanceof ArrayBuffer) && !ArrayBuffer.isView(value)) {
           break;
@@ -247,7 +248,7 @@ export class Encoder {
         }
         break;
       }
-      case SchemaType.Enum:
+      case SchemaType.Enum: {
         const enumItem = schema.members.find((v) => v.value === value);
         if (!enumItem) {
           throw new Error(`Unexpect enum value: ${value}`);
@@ -257,6 +258,7 @@ export class Encoder {
           value: Varint64.from(enumItem.id),
         });
         break;
+      }
       case SchemaType.Any:
         if (value === undefined) {
           this._writer.push({ type: 'string', value: 'undefined' });
@@ -287,7 +289,7 @@ export class Encoder {
       case SchemaType.Partial:
       case SchemaType.Pick:
       case SchemaType.Omit:
-      case SchemaType.Overwrite:
+      case SchemaType.Overwrite: {
         const parsed = this._validator.protoHelper.parseMappedType(schema);
         if (parsed.type === SchemaType.Interface) {
           this._writePureMappedType(value, schema, options);
@@ -297,6 +299,7 @@ export class Encoder {
           this._writeIntersection(value, parsed, options?.skipFields);
         }
         break;
+      }
       case SchemaType.Union:
         this._writeUnion(value, schema, options?.skipFields);
         break;
@@ -312,7 +315,7 @@ export class Encoder {
       case SchemaType.NonNullable:
         this._write(value, schema.target, options);
         break;
-      case SchemaType.Custom:
+      case SchemaType.Custom: {
         if (!schema.encode) {
           throw new Error('Missing encode method for CustomTypeSchema');
         }
@@ -320,8 +323,9 @@ export class Encoder {
         // 以 Buffer 形式写入
         this._writeBuffer(buf);
         break;
+      }
       default:
-        // @ts-expect-error
+        // @ts-expect-error Should include all type above
         throw new Error(`Unrecognized schema type: ${schema.type}`);
     }
   }
@@ -373,8 +377,9 @@ export class Encoder {
       // 写入Overwrite部分
       this._write(parsed.overwriteValue, parsed.overwrite, options);
     } else if (schema.type === 'Partial') {
+      // nop
     } else {
-      // @ts-expect-error
+      // @ts-expect-error Should cover all type above
       throw new Error('Invalid PureMappedType child: ' + schema.type);
     }
 

@@ -306,7 +306,7 @@ export class ProtoGenerator {
         break;
       }
       case 'Intersection':
-      case 'Union':
+      case 'Union': {
         const cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
         const ids = EncodeIdUtil.genEncodeIds(
           EncodeIdUtil.getSchemaEncodeKeys(schema),
@@ -324,6 +324,7 @@ export class ProtoGenerator {
           this._regenSchemaEncodeIds(schema.members[i].type, subCpSchema);
         }
         break;
+      }
       case 'Array':
         // TODO elementType
         this._regenSchemaEncodeIds(

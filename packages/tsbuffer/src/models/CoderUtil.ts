@@ -30,7 +30,7 @@ export class CoderUtil {
             this.isJsonCompatible(v, type, protoHelper)
           );
           break;
-        case SchemaType.Interface:
+        case SchemaType.Interface: {
           const flatSchema = protoHelper.getFlatInterfaceSchema(schema);
           schemaInfo[key] = flatSchema.properties.every((v) =>
             this.isJsonCompatible(v.type, type, protoHelper)
@@ -45,6 +45,7 @@ export class CoderUtil {
               );
           }
           break;
+        }
         case SchemaType.IndexedAccess:
         case SchemaType.Reference: {
           const parsed = protoHelper.parseReference(schema);

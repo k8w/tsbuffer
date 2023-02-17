@@ -26,9 +26,9 @@ export class Base64Util {
       return new Uint8Array(Buffer.from(base64, 'base64'));
     }
 
-    let bufferLength = base64.length * 0.75,
-      len = base64.length,
-      p = 0;
+    let bufferLength = base64.length * 0.75;
+    const len = base64.length;
+    let p = 0;
     let encoded1: number, encoded2: number, encoded3: number, encoded4: number;
     if (base64[base64.length - 1] === '=') {
       bufferLength--;

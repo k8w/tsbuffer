@@ -63,7 +63,7 @@ export class IdBlockUtil {
       case SchemaType.Custom:
         return { lengthType: LengthType.LengthDelimited };
       default:
-        // @ts-expect-error
+        // @ts-expect-error Should include all type above
         throw new Error(`Unrecognized schema type: ${parsedSchema.type}`);
     }
   }

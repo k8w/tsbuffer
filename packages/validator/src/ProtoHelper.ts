@@ -269,7 +269,7 @@ export class ProtoHelper {
     } else if (this.isMappedType(schema)) {
       this._flatInterfaceSchemaCache[uuid] = this._flattenMappedType(schema);
     } else {
-      // @ts-expect-error
+      // @ts-expect-error unsupport
       throw new Error('Invalid interface type: ' + schema.type);
     }
 

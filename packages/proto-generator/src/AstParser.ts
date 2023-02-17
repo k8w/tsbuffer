@@ -752,7 +752,7 @@ export class AstParser {
       } else if (ts.isExpressionWithTypeArguments(node)) {
         nodeName = node.expression.getText();
       } else {
-        // @ts-expect-error
+        // @ts-expect-error unsupport
         throw new Error(`Invalid ts.Node kind for Pick/Omit: ${node.kind}`);
       }
 
