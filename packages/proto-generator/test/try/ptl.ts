@@ -1,34 +1,36 @@
 interface Protocol<Req, Res> {
-    req?: Req,
-    res?: Res,
-    url: string,
-    conf?: object
+  req?: Req;
+  res?: Res;
+  url: string;
+  conf?: object;
 }
 
 interface ReqTest {
-    test: string;
+  test: string;
 }
 
 interface ResTest {
-    test1: boolean;
+  test1: boolean;
 }
 
 const PtlTest: Protocol<ReqTest, ResTest> = {
-    url: 'xxxkjj',
-    conf: {
-        needLogin: true
-    }
+  url: 'xxxkjj',
+  conf: {
+    needLogin: true,
+  },
 };
 
-function callApi<P extends Protocol<any, any>>(ptl: P, req: P['req']): P['res'] {
-    throw new Error('e')
+function callApi<P extends Protocol<any, any>>(
+  ptl: P,
+  req: P['req']
+): P['res'] {
+  throw new Error('e');
 }
 
-export default interface MsgXXX {
-}
+export default interface MsgXXX {}
 
 // function sendMsg(msg: MsgXXX);
 
 callApi(PtlTest, {
-    test: 'xxx'
-})
+  test: 'xxx',
+});

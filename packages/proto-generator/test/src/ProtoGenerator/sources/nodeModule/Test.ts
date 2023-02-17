@@ -1,5 +1,3 @@
-import { TestNodeModule } from "test-nm";
+import { TestNodeModule } from 'test-nm';
 
-export interface Test extends TestNodeModule {
-    
-}
+export interface Test extends TestNodeModule {}

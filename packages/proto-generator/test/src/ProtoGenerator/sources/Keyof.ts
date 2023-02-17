@@ -1,17 +1,17 @@
 export type Obj1 = {
-    aa: string,
-    bb: number,
-    cc: {
-        c1: string,
-        c2: boolean[],
-        c3: boolean
-    }
+  aa: string;
+  bb: number;
+  cc: {
+    c1: string;
+    c2: boolean[];
+    c3: boolean;
+  };
 };
 
 export interface Obj2 {
-    bb: string,
-    cc: any[],
-    dd: string
+  bb: string;
+  cc: any[];
+  dd: string;
 }
 
 export type key1 = keyof Obj1;

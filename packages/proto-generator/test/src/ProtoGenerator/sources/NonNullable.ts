@@ -1,6 +1,6 @@
 export interface Wrapper {
-    value1?: string,
-    value2: null | string | undefined
+  value1?: string;
+  value2: null | string | undefined;
 }
 export type Value3 = string | null | undefined;
 export type NonNullable1 = NonNullable<Wrapper['value1']>;

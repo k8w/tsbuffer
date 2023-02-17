@@ -1,30 +1,30 @@
 import Animal from './Animal';
 
 namespace NSPerson {
-    export interface Male extends Animal {
-        maleXXX: {
-            value: string;
-        }
+  export interface Male extends Animal {
+    maleXXX: {
+      value: string;
+    };
 
-        sex: 'm';
-    }
+    sex: 'm';
+  }
 
-    export interface Female extends Animal {
-        femaleXXX: {
-            value: string;
-        }
+  export interface Female extends Animal {
+    femaleXXX: {
+      value: string;
+    };
 
-        sex: 'f';
-    }
+    sex: 'f';
+  }
 
-    export type Person = Male | Female;
+  export type Person = Male | Female;
 }
 export default NSPerson;
 
 export interface Unused1 {
-    value: string
+  value: string;
 }
 
 interface Unused2 {
-    value: string
+  value: string;
 }

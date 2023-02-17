@@ -1,17 +1,17 @@
-import { TestEnum } from "./SimpleEnum";
+import { TestEnum } from './SimpleEnum';
 
 export interface A {
-    type: TestEnum.a
+  type: TestEnum.a;
 }
 export interface C {
-    type: TestEnum.c
+  type: TestEnum.c;
 }
 export interface D {
-    type: TestEnum.d
+  type: TestEnum.d;
 }
 export interface G {
-    type: TestEnum.g
+  type: TestEnum.g;
 }
 export interface H {
-    type: TestEnum.h
+  type: TestEnum.h;
 }

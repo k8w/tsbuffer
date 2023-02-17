@@ -1,3 +1,3 @@
 export interface EB {
-    b1: string;
+  b1: string;
 }

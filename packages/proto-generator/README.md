@@ -1,5 +1,4 @@
-TSBuffer Proto Generator
----
+## TSBuffer Proto Generator
 
 Proto generator for [TSBuffer](https://github.com/k8w/tsbuffer).
 
