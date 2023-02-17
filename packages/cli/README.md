@@ -1,44 +1,52 @@
-TSBuffer CLI Tools
-===
+# TSBuffer CLI Tools
 
 EN / [中文](README_CN.md)
 
-CLI utilities for [TSBuffer](https://npmjs.com/tsbuffer) 
+CLI utilities for [TSBuffer](https://npmjs.com/tsbuffer)
 
 # Install
+
 ```
 npm i -g tsbuffer-cli
 ```
 
 ## Usage
+
 ### Generate proto
+
 ```
 tsbuffer proto -i **/*.ts -o proto.json
 ```
 
 ### Encode Test
+
 ```
 tsbuffer encode -p proto.json -s a/b/c/TypeName "{value: 1}"
 tsbuffer encode -p proto.json -s a/b/c/TypeName "{value: 1}" -o buf.bin
 ```
+
 ### Decode Test
+
 ```
 tsbuffer decode -p proto.json -s a/b/c/TypeName "01 0A 01"
 tsbuffer decode -p proto.json -s a/b/c/TypeName -i buf.bin -o output.js
 ```
 
 ### Validate Test
+
 ```
 tsbuffer validate -p proto.json -s a/b/c/TypeName "{value: 1}"
 tsbuffer validate -p proto.json -s a/b/c/TypeName -i xxx.js
 ```
 
 ### Show buffer
+
 ```
 tsbuffer show buf.bin
 ```
 
 ## CLI Reference
+
 ```
 tsbuffer proto <options>                Generate proto file
     -i, --input <file>                  Input TS file (support glob expression)
@@ -56,7 +64,7 @@ tsbuffer encode <options> [exp]         Encode a JS expression or a file (conten
     -i, --input <file>                  Input file path, alternative to [exp]
     -o, --output <file>                 Output file path (or print to CLI)
     -v, --verbose                       Show debug info
-                                        
+
 tsbuffer decode <options> [binstr]      Decode buffer
     [binstr]                            Buffer to decode, hex string, like "0F A2 E3"
     -p, --proto <file>                  Proto file

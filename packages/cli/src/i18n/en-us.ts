@@ -1,6 +1,7 @@
 export const i18n = {
-    welcome: 'https://npmjs.com/tsbuffer\nWelcome to TSBuffer utilities V${version}',
-    help: `
+  welcome:
+    'https://npmjs.com/tsbuffer\nWelcome to TSBuffer utilities V${version}',
+  help: `
 Usage：
 
     tsbuffer proto <options>                Generate proto file
@@ -38,7 +39,7 @@ Usage：
 
     tsbuffer show <file>                    Show a binary file as hex string
 `.trim(),
-    example: `
+  example: `
 Example：
 
     tsbuffer proto -i **/*.ts -o proto.ts
@@ -48,20 +49,25 @@ Example：
     tsbuffer validate -p proto.json -s a/b/c/TypeName "{value: 1}"
     tsbuffer show buf.bin
 `.trim(),
-    errCmd: 'Error command, use "tsbuffer -h" to see more help info.',
-    missingParam: 'Missing parameter ${param}, use "tsbuffer -h" to see more help info.',
-    protoSucc: '√ Proto generated to: ${output}',
-    fileOpenError: 'Failed to open file: ${file}',
-    jsParsedError: 'Failed to parse JS expression from: ${file}',
-    protoParsedError: 'Failed to parse old proto: ${file}',
-    expParsedError: 'Invalid JS expression',
-    or: 'or',
-    and: 'and',
-    encodeSucc: '√ Encoded succ to: ${output}',
-    decodeSucc: '√ Decoded succ to: ${output}',
-    validateSucc: '√ Validate succ',
-    validateFail: '× Validate fail: ${msg}',
-    error: ' ERROR ',
-    helpGuide: 'Use "tsbuffer -h" to see more help info.',
-    canOptimizeByNew: 'WARNING：Compatible with old proto increased encoded buffer size，you can optimize this by parameter '.yellow + '--new'.red + ' , but this may leads to non-compatibility with old proto.'.yellow
-}
+  errCmd: 'Error command, use "tsbuffer -h" to see more help info.',
+  missingParam:
+    'Missing parameter ${param}, use "tsbuffer -h" to see more help info.',
+  protoSucc: '√ Proto generated to: ${output}',
+  fileOpenError: 'Failed to open file: ${file}',
+  jsParsedError: 'Failed to parse JS expression from: ${file}',
+  protoParsedError: 'Failed to parse old proto: ${file}',
+  expParsedError: 'Invalid JS expression',
+  or: 'or',
+  and: 'and',
+  encodeSucc: '√ Encoded succ to: ${output}',
+  decodeSucc: '√ Decoded succ to: ${output}',
+  validateSucc: '√ Validate succ',
+  validateFail: '× Validate fail: ${msg}',
+  error: ' ERROR ',
+  helpGuide: 'Use "tsbuffer -h" to see more help info.',
+  canOptimizeByNew:
+    'WARNING：Compatible with old proto increased encoded buffer size，you can optimize this by parameter '
+      .yellow +
+    '--new'.red +
+    ' , but this may leads to non-compatibility with old proto.'.yellow,
+};

@@ -1,4 +1,1 @@
-export interface BasicType {
-    
-}
-
+export interface BasicType {}

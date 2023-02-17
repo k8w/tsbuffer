@@ -1,45 +1,52 @@
-TSBuffer 命令行实用工具
-===
+# TSBuffer 命令行实用工具
 
 [EN](README.md) / 中文
 
 [TSBuffer](https://npmjs.com/tsbuffer) 命令行使用工具
 
 ## 安装
+
 ```
 npm i -g tsbuffer-cli
 ```
 
 # 示例
-### 生成Proto
+
+### 生成 Proto
+
 ```
 tsbuffer proto -i **/*.ts -o proto.json
 ```
 
 ### 编码测试
+
 ```
 tsbuffer encode -p proto.json -s a/b/c/TypeName "{value: 1}"
-tsbuffer encode -p proto.json -s a/b/c/TypeName "{value: 1}" -o buf.bin 
+tsbuffer encode -p proto.json -s a/b/c/TypeName "{value: 1}" -o buf.bin
 ```
 
 ### 解码测试
+
 ```
 tsbuffer decode -p proto.json -s a/b/c/TypeName "01 0A 01"
 tsbuffer decode -p proto.json -s a/b/c/TypeName -i buf.bin
 ```
 
 ### 类型验证
+
 ```
 tsbuffer validate -p proto.json -s a/b/c/TypeName "{value: 1}"
 tsbuffer validate -p proto.json -s a/b/c/TypeName -i value.js
 ```
 
 ### 显示二进制文件
+
 ```
 tsbuffer show buf.bin
 ```
 
 ## 命令行参数说明
+
 ```
 tsbuffer proto <options>                生成Proto文件
     -i, --input <file>                  用来生成Proto的TS文件（glob表达式）
@@ -57,7 +64,7 @@ tsbuffer encode <options> [exp]         编码JS表达式
     -i, --input <file>                  输入为文件，不可与[exp]同用（文件内容为JS表达式）
     -o, --output <file>                 输出的文件路径，不指定将直接输出到命令行
     -v, --verbose                       显示调试信息
-                                        
+
 tsbuffer decode <options> [binstr]      解码二进制数据
     [binstr]                            要解码的二进制数据的字符串表示，如"0F A2 E3 F2 D9"
     -p, --proto <file>                  解码要使用的Proto文件

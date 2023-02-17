@@ -1,5 +1,3 @@
 import * as assert from 'assert';
 
-describe('combine', function () {
-    
-})
+describe('combine', function () {});

@@ -5,11 +5,15 @@ import { UnionTypeSchema } from './UnionTypeSchema';
 
 /**
  * TypeScript `Pick<Type>`
- * @remarks 
+ * @remarks
  * See: {@link https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys}
  */
 export interface PickTypeSchema {
-    type: 'Pick';
-    target: InterfaceTypeSchema | InterfaceReference | UnionTypeSchema | IntersectionTypeSchema;
-    keys: string[];
+  type: 'Pick';
+  target:
+    | InterfaceTypeSchema
+    | InterfaceReference
+    | UnionTypeSchema
+    | IntersectionTypeSchema;
+  keys: string[];
 }

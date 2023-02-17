@@ -1,11 +1,11 @@
-import { TSBufferSchema } from "../models/TSBufferSchema";
+import { TSBufferSchema } from '../models/TSBufferSchema';
 
 /**
  * TypeScript `Array` type
- * 
- * @remarks 
+ *
+ * @remarks
  * See: {@link https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#arrays}
- * 
+ *
  * @example
  * ```ts
  * type A = string[];
@@ -13,6 +13,6 @@ import { TSBufferSchema } from "../models/TSBufferSchema";
  * ```
  */
 export interface ArrayTypeSchema {
-    type: 'Array';
-    elementType: TSBufferSchema;
+  type: 'Array';
+  elementType: TSBufferSchema;
 }

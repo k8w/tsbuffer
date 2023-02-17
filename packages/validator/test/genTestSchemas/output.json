@@ -1218,9 +1218,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name"
-    ],
+    "keys": ["name"],
     "type": "Pick"
   },
   "mapped/Pick2": {
@@ -1228,10 +1226,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Pick"
   },
   "mapped/Pick2_1": {
@@ -1239,10 +1234,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Pick"
   },
   "mapped/Pick2_2": {
@@ -1250,10 +1242,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Pick"
   },
   "mapped/Pick2_3": {
@@ -1261,10 +1250,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Pick"
   },
   "mapped/Pick2_4": {
@@ -1272,10 +1258,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Pick"
   },
   "mapped/Pick3": {
@@ -1283,9 +1266,7 @@
       "type": "Reference",
       "target": "mapped/Pick2"
     },
-    "keys": [
-      "orders"
-    ],
+    "keys": ["orders"],
     "type": "Pick"
   },
   "mapped/Partial1": {
@@ -1307,9 +1288,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "sex"
-    ],
+    "keys": ["sex"],
     "type": "Omit"
   },
   "mapped/Omit2": {
@@ -1317,9 +1296,7 @@
       "type": "Reference",
       "target": "mapped/Pick2"
     },
-    "keys": [
-      "orders"
-    ],
+    "keys": ["orders"],
     "type": "Omit"
   },
   "mapped/Omit3": {
@@ -1327,9 +1304,7 @@
       "type": "Reference",
       "target": "mapped/Omit1"
     },
-    "keys": [
-      "name"
-    ],
+    "keys": ["name"],
     "type": "Omit"
   },
   "mapped/Omit4_1": {
@@ -1337,10 +1312,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Omit"
   },
   "mapped/Omit4_2": {
@@ -1348,10 +1320,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Omit"
   },
   "mapped/Omit4_3": {
@@ -1359,10 +1328,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Omit"
   },
   "mapped/Omit4_4": {
@@ -1370,10 +1336,7 @@
       "type": "Reference",
       "target": "mapped/Base"
     },
-    "keys": [
-      "name",
-      "orders"
-    ],
+    "keys": ["name", "orders"],
     "type": "Omit"
   },
   "mapped/Overwrite1": {
@@ -1425,10 +1388,7 @@
         "type": "Reference",
         "target": "mapped/Base"
       },
-      "keys": [
-        "name",
-        "sex"
-      ],
+      "keys": ["name", "sex"],
       "type": "Pick"
     },
     "overwrite": {
@@ -1511,10 +1471,7 @@
       "type": "Reference",
       "target": "mapped/Base1"
     },
-    "keys": [
-      "a",
-      "c"
-    ],
+    "keys": ["a", "c"],
     "type": "Pick"
   },
   "mapped/IPartial": {
@@ -1529,10 +1486,7 @@
       "type": "Reference",
       "target": "mapped/Base1"
     },
-    "keys": [
-      "b",
-      "c"
-    ],
+    "keys": ["b", "c"],
     "type": "Omit"
   },
   "mapped/IOverwrite1": {
@@ -1696,10 +1650,7 @@
       "type": "Reference",
       "target": "mapped/AB"
     },
-    "keys": [
-      "type",
-      "common"
-    ],
+    "keys": ["type", "common"],
     "type": "Pick"
   },
   "mapped/OmitAB": {
@@ -1707,10 +1658,7 @@
       "type": "Reference",
       "target": "mapped/AB"
     },
-    "keys": [
-      "common",
-      "common1"
-    ],
+    "keys": ["common", "common1"],
     "type": "Omit"
   },
   "mapped/NestedAB": {
@@ -1720,22 +1668,13 @@
           "type": "Reference",
           "target": "mapped/AB"
         },
-        "keys": [
-          "type",
-          "common",
-          "common1"
-        ],
+        "keys": ["type", "common", "common1"],
         "type": "Pick"
       },
-      "keys": [
-        "common1",
-        "type"
-      ],
+      "keys": ["common1", "type"],
       "type": "Omit"
     },
-    "keys": [
-      "common"
-    ],
+    "keys": ["common"],
     "type": "Pick"
   },
   "mapped/PartialAB": {
@@ -1757,9 +1696,7 @@
       "type": "Reference",
       "target": "mapped/PartialAB"
     },
-    "keys": [
-      "type"
-    ],
+    "keys": ["type"],
     "type": "Pick"
   },
   "mapped/PickIntersection1": {
@@ -1812,10 +1749,7 @@
         }
       ]
     },
-    "keys": [
-      "a",
-      "c"
-    ],
+    "keys": ["a", "c"],
     "type": "Pick"
   },
   "mapped/OmitIntersection1": {
@@ -1868,10 +1802,7 @@
         }
       ]
     },
-    "keys": [
-      "b",
-      "d"
-    ],
+    "keys": ["b", "d"],
     "type": "Omit"
   },
   "mapped/PickIntersection2": {
@@ -1967,10 +1898,7 @@
         }
       ]
     },
-    "keys": [
-      "type",
-      "value"
-    ],
+    "keys": ["type", "value"],
     "type": "Pick"
   },
   "mapped/OmitIntersection2": {
@@ -2066,9 +1994,7 @@
         }
       ]
     },
-    "keys": [
-      "meta"
-    ],
+    "keys": ["meta"],
     "type": "Omit"
   },
   "mapped/Wrapper": {

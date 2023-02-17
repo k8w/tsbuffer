@@ -4,4 +4,4 @@ module.exports = `/*!
  * MIT LICENSE
  * KingWorks (C) Copyright ${new Date().getFullYear()}
  * https://github.com/k8w/tsbuffer
- */`
+ */`;

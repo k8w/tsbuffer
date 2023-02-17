@@ -1,20 +1,19 @@
-
 /**
  * Primitive `number` type, with specific scalar type (like `int`, `uint`)
- * 
+ *
  * @remarks
  * See: {@link https://www.typescriptlang.org/docs/handbook/basic-types.html#number}
- * 
+ *
  * Encoding:<br/>
  * - {@link https://developers.google.com/protocol-buffers/docs/encoding#varints | Varint}: `int`, `uint`<br/>
  * - Fixed 64 bit: `double`, `bigint`, `bigint64`, `biguint64`
  */
 export interface NumberTypeSchema {
-    type: 'Number';
-    /**
-     * @defaultValue 'double'
-     */
-    scalarType?: 'int' | 'uint' | 'bigint' | 'bigint64' | 'biguint64' | 'double';
+  type: 'Number';
+  /**
+   * @defaultValue 'double'
+   */
+  scalarType?: 'int' | 'uint' | 'bigint' | 'bigint64' | 'biguint64' | 'double';
 }
 
 // Scalar Types

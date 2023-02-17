@@ -5,11 +5,15 @@ import { UnionTypeSchema } from './UnionTypeSchema';
 
 /**
  * TypeScript `Partial<Type>`
- * 
- * @remarks 
+ *
+ * @remarks
  * See: {@link https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype}
  */
 export interface PartialTypeSchema {
-    type: 'Partial';
-    target: InterfaceTypeSchema | InterfaceReference | UnionTypeSchema | IntersectionTypeSchema;
+  type: 'Partial';
+  target:
+    | InterfaceTypeSchema
+    | InterfaceReference
+    | UnionTypeSchema
+    | IntersectionTypeSchema;
 }

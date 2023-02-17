@@ -1,6 +1,6 @@
 export const i18n = {
-    welcome: 'https://npmjs.com/tsbuffer\n欢迎进入 TSBuffer 实用工具 V${version}',
-    help: `
+  welcome: 'https://npmjs.com/tsbuffer\n欢迎进入 TSBuffer 实用工具 V${version}',
+  help: `
 使用说明：
 
     tsbuffer proto <options>                生成Proto文件
@@ -38,7 +38,7 @@ export const i18n = {
 
     tsbuffer show <file>                    打印二进制文件内容
 `.trim(),
-    example: `
+  example: `
 使用示例：
 
     tsbuffer proto -i **/*.ts -o proto.ts
@@ -48,20 +48,23 @@ export const i18n = {
     tsbuffer validate -p proto.json -s a/b/c/TypeName "{value: 1}"
     tsbuffer show buf.bin
 `.trim(),
-    errCmd: '命令格式有误，键入 tsbuffer -h 以查看帮助。',
-    missingParam: '缺少 ${param} 参数，键入 tsbuffer -h 以查看更多信息。',
-    protoSucc: '√ Proto已生成到：${output}',
-    fileOpenError: '文件打开失败: ${file}',
-    jsParsedError: 'JS表达式解析失败: ${file}',
-    protoParsedError: '旧Proto文件解析失败: ${file}',
-    expParsedError: '表达式解析失败',
-    or: '或',
-    and: '和',
-    encodeSucc: '√ 编码结果已生成到：${output}',
-    decodeSucc: '√ 解码结果已生成到：${output}',
-    validateSucc: '√ 验证通过',
-    validateFail: '× 验证不通过: ${msg}',
-    error: ' 错误 ',
-    helpGuide: '键入 tsbuffer -h 查看更多帮助信息',
-    canOptimizeByNew: '注意：由于兼容旧Proto增加了编码大小，可加入参数 '.yellow + '--new'.red + ' 来实现优化，但可能导致对旧Proto的不兼容。'.yellow
-}
+  errCmd: '命令格式有误，键入 tsbuffer -h 以查看帮助。',
+  missingParam: '缺少 ${param} 参数，键入 tsbuffer -h 以查看更多信息。',
+  protoSucc: '√ Proto已生成到：${output}',
+  fileOpenError: '文件打开失败: ${file}',
+  jsParsedError: 'JS表达式解析失败: ${file}',
+  protoParsedError: '旧Proto文件解析失败: ${file}',
+  expParsedError: '表达式解析失败',
+  or: '或',
+  and: '和',
+  encodeSucc: '√ 编码结果已生成到：${output}',
+  decodeSucc: '√ 解码结果已生成到：${output}',
+  validateSucc: '√ 验证通过',
+  validateFail: '× 验证不通过: ${msg}',
+  error: ' 错误 ',
+  helpGuide: '键入 tsbuffer -h 查看更多帮助信息',
+  canOptimizeByNew:
+    '注意：由于兼容旧Proto增加了编码大小，可加入参数 '.yellow +
+    '--new'.red +
+    ' 来实现优化，但可能导致对旧Proto的不兼容。'.yellow,
+};

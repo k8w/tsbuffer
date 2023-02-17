@@ -1,11 +1,11 @@
-import { TSBufferSchema } from "../models/TSBufferSchema";
+import { TSBufferSchema } from '../models/TSBufferSchema';
 
 /**
  * TypeScript intersection type, like `A & B`
- * 
- * @remarks 
+ *
+ * @remarks
  * See: {@link https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types}
- * 
+ *
  * @example
  * ```ts
  * type X1 = A & B;
@@ -13,10 +13,10 @@ import { TSBufferSchema } from "../models/TSBufferSchema";
  * ```
  */
 export interface IntersectionTypeSchema {
-    type: 'Intersection';
-    members: {
-        /** Encoding identifier, generated according to the order */
-        id: number,
-        type: TSBufferSchema
-    }[];
+  type: 'Intersection';
+  members: {
+    /** Encoding identifier, generated according to the order */
+    id: number;
+    type: TSBufferSchema;
+  }[];
 }

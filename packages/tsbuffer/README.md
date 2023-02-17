@@ -1,5 +1,4 @@
-TSBuffer
-===
+# TSBuffer
 
 TypeScript type serializer used by [TSRPC](https://github.com/tsrpc).
 

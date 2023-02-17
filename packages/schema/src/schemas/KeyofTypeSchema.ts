@@ -1,15 +1,15 @@
-import { InterfaceReference } from "../models/InterfaceReference";
+import { InterfaceReference } from '../models/InterfaceReference';
 
 /**
  * TypeScript `keyof` feature, to get keys of an interface.
- * 
+ *
  * @remarks
  * Type:
  * ```ts
  * interface ABC { a: string; b: string }
  * type Keys = keyof ABC;
  * ```
- * 
+ *
  * Schema:
  * ```json
  * {
@@ -22,6 +22,6 @@ import { InterfaceReference } from "../models/InterfaceReference";
  * ```
  */
 export interface KeyofTypeSchema {
-    type: 'Keyof';
-    target: InterfaceReference;
+  type: 'Keyof';
+  target: InterfaceReference;
 }
