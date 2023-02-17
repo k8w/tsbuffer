@@ -1,41 +1,42 @@
 {
   "name": "tsbuffer",
-  "version": "2.2.7",
+  "version": "3.0.0-dev.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "exports": {
-    "require": "./index.js",
-    "import": "./index.mjs"
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs"
   },
-  "typings": "./index.d.ts",
-  "directories": {
-    "doc": "docs"
-  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "k8w-extend-native": "^1.4.6",
-    "@tsbuffer/validator": "workspace:^",
-    "tslib": "*"
+    "@tsbuffer/validator": "workspace:^"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.19.14",
-    "@microsoft/api-extractor": "^7.31.2",
     "@types/mocha": "^8.2.3",
     "@types/node": "^15.14.9",
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
-    "rollup": "^2.79.1",
-    "rollup-plugin-typescript2": "^0.34.0",
-    "ts-node": "^10.9.1",
     "@tsbuffer/proto-generator": "workspace:^",
-    "typescript": "^4.8.3"
+    "k8w-extend-native": "^1.4.6",
+    "tslib": "*",
+    "rollup": "^2.79.1",
+    "rollup-plugin-dts": "^4.2.3",
+    "rollup-plugin-typescript2": "^0.34.1"
+  },
+  "peerDependencies": {
+    "k8w-extend-native": "^1.4.6",
+    "tslib": "*"
   },
   "scripts": {
     "test": "npx mocha",
     "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
-    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
-    "build:js": "rm -rf dist && npx rollup -c",
-    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
-    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api"
+    "dev": "rollup -c -w",
+    "check": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts --fix",
+    "build": "shx rm -rf dist && rollup -c"
   },
   "repository": {
     "type": "git",
@@ -63,5 +64,5 @@
   "bugs": {
     "url": "https://github.com/k8w/tsbuffer/issues"
   },
-  "homepage": "https://github.com/k8w/tsbuffer#readme"
+  "homepage": "https://github.com/k8w/tsbuffer/tree/main/packages/tsbuffer#readme"
 }

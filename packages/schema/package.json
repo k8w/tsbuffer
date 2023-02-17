@@ -1,19 +1,21 @@
 {
   "name": "@tsbuffer/schema",
-  "version": "2.2.0",
+  "version": "3.0.0-dev.0",
   "description": "TSBuffer schema declarations",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "exports": {
-    "require": "./index.js",
-    "import": "./index.mjs"
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs"
   },
-  "typings": "index.d.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "bp": "tsc --noEmit && npm version patch && npm run build && cd dist && npm publish && cd ..",
-    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
-    "build:js": "rm -rf dist && npx rollup -c",
-    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
-    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api"
+    "dev": "rollup -c -w",
+    "check": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts --fix",
+    "build": "shx rm -rf dist && rollup -c"
   },
   "repository": {
     "type": "git",
@@ -37,14 +39,12 @@
   "author": "k8w",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/k8w/tsbuffer-schema/issues"
+    "url": "https://github.com/k8w/tsbuffer/issues"
   },
-  "homepage": "https://github.com/k8w/tsbuffer#readme",
+  "homepage": "https://github.com/k8w/tsbuffer/tree/main/packages/schema#readme",
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.13.63",
-    "@microsoft/api-extractor": "^7.18.16",
-    "rollup": "^2.58.0",
-    "rollup-plugin-typescript2": "^0.30.0",
-    "typedoc": "^0.22.5"
+    "rollup": "^2.79.1",
+    "rollup-plugin-dts": "^4.2.3",
+    "rollup-plugin-typescript2": "^0.34.1"
   }
 }
