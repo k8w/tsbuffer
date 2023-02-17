@@ -134,7 +134,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
         // validate before encode
         if (!(options?.skipValidate ?? this._options.skipEncodeValidate)) {
-            let vRes = this._validator.validate(value, schema, {
+            const vRes = this._validator.validate(value, schema, {
                 // 禁用excessPropertyChecks，因为不会编码excess property
                 excessPropertyChecks: false
             });
@@ -180,7 +180,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
-            let vRes = this._validator.validate(value, schema);
+            const vRes = this._validator.validate(value, schema);
             if (!vRes.isSucc) {
                 return { ...vRes, errPhase: 'validate' as const };
             }
@@ -209,7 +209,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
 
         // validate before encode
         if (!(options?.skipValidate ?? this._options.skipEncodeValidate)) {
-            let vRes = this._validator.prune(value, schema);
+            const vRes = this._validator.prune(value, schema);
             if (!vRes.isSucc) {
                 return vRes;
             }
@@ -258,7 +258,7 @@ export class TSBuffer<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         if (!(options?.skipValidate ?? this._options.skipDecodeValidate)) {
-            let vRes = this._validator.prune(value, schema);
+            const vRes = this._validator.prune(value, schema);
             if (!vRes.isSucc) {
                 (vRes as DecodeOutput<T> & { isSucc: false }).errPhase = 'validate';
                 return vRes as DecodeOutput<T>;

@@ -3,7 +3,7 @@ import { Utf8Coder } from '../models/Utf8Coder';
 import { Varint64 } from '../models/Varint64';
 export class BufferReader {
 
-    private _pos: number = 0;
+    private _pos = 0;
     private _buf!: Uint8Array;
     private _view!: DataView;
 
@@ -11,14 +11,14 @@ export class BufferReader {
         
     }
 
-    load(buf: Uint8Array, pos: number = 0) {
+    load(buf: Uint8Array, pos = 0) {
         this._buf = buf;
         this._pos = pos;
         this._view = new DataView(buf.buffer);
     }
 
     readVarint(): Varint64 {
-        let varint = Varint64.readFromBuffer(this._buf, this._pos);
+        const varint = Varint64.readFromBuffer(this._buf, this._pos);
         this._pos += varint.byteLength;
         return varint;
     }
@@ -32,21 +32,21 @@ export class BufferReader {
     }
 
     readDouble(): number {
-        let pos = this._pos;
+        const pos = this._pos;
         this._pos += 8;
         return this._view.getFloat64(this._buf.byteOffset + pos);
     }
 
     readString(): string {
-        let strByteLength = this.readUint();
-        let str = Utf8Coder.read(this._buf, this._pos, strByteLength);
+        const strByteLength = this.readUint();
+        const str = Utf8Coder.read(this._buf, this._pos, strByteLength);
         this._pos += strByteLength;
         return str;
     }
 
     readBuffer(): Uint8Array {
-        let bufByteLength = this.readUint();
-        let buf = this._buf.subarray(this._pos, this._pos + bufByteLength);
+        const bufByteLength = this.readUint();
+        const buf = this._buf.subarray(this._pos, this._pos + bufByteLength);
         this._pos += bufByteLength;
         return buf;
     }
@@ -63,7 +63,7 @@ export class BufferReader {
             this.readVarint();
         }
         else if (lengthType === LengthType.LengthDelimited) {
-            let bufByteLength = this.readUint();
+            const bufByteLength = this.readUint();
             this._pos += bufByteLength;
         }
         else if (lengthType === LengthType.IdBlock) {
@@ -75,16 +75,16 @@ export class BufferReader {
     }
 
     skipIdBlock() {
-        let idNum = this.readUint();
+        const idNum = this.readUint();
         for (let i = 0; i < idNum; ++i) {
-            let id = this.readUint();
-            let lengthType = id & 3 as LengthType;
+            const id = this.readUint();
+            const lengthType = id & 3 as LengthType;
             this.skipByLengthType(lengthType);
         }
     }
 
     readBoolean(): boolean {
-        let value = this._view.getUint8(this._buf.byteOffset + this._pos++);
+        const value = this._view.getUint8(this._buf.byteOffset + this._pos++);
         if (value === 255) {
             return true;
         }

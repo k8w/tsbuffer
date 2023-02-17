@@ -58,9 +58,9 @@ export class Decoder {
                     break;
                 }
                 json = Object.assign({}, json);
-                let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
-                for (let key in json) {
-                    let property = flatSchema.properties.find(v => v.name === key);
+                const flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+                for (const key in json) {
+                    const property = flatSchema.properties.find(v => v.name === key);
                     if (property) {
                         json[key] = this.decodeJSON(json[key], property.type)
                     }
@@ -78,13 +78,13 @@ export class Decoder {
             case SchemaType.Pick:
             case SchemaType.Omit:
             case SchemaType.Overwrite:
-                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                const parsed = this._validator.protoHelper.parseMappedType(schema);
                 return this.decodeJSON(json, parsed);
             case SchemaType.Buffer:
                 if (typeof json !== 'string') {
                     break;
                 }
-                let uint8Arr = Base64Util.base64ToBuffer(json);
+                const uint8Arr = Base64Util.base64ToBuffer(json);
                 return this._getBufferValue(uint8Arr, schema);
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
@@ -93,7 +93,7 @@ export class Decoder {
             case SchemaType.Union:
             case SchemaType.Intersection: {
                 // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
-                for (let member of schema.members) {
+                for (const member of schema.members) {
                     json = this.decodeJSON(json, member.type);
                 }
                 return json;
@@ -121,11 +121,11 @@ export class Decoder {
             case SchemaType.String:
                 return this._reader.readString();
             case SchemaType.Array: {
-                let output: any[] = [];
+                const output: any[] = [];
                 // 数组长度：Varint
-                let length = this._reader.readUint();
+                const length = this._reader.readUint();
                 for (let i = 0; i < length; ++i) {
-                    let item = this._read(schema.elementType);
+                    const item = this._read(schema.elementType);
                     output.push(item);
                 }
                 return output;
@@ -135,11 +135,11 @@ export class Decoder {
                     throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
                 }
 
-                let output: any[] = [];
+                const output: any[] = [];
                 // PayloadMask: Varint64
-                let payloadMask: Varint64 = this._reader.readVarint();
+                const payloadMask: Varint64 = this._reader.readVarint();
                 // 计算maskIndices
-                let maskIndices: number[] = [];
+                const maskIndices: number[] = [];
                 // Low
                 for (let i = 0; i < 32; ++i) {
                     if (payloadMask.uint32s[1] & 1 << i) {
@@ -157,7 +157,7 @@ export class Decoder {
                     return [];
                 }
 
-                let maxIndex = maskIndices.last();
+                const maxIndex = maskIndices.last();
                 for (let i = 0, nextMaskIndex = 0, next = maskIndices[0]; i <= maxIndex; ++i) {
                     if (i === next) {
                         output[i] = this._read(schema.elementTypes[i]);
@@ -179,15 +179,15 @@ export class Decoder {
                 return output;
             }
             case SchemaType.Enum:
-                let enumId = this._reader.readVarint().toNumber();
-                let enumItem = schema.members.find(v => v.id === enumId);
+                const enumId = this._reader.readVarint().toNumber();
+                const enumItem = schema.members.find(v => v.id === enumId);
                 if (!enumItem) {
                     throw new Error(`Invalid enum encoding: unexpected id ${enumId}`);
                 }
                 return enumItem.value;
             case SchemaType.Any:
             case SchemaType.Object:
-                let jsonStr = this._reader.readString();
+                const jsonStr = this._reader.readString();
                 if (jsonStr === 'undefined') {
                     return undefined;
                 }
@@ -197,7 +197,7 @@ export class Decoder {
             case SchemaType.Interface:
                 return this._readInterface(schema);
             case SchemaType.Buffer:
-                let uint8Arr = this._reader.readBuffer();
+                const uint8Arr = this._reader.readBuffer();
                 return this._getBufferValue(uint8Arr, schema);
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
@@ -207,7 +207,7 @@ export class Decoder {
             case SchemaType.Pick:
             case SchemaType.Omit:
             case SchemaType.Overwrite:
-                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                const parsed = this._validator.protoHelper.parseMappedType(schema);
                 if (parsed.type === SchemaType.Interface) {
                     return this._readPureMappedType(schema);
                 }
@@ -226,7 +226,7 @@ export class Decoder {
                 if (!schema.decode) {
                     throw new Error('Missing decode method for CustomTypeSchema');
                 }
-                let buf = this._reader.readBuffer();
+                const buf = this._reader.readBuffer();
                 return schema.decode(buf);
             default:
                 // @ts-expect-error
@@ -246,7 +246,7 @@ export class Decoder {
             overwrite = this._read(schema.overwrite) as object;
         }
 
-        let parsedTarget = this._validator.protoHelper.parseReference(schema.target);
+        const parsedTarget = this._validator.protoHelper.parseReference(schema.target);
         if (parsedTarget.type === 'Interface') {
             output = this._readInterface(parsedTarget);
         }
@@ -260,7 +260,7 @@ export class Decoder {
         // filter key
         if (schema.type === 'Pick') {
             // 把Pick以外的剔除
-            for (let key in output) {
+            for (const key in output) {
                 if (schema.keys.indexOf(key) === -1) {
                     delete output[key];
                 }
@@ -268,7 +268,7 @@ export class Decoder {
         }
         else if (schema.type === 'Omit') {
             // 剔除Omit
-            for (let key in output) {
+            for (const key in output) {
                 if (schema.keys.indexOf(key) > -1) {
                     delete output[key];
                 }
@@ -284,7 +284,7 @@ export class Decoder {
 
     private _readNumber(schema: NumberTypeSchema): number {
         // 默认为double
-        let scalarType = schema.scalarType || 'double';
+        const scalarType = schema.scalarType || 'double';
 
         switch (scalarType) {
             // 定长编码
@@ -301,22 +301,22 @@ export class Decoder {
     }
 
     private _readInterface(schema: InterfaceTypeSchema): unknown {
-        let output: any = {};
-        let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+        const output: any = {};
+        const flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
 
         // BlockID数量
-        let blockIdNum = this._reader.readUint();
+        const blockIdNum = this._reader.readUint();
         for (let i = 0; i < blockIdNum; ++i) {
             // ReadBlock
-            let readBlockId = this._reader.readUint();
-            let lengthType: LengthType = readBlockId & 3;
-            let blockId = readBlockId >> 2;
+            const readBlockId = this._reader.readUint();
+            const lengthType: LengthType = readBlockId & 3;
+            const blockId = readBlockId >> 2;
 
             // indexSignature
             if (blockId === 0) {
                 if (flatSchema.indexSignature) {
-                    let type = flatSchema.indexSignature.type;
-                    let fieldName = this._reader.readString();
+                    const type = flatSchema.indexSignature.type;
+                    const fieldName = this._reader.readString();
                     this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(type));
                     output[fieldName] = this._read(type);
                 }
@@ -331,11 +331,11 @@ export class Decoder {
             }
             // extend block
             else if (blockId <= 9) {
-                let extendId = blockId - 1;
-                let extend = schema.extends && schema.extends.find(v => v.id === extendId);
+                const extendId = blockId - 1;
+                const extend = schema.extends && schema.extends.find(v => v.id === extendId);
                 if (extend) {
                     this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(extend.type));
-                    let extendValue = this._read(extend.type);
+                    const extendValue = this._read(extend.type);
                     Object.assign(output, extendValue);
                 }
                 // 未知的extendId 可能是新协议 跳过
@@ -346,8 +346,8 @@ export class Decoder {
             }
             // property
             else {
-                let propertyId = blockId - 10;
-                let property = schema.properties && schema.properties.find(v => v.id === propertyId);
+                const propertyId = blockId - 10;
+                const property = schema.properties && schema.properties.find(v => v.id === propertyId);
                 if (property) {
                     this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(property.type));
                     output[property.name] = this._read(property.type);
@@ -362,13 +362,13 @@ export class Decoder {
 
         // Literal property 由于不编码 将其补回
         // undefined as null
-        for (let property of flatSchema.properties) {
+        for (const property of flatSchema.properties) {
             if (output.hasOwnProperty(property.name)) {
                 continue;
             }
 
             // Literal
-            let parsedType = this._validator.protoHelper.parseReference(property.type);
+            const parsedType = this._validator.protoHelper.parseReference(property.type);
             if (parsedType.type === 'Literal') {
                 output[property.name] = parsedType.literal;
                 continue;
@@ -393,7 +393,7 @@ export class Decoder {
     }
 
     private _skipIdLengthPrefix(parsedSchema: Exclude<TSBufferSchema, TypeReference>) {
-        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
+        const lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
         if (lengthInfo.needLengthPrefix) {
             // skip length prefix
             this._reader.skipByLengthType(LengthType.Varint);
@@ -403,13 +403,13 @@ export class Decoder {
     private _readUnionOrIntersection(schema: UnionTypeSchema | IntersectionTypeSchema): unknown {
         let output: any;
 
-        let idNum = this._reader.readUint();
+        const idNum = this._reader.readUint();
         for (let i = 0; i < idNum; ++i) {
-            let readId = this._reader.readUint();
-            let lengthType: LengthType = readId & 3;
-            let id = readId >> 2;
+            const readId = this._reader.readUint();
+            const lengthType: LengthType = readId & 3;
+            const id = readId >> 2;
 
-            let member = schema.members.find(v => v.id === id);
+            const member = schema.members.find(v => v.id === id);
             // 不可识别的Member，可能是新协议，跳过使兼容
             if (!member) {
                 this._reader.skipByLengthType(lengthType);
@@ -417,7 +417,7 @@ export class Decoder {
             }
 
             this._skipIdLengthPrefix(this._validator.protoHelper.parseReference(member.type));
-            let value = this._read(member.type);
+            const value = this._read(member.type);
             if (this._isObject(output) && this._isObject(value)) {
                 Object.assign(output, value);
             }
@@ -448,14 +448,14 @@ export class Decoder {
             }
             // 其余TypedArray 可能需要内存拷贝 性能次之
             else {
-                let typedArr = TypedArrays[schema.arrayType];
+                const typedArr = TypedArrays[schema.arrayType];
                 // 字节对齐，可以直接转，无需拷贝内存
                 if (uint8Arr.byteOffset % typedArr.BYTES_PER_ELEMENT === 0) {
                     return new typedArr(uint8Arr.buffer, uint8Arr.byteOffset, uint8Arr.byteLength / typedArr.BYTES_PER_ELEMENT);
                 }
                 // 字节不对齐，不能直接转，只能拷贝内存后再生成
                 else {
-                    let arrBuf = uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
+                    const arrBuf = uint8Arr.buffer.slice(uint8Arr.byteOffset, uint8Arr.byteOffset + uint8Arr.byteLength);
                     return new typedArr(arrBuf);
                 }
             }

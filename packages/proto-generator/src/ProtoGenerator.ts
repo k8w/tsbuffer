@@ -66,7 +66,7 @@ export class ProtoGenerator {
      * @param options 
      */
     async generate(paths: string | string[], options: GenerateFileSchemaOptions = {}): Promise<TSBufferProto> {
-        let output: TSBufferProto = {};
+        const output: TSBufferProto = {};
         const logger = 'logger' in options ? options.logger : console;
 
         if (typeof paths === 'string') {
@@ -82,7 +82,7 @@ export class ProtoGenerator {
         }
 
         // AST CACHE
-        let astCache: AstCache = this.options.astCache ?? {};
+        const astCache: AstCache = this.options.astCache ?? {};
 
         // Init Post
         this._astParser.pre = {
@@ -91,25 +91,25 @@ export class ProtoGenerator {
         };
 
         // 默认filter是导出所有export项
-        let filter = options.filter || (v => v.isExport);
+        const filter = options.filter || (v => v.isExport);
         // 是要被导出的直接引用的项目
-        let exports: { [path: string]: string[] } = {};
+        const exports: { [path: string]: string[] } = {};
 
         // 生成这几个文件的AST CACHE
-        for (let filepath of paths) {
+        for (const filepath of paths) {
             if (this.options.verbose) {
                 logger?.debug('[TSBuffer Schema Generator]', 'generate', 'FilePath=' + filepath)
             }
 
             // 生成该文件的AST
-            let { ast, astKey } = await this._getAst(filepath, astCache, logger);
+            const { ast, astKey } = await this._getAst(filepath, astCache, logger);
 
             if (this.options.verbose) {
                 logger?.debug('[TSBuffer Schema Generator]', 'generate', 'AstLoaded Key=' + astKey);
             }
 
             // Filter出要被导出的
-            for (let name in ast) {
+            for (const name in ast) {
                 if (filter({
                     path: filepath,
                     name: name,
@@ -158,7 +158,7 @@ export class ProtoGenerator {
      * @param compatibleResult 
      */
     private _regenResultEncodeIds(output: TSBufferProto, compatibleResult?: TSBufferProto) {
-        for (let schemaId in output) {
+        for (const schemaId in output) {
             this._regenSchemaEncodeIds(
                 output[schemaId],
                 compatibleResult && compatibleResult[schemaId]
@@ -174,8 +174,8 @@ export class ProtoGenerator {
 
         switch (schema.type) {
             case 'Enum': {
-                let cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
-                let ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
+                const cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
+                const ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
                 for (let i = 0; i < ids.length; ++i) {
                     schema.members[i].id = ids[i].id;
                 }
@@ -184,12 +184,12 @@ export class ProtoGenerator {
             case 'Interface': {
                 // extends
                 if (schema.extends) {
-                    let cpExtends = compatibleSchema && (compatibleSchema as InterfaceTypeSchema).extends;
-                    let cpIds = cpExtends && cpExtends.map(v => ({
+                    const cpExtends = compatibleSchema && (compatibleSchema as InterfaceTypeSchema).extends;
+                    const cpIds = cpExtends && cpExtends.map(v => ({
                         key: JSON.stringify(v.type),
                         id: v.id
                     }));
-                    let ids = EncodeIdUtil.genEncodeIds(schema.extends.map(v => JSON.stringify(v.type)), cpIds);
+                    const ids = EncodeIdUtil.genEncodeIds(schema.extends.map(v => JSON.stringify(v.type)), cpIds);
                     for (let i = 0; i < ids.length; ++i) {
                         schema.extends[i].id = ids[i].id;
                     }
@@ -197,22 +197,22 @@ export class ProtoGenerator {
 
                 // properties
                 if (schema.properties) {
-                    let cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
-                    let ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
+                    const cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
+                    const ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
 
-                    let cpSchemaProps = compatibleSchema && (compatibleSchema as InterfaceTypeSchema).properties;
+                    const cpSchemaProps = compatibleSchema && (compatibleSchema as InterfaceTypeSchema).properties;
                     for (let i = 0; i < ids.length; ++i) {
                         // 更新ID
                         schema.properties[i].id = ids[i].id;
                         // 递归子项
-                        let subCpProp = cpSchemaProps && cpSchemaProps.find(v => v.name === schema.properties![i].name);
+                        const subCpProp = cpSchemaProps && cpSchemaProps.find(v => v.name === schema.properties![i].name);
                         this._regenSchemaEncodeIds(schema.properties[i].type, subCpProp ? subCpProp.type : undefined)
                     }
                 }
 
                 // indexSignature
                 if (schema.indexSignature) {
-                    let cpIndexSignature = compatibleSchema
+                    const cpIndexSignature = compatibleSchema
                         && (compatibleSchema as InterfaceTypeSchema).indexSignature
                         && (compatibleSchema as InterfaceTypeSchema).indexSignature!.type || undefined;
                     this._regenSchemaEncodeIds(schema.indexSignature.type, cpIndexSignature);
@@ -222,14 +222,14 @@ export class ProtoGenerator {
             }
             case 'Intersection':
             case 'Union':
-                let cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
-                let ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
+                const cpIds = EncodeIdUtil.getSchemaEncodeIds(compatibleSchema);
+                const ids = EncodeIdUtil.genEncodeIds(EncodeIdUtil.getSchemaEncodeKeys(schema), cpIds);
                 for (let i = 0; i < ids.length; ++i) {
                     schema.members[i].id = ids[i].id;
                     // 递归子项
-                    let subCpMember = compatibleSchema
+                    const subCpMember = compatibleSchema
                         && (compatibleSchema as IntersectionTypeSchema | UnionTypeSchema).members.find(v => v.id === ids[i].id);
-                    let subCpSchema = subCpMember && subCpMember.type;
+                    const subCpSchema = subCpMember && subCpMember.type;
                     this._regenSchemaEncodeIds(schema.members[i].type, subCpSchema);
                 }
                 break;
@@ -255,8 +255,8 @@ export class ProtoGenerator {
         if (!astCache[astKey]) {
             // 按node规则解析文件
             let fileContent: string | undefined;
-            let postfixs = ['.ts', '.d.ts', '/index.ts', '/index.d.ts'];
-            for (let postfix of postfixs) {
+            const postfixs = ['.ts', '.d.ts', '/index.ts', '/index.d.ts'];
+            for (const postfix of postfixs) {
                 try {
                     fileContent = await this.options.readFile(astKey + postfix);
                 }
@@ -296,7 +296,7 @@ export class ProtoGenerator {
             logger?.debug('[TSBuffer Schema Generator]', `addToOutput(${astKey}, ${name}})`)
         }
 
-        let schemaId = astKey + '/' + name;
+        const schemaId = astKey + '/' + name;
         if (output[schemaId]) {
             // Already added
             return;
@@ -305,11 +305,11 @@ export class ProtoGenerator {
         output[schemaId] = schema;
 
         // 递归加入引用
-        let refs = SchemaUtil.getUsedReferences(schema);
+        const refs = SchemaUtil.getUsedReferences(schema);
         if (this.options.verbose) {
             logger?.debug('[TSBuffer Schema Generator]', `addToOutput(${astKey}, ${name}})`, `refs.length=${refs.length}`)
         }
-        for (let ref of refs) {
+        for (const ref of refs) {
             await this._addRefToOutput(ref, astKey, name, output, astCache, logger)
         }
     }
@@ -335,7 +335,7 @@ export class ProtoGenerator {
 
         let refPath: string;
         // 外部引用
-        let pathMatch = ref.target.match(/(.*)\/(.*)$/);
+        const pathMatch = ref.target.match(/(.*)\/(.*)$/);
         if (pathMatch) {
             // 相对路径引用
             if (ref.target.startsWith('.')) {
@@ -359,14 +359,14 @@ export class ProtoGenerator {
         }
 
         // load ast
-        let refAst = await this._getAst(refPath, astCache, logger);
+        const refAst = await this._getAst(refPath, astCache, logger);
 
         if (this.options.verbose) {
             logger?.debug('[TSBuffer Schema Generator]', `addToOutput(${astKey}, ${name}})`, `AST '${refPath}' loaded`);
         }
 
         // 将要挨个寻找的refTarget
-        let refTargetNames: string[] = [];
+        const refTargetNames: string[] = [];
         // 文件内&Namespace内引用，从Namespace向外部 逐级寻找
         if (!pathMatch && name.indexOf('.') > 0) {
             // name: A.B.C.D
@@ -375,7 +375,7 @@ export class ProtoGenerator {
             // A.B.E
             // A.E
             // E
-            let nameArr = name.split('.');
+            const nameArr = name.split('.');
             for (let i = nameArr.length - 1; i >= 1; --i) {
                 let refName = '';
                 for (let j = 0; j < i; ++j) {
@@ -385,12 +385,12 @@ export class ProtoGenerator {
             }
         }
 
-        let refTargetName = pathMatch ? pathMatch[2] : ref.target;
+        const refTargetName = pathMatch ? pathMatch[2] : ref.target;
         refTargetNames.push(refTargetName);
 
         // 确认的 refTargetName
         let certainRefTargetName: string | undefined;
-        for (let refTargetName of refTargetNames) {
+        for (const refTargetName of refTargetNames) {
             if (refAst.ast[refTargetName]) {
                 certainRefTargetName = refTargetName;
                 break;
@@ -410,10 +410,10 @@ export class ProtoGenerator {
         }
 
         // TODO 可能是enum引用？
-        let rMatch = refTargetName.match(/^(\w+)\.(\w+)$/);
+        const rMatch = refTargetName.match(/^(\w+)\.(\w+)$/);
         if (rMatch && refAst.ast[rMatch[1]]) {
             // enum schema
-            let enumSchema = refAst.ast[rMatch[1]].schema;
+            const enumSchema = refAst.ast[rMatch[1]].schema;
             if (enumSchema.type === SchemaType.Enum) {
                 // add enum to output
                 await this._addRefToOutput({
@@ -422,10 +422,10 @@ export class ProtoGenerator {
                 }, astKey, name, output, astCache, logger);
 
                 // replace ref to LiteralTypeSchema
-                for (let key in ref) {
+                for (const key in ref) {
                     delete (ref as any)[key];
                 }
-                let member = enumSchema.members.find(v => v.name === rMatch![2]);
+                const member = enumSchema.members.find(v => v.name === rMatch![2]);
                 if (!member) {
                     throw new Error('Referenced an unexisted enum key: ' + rMatch![2]);
                 }

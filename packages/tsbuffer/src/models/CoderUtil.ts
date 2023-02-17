@@ -3,7 +3,7 @@ import { TSBufferValidator } from '@tsbuffer/validator';
 
 export class CoderUtil {
     static isJsonCompatible(schema: TSBufferSchema, type: 'encode' | 'decode', protoHelper: TSBufferValidator['protoHelper']): boolean {
-        let schemaInfo: TSBufferSchema & { isJsonEncodable?: boolean, isJsonDecodable?: boolean } = schema;
+        const schemaInfo: TSBufferSchema & { isJsonEncodable?: boolean, isJsonDecodable?: boolean } = schema;
         const key = type === 'encode' ? 'isJsonEncodable' : 'isJsonDecodable';
 
         if (schemaInfo[key] === undefined) {
@@ -18,7 +18,7 @@ export class CoderUtil {
                     schemaInfo[key] = schema.elementTypes.every(v => this.isJsonCompatible(v, type, protoHelper));
                     break;
                 case SchemaType.Interface:
-                    let flatSchema = protoHelper.getFlatInterfaceSchema(schema);
+                    const flatSchema = protoHelper.getFlatInterfaceSchema(schema);
                     schemaInfo[key] = flatSchema.properties.every(v => this.isJsonCompatible(v.type, type, protoHelper));
                     if (flatSchema.indexSignature) {
                         schemaInfo[key] = schemaInfo[key] && this.isJsonCompatible(flatSchema.indexSignature.type, type, protoHelper);
@@ -26,7 +26,7 @@ export class CoderUtil {
                     break;
                 case SchemaType.IndexedAccess:
                 case SchemaType.Reference: {
-                    let parsed = protoHelper.parseReference(schema);
+                    const parsed = protoHelper.parseReference(schema);
                     schemaInfo[key] = this.isJsonCompatible(parsed, type, protoHelper);
                     break;
                 }
@@ -41,7 +41,7 @@ export class CoderUtil {
                 case SchemaType.Partial:
                 case SchemaType.Omit:
                 case SchemaType.Overwrite: {
-                    let parsed = protoHelper.parseMappedType(schema);
+                    const parsed = protoHelper.parseMappedType(schema);
                     schemaInfo[key] = this.isJsonCompatible(parsed, type, protoHelper);
                     break;
                 }

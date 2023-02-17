@@ -30,7 +30,7 @@ const BUFFER_TYPES = [
  */
 export class AstParser {
 
-    keepComment: boolean = false;
+    keepComment = false;
     pre?: {
         prePickOmitSchemas: PrePickOmitSchema[];
         preEnumSchemas: PreEnumSchema[];
@@ -45,23 +45,23 @@ export class AstParser {
      * @param content 
      */
     parseScript(content: string, logger?: Logger | undefined): AstParserResult {
-        let output: AstParserResult = {};
+        const output: AstParserResult = {};
 
         // 1. get flatten nodes
-        let src = ts.createSourceFile(
+        const src = ts.createSourceFile(
             '',
             content,
             ts.ScriptTarget.ES3,
             true,
             ts.ScriptKind.TS
         );
-        let nodes = this.getFlattenNodes(src, true);
+        const nodes = this.getFlattenNodes(src, true);
 
         // 2. parse imports
-        let imports = this.getScriptImports(src);
+        const imports = this.getScriptImports(src);
 
         // 3. node2schema
-        for (let name in nodes) {
+        for (const name in nodes) {
             output[name] = {
                 isExport: nodes[name].isExport,
                 schema: this.node2schema(nodes[name].node, imports, logger, undefined, nodes[name].comment)
@@ -73,20 +73,20 @@ export class AstParser {
 
     /** 解析顶层imports */
     getScriptImports(src: ts.SourceFile): ScriptImports {
-        let output: ScriptImports = {};
+        const output: ScriptImports = {};
 
         src.forEachChild(v => {
             if (v.kind !== ts.SyntaxKind.ImportDeclaration) {
                 return;
             }
 
-            let node = v as ts.ImportDeclaration;
+            const node = v as ts.ImportDeclaration;
 
             // 仅支持从字符串路径import
             if (node.moduleSpecifier.kind !== ts.SyntaxKind.StringLiteral) {
                 return;
             }
-            let importPath = (node.moduleSpecifier as ts.StringLiteral).text;
+            const importPath = (node.moduleSpecifier as ts.StringLiteral).text;
 
             // import from 'xxx'
             if (!node.importClause) {
@@ -131,20 +131,20 @@ export class AstParser {
      * @param node 
      * @param isExport 当node是Namespace时，其外层是否处于export
      */
-    getFlattenNodes(node: ts.Node, isExport: boolean = false): {
+    getFlattenNodes(node: ts.Node, isExport = false): {
         [name: string]: {
             node: ts.Node,
             comment?: string,
             isExport: boolean
         }
     } {
-        let output: ReturnType<AstParser['getFlattenNodes']> = {};
+        const output: ReturnType<AstParser['getFlattenNodes']> = {};
 
         // 检测到ExportDeclaration的项目，会在最后统一设为isExport
-        let exportNames: { [name: string]: true } = {};
+        const exportNames: { [name: string]: true } = {};
 
         // 检测到的顶级Modules（namespace）
-        let namespaceExports: {
+        const namespaceExports: {
             [nsname: string]: {
                 // 在Namespace内是否export
                 [symbolName: string]: boolean
@@ -155,10 +155,10 @@ export class AstParser {
             // 类型定义
             if (ts.isInterfaceDeclaration(v) || ts.isTypeAliasDeclaration(v) || ts.isEnumDeclaration(v)) {
                 // 外层允许export，且自身有被export
-                let _isExport = Boolean(isExport && v.modifiers && v.modifiers.findIndex(v1 => v1.kind === ts.SyntaxKind.ExportKeyword) > -1);
+                const _isExport = Boolean(isExport && v.modifiers && v.modifiers.findIndex(v1 => v1.kind === ts.SyntaxKind.ExportKeyword) > -1);
 
                 // 是否为export default
-                let _isExportDefault = _isExport && v.modifiers!.findIndex(v1 => v1.kind === ts.SyntaxKind.DefaultKeyword) > -1
+                const _isExportDefault = _isExport && v.modifiers!.findIndex(v1 => v1.kind === ts.SyntaxKind.DefaultKeyword) > -1
 
                 output[v.name.text] = {
                     node: v.kind === ts.SyntaxKind.TypeAliasDeclaration ? (v as ts.TypeAliasDeclaration).type : v,
@@ -179,13 +179,13 @@ export class AstParser {
             else if (ts.isModuleDeclaration(v) && (v.flags & ts.NodeFlags.Namespace)) {
                 if (v.body && v.body.kind === ts.SyntaxKind.ModuleBlock) {
                     // 外层允许export，且自身有被export
-                    let _isExport = Boolean(isExport && v.modifiers && v.modifiers.findIndex(v1 => v1.kind === ts.SyntaxKind.ExportKeyword) > -1);
+                    const _isExport = Boolean(isExport && v.modifiers && v.modifiers.findIndex(v1 => v1.kind === ts.SyntaxKind.ExportKeyword) > -1);
 
                     // 递归生成子树
-                    let children = this.getFlattenNodes(v.body, true);
+                    const children = this.getFlattenNodes(v.body, true);
 
                     namespaceExports[v.name.text] = {};
-                    for (let item of Object.entries(children)) {
+                    for (const item of Object.entries(children)) {
                         // 临时存储内部export
                         namespaceExports[v.name.text][item[0]] = item[1].isExport;
                         // 实际export还要考虑外部(_isExport)
@@ -244,12 +244,12 @@ export class AstParser {
 
         // export default namespace 的情况
         if (output['default'] && ts.isTypeReferenceNode(output['default'].node)) {
-            let typeName = this._typeNameToString(output['default'].node.typeName);
+            const typeName = this._typeNameToString(output['default'].node.typeName);
             // 确实是export default namespace
             if (namespaceExports[typeName]) {
                 delete output['default'];
                 // 遍历所有 typeName.XXX
-                for (let key in namespaceExports[typeName]) {
+                for (const key in namespaceExports[typeName]) {
                     // 内部也export的
                     if (namespaceExports[typeName][key]) {
                         // 增加 default.XXX 到 typeName.XXX 的引用
@@ -266,7 +266,7 @@ export class AstParser {
     }
 
     node2schema(node: ts.Node, imports: ScriptImports, logger?: Logger, fullText?: string, comment?: string): PreSchema {
-        let schema: PreSchema = this._node2schema(node, imports, logger);
+        const schema: PreSchema = this._node2schema(node, imports, logger);
 
         if (this.keepComment) {
             if (comment) {
@@ -278,9 +278,9 @@ export class AstParser {
                 }
                 fullText = fullText.trim();
                 if (fullText.startsWith('/**')) {
-                    let endPos = fullText.indexOf('*/');
+                    const endPos = fullText.indexOf('*/');
                     if (endPos > -1) {
-                        let comment = fullText.substr(3, endPos - 3).trim().split('\n')
+                        const comment = fullText.substr(3, endPos - 3).trim().split('\n')
                             .map(v => v.trim().replace(/^\* ?/, '')).filter(v => !!v).join('\n');
                         schema.comment = comment;
                     }
@@ -305,13 +305,13 @@ export class AstParser {
 
         // BufferType
         if (ts.isTypeReferenceNode(node)) {
-            let ref = this._getReferenceTypeSchema(node.typeName, imports);
+            const ref = this._getReferenceTypeSchema(node.typeName, imports);
             if (BUFFER_TYPES.binarySearch(ref.target) > -1) {
-                let output: BufferTypeSchema = {
+                const output: BufferTypeSchema = {
                     type: SchemaType.Buffer
                 };
 
-                let target = ref.target as (typeof BUFFER_TYPES)[number];
+                const target = ref.target as (typeof BUFFER_TYPES)[number];
                 if (target !== 'ArrayBuffer') {
                     output.arrayType = target;
                 }
@@ -377,7 +377,7 @@ export class AstParser {
         // TupleType
         if (ts.isTupleTypeNode(node)) {
             let optionalStartIndex: number | undefined;
-            let output: TupleTypeSchema = {
+            const output: TupleTypeSchema = {
                 type: SchemaType.Tuple,
                 elementTypes: node.elements.map((v, i) => {
                     if (v.kind === ts.SyntaxKind.OptionalType) {
@@ -442,7 +442,7 @@ export class AstParser {
         // EnumType
         if (ts.isEnumDeclaration(node)) {
             let initializer = 0;
-            let schema: PreEnumSchema = {
+            const schema: PreEnumSchema = {
                 type: SchemaType.Enum,
                 members: node.members.map((v, i) => {
                     if (v.initializer) {
@@ -497,13 +497,13 @@ export class AstParser {
                 extendsInterface = [];
                 node.heritageClauses.forEach(v => {
                     v.types.forEach(type => {
-                        let extendsType = this._node2schema(type, imports, logger) as InterfaceReference;
+                        const extendsType = this._node2schema(type, imports, logger) as InterfaceReference;
                         extendsInterface!.push(extendsType);
                     })
                 })
             }
 
-            let properties: NonNullable<InterfaceTypeSchema['properties']>[number][] = [];
+            const properties: NonNullable<InterfaceTypeSchema['properties']>[number][] = [];
             let indexSignature: InterfaceTypeSchema['indexSignature'];
 
             node.members.forEach((member, i) => {
@@ -516,7 +516,7 @@ export class AstParser {
                         throw new Error(`Field must have a type: ${member.name.text}`);
                     }
 
-                    let property: NonNullable<InterfaceTypeSchema['properties']>[number] = {
+                    const property: NonNullable<InterfaceTypeSchema['properties']>[number] = {
                         id: i,
                         name: member.name.text,
                         type: this.node2schema(member.type, imports, logger, member.getFullText())
@@ -551,7 +551,7 @@ export class AstParser {
             })
 
             // output
-            let output: InterfaceTypeSchema = {
+            const output: InterfaceTypeSchema = {
                 type: SchemaType.Interface
             };
             if (extendsInterface) {
@@ -588,7 +588,7 @@ export class AstParser {
                     throw new Error(`Error indexType literal: ${node.getText()}`)
                 }
 
-                let objectType = this.node2schema(node.objectType, imports, logger, node.getFullText());
+                const objectType = this.node2schema(node.objectType, imports, logger, node.getFullText());
                 if (!this._isInterfaceReference(objectType)) {
                     throw new Error(`ObjectType for IndexedAccess must be interface or interface reference`);
                 }
@@ -648,13 +648,13 @@ export class AstParser {
                 throw new Error(`Illeagle ${nodeName}Type: ` + node.getText());
             }
 
-            let target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
+            const target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
             if (!this._isInterfaceReference(target) && target.type !== SchemaType.Union && target.type !== SchemaType.Intersection) {
                 throw new Error(`Illeagle ${nodeName}Type: ` + node.getText())
             }
 
-            let preKey = this._getPreKey(this.node2schema(node.typeArguments[1], imports, logger, node.getFullText()), logger);
-            let output: PrePickOmitSchema = Object.assign({
+            const preKey = this._getPreKey(this.node2schema(node.typeArguments[1], imports, logger, node.getFullText()), logger);
+            const output: PrePickOmitSchema = Object.assign({
                 target: target,
                 keys: [],
                 pre: { key: preKey }
@@ -671,7 +671,7 @@ export class AstParser {
                 throw new Error('Illeagle PartialType: ' + node.getText());
             }
 
-            let target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
+            const target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
             if (!this._isInterfaceReference(target)) {
                 throw new Error('Illeagle PartialType: ' + node.getText())
             }
@@ -688,12 +688,12 @@ export class AstParser {
                 throw new Error(`Illeagle OverwriteType: ` + node.getText());
             }
 
-            let target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
+            const target = this.node2schema(node.typeArguments[0], imports, logger, node.getFullText());
             if (!this._isInterfaceReference(target)) {
                 throw new Error(`Illeagle OverwriteType: ` + node.getText())
             }
 
-            let overwrite = this.node2schema(node.typeArguments[1], imports, logger, node.getFullText());
+            const overwrite = this.node2schema(node.typeArguments[1], imports, logger, node.getFullText());
             if (!this._isInterfaceReference(overwrite)) {
                 throw new Error(`Illeagle OverwriteType: ` + node.getText())
             }
@@ -714,7 +714,7 @@ export class AstParser {
 
         // NonNullableType
         if (ts.isTypeReferenceNode(node) && this._typeNameToString(node.typeName) === 'NonNullable' && !imports['NonNullable']) {
-            let target = this.node2schema(node.typeArguments![0], imports, logger, node.getFullText());
+            const target = this.node2schema(node.typeArguments![0], imports, logger, node.getFullText());
             return {
                 type: SchemaType.NonNullable,
                 target: target
@@ -751,7 +751,7 @@ export class AstParser {
             return name.text;
         }
         else {
-            let left = ts.isIdentifier(name.left) ? name.left.text : this._typeNameToString(name.left);
+            const left = ts.isIdentifier(name.left) ? name.left.text : this._typeNameToString(name.left);
             return left + '.' + name.right.text;
         }
     }
@@ -761,10 +761,10 @@ export class AstParser {
             name = this._typeNameToString(name);
         }
 
-        let arrName = name.split('.');
-        let importItem = imports[arrName[0]];
+        const arrName = name.split('.');
+        const importItem = imports[arrName[0]];
         if (importItem) {
-            let importName = arrName.slice();
+            const importName = arrName.slice();
             importName[0] = importItem.targetName;
             return {
                 type: SchemaType.Reference,
@@ -772,7 +772,7 @@ export class AstParser {
             }
         }
         else {
-            let ref: Omit<ReferenceTypeSchema, 'path'> = {
+            const ref: Omit<ReferenceTypeSchema, 'path'> = {
                 type: SchemaType.Reference,
                 target: name
             };
@@ -796,7 +796,7 @@ export class AstParser {
             referenceName = [referenceName];
         }
 
-        for (let name of referenceName) {
+        for (const name of referenceName) {
             if (ref.target.indexOf('/') === -1 && ref.target === name) {
                 return name as any;
             }

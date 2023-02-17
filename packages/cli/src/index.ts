@@ -13,13 +13,13 @@ import * as path from 'path';
 import { TSBuffer } from 'tsbuffer';
 import { i18n } from './i18n/i18n';
 
-let colorJson = (json: any) => {
+const colorJson = (json: any) => {
   return (JSON as any).colorStringify(json, null, 2) as string;
 };
 
 const version = '__TSBUFFER_CLI_VERSION__';
 const args = minimist.default(process.argv);
-let verbose: boolean | undefined = args.verbose || args.v;
+const verbose: boolean | undefined = args.verbose || args.v;
 
 // 进入主流程
 main();
@@ -138,7 +138,7 @@ async function proto(
   fileList = fileList.distinct();
 
   // compatible 默认同output
-  let oldProtoPath = compatible || output;
+  const oldProtoPath = compatible || output;
   let oldProto: TSBufferProto | undefined;
   if (!newMode && oldProtoPath) {
     // 打开OldFile
@@ -154,7 +154,7 @@ async function proto(
     if (oldFile) {
       // Parse TS
       if (oldProtoPath.endsWith('.ts')) {
-        let match = oldFile.match(
+        const match = oldFile.match(
           /^\s*export\s+const\s+proto\s*=\s*(\{[\s\S]+\});?\s*/
         );
         if (match) {
@@ -187,7 +187,7 @@ async function proto(
   EncodeIdUtil.onGenCanOptimized = () => {
     canOptimizeByNew = true;
   };
-  let proto = await new TSBufferProtoGenerator({ verbose: verbose }).generate(
+  const proto = await new TSBufferProtoGenerator({ verbose: verbose }).generate(
     fileList,
     {
       compatibleResult: oldProto,
@@ -199,7 +199,7 @@ async function proto(
       console.warn(i18n.canOptimizeByNew);
     }
 
-    let json = ugly ? JSON.stringify(proto) : JSON.stringify(proto, null, 2);
+    const json = ugly ? JSON.stringify(proto) : JSON.stringify(proto, null, 2);
     // Output TS
     if (output.endsWith('.ts')) {
       fs.writeFileSync(output, `export const proto = ${json};`);
@@ -223,7 +223,7 @@ function encode(
   proto?: string,
   schemaId?: string
 ) {
-  let parsedProto = parseProtoAndSchema(proto, schemaId);
+  const parsedProto = parseProtoAndSchema(proto, schemaId);
 
   // #region 解析Input Value
   let inputValue: any;
@@ -257,7 +257,7 @@ function encode(
   // #endregion
 
   verbose && console.log('inputValue', inputValue);
-  let opEncode = new TSBuffer(parsedProto.proto).encode(
+  const opEncode = new TSBuffer(parsedProto.proto).encode(
     inputValue,
     parsedProto.schemaId
   );
@@ -283,7 +283,7 @@ function decode(
   binStr?: string,
   output?: string
 ) {
-  let parsedProto = parseProtoAndSchema(protoPath, schemaId);
+  const parsedProto = parseProtoAndSchema(protoPath, schemaId);
   let inputBuf: Buffer;
 
   if (input) {
@@ -323,7 +323,7 @@ function validate(
   input?: string,
   expression?: string
 ) {
-  let parsedProto = parseProtoAndSchema(proto, schemaId);
+  const parsedProto = parseProtoAndSchema(proto, schemaId);
 
   // #region 解析Input Value
   let inputValue: any;
@@ -356,7 +356,7 @@ function validate(
   }
   // #endregion
 
-  let vRes = new TSBuffer(parsedProto.proto).validate(
+  const vRes = new TSBuffer(parsedProto.proto).validate(
     inputValue,
     parsedProto.schemaId
   );
@@ -376,7 +376,7 @@ function error(str: string, data?: { [key: string]: string }) {
 }
 
 function formatStr(str: string, data: { [key: string]: string }) {
-  for (let key in data) {
+  for (const key in data) {
     while (str.indexOf(key) > -1) {
       str = str.replace(`\${${key}}`, data[key]);
     }
@@ -385,7 +385,7 @@ function formatStr(str: string, data: { [key: string]: string }) {
 }
 
 function buf2Hex(buf: Uint8Array): string {
-  let arr: string[] = [];
+  const arr: string[] = [];
   buf.forEach((v) => {
     let char = v.toString(16).toUpperCase();
     if (char.length === 1) {

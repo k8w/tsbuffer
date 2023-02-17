@@ -5,7 +5,7 @@ export class InterfaceKeyFilter {
 
     private static _pool: InterfaceKeyFilter[] = [];
     static get(): InterfaceKeyFilter {
-        let item = this._pool.pop() || new InterfaceKeyFilter();
+        const item = this._pool.pop() || new InterfaceKeyFilter();
         item.reset();
         return item;
     }
@@ -36,7 +36,7 @@ export class InterfaceKeyFilter {
             this.omit = keys.slice();
         }
         else {
-            for (let key of keys) {
+            for (const key of keys) {
                 this.omit.indexOf(key) === -1 && this.omit.push(key);
             }
         }
@@ -45,7 +45,7 @@ export class InterfaceKeyFilter {
     validate(value: { [key: string]: any }): { isSucc: true } | { isSucc: false, key: string } {
         // Omit 不能出现
         if (this.omit) {
-            for (let key of this.omit) {
+            for (const key of this.omit) {
                 if (value[key] !== undefined) {
                     return { isSucc: false, key: key }
                 }
@@ -54,7 +54,7 @@ export class InterfaceKeyFilter {
 
         // Pick 不能出现其它
         if (this.pick) {
-            for (let key in value) {
+            for (const key in value) {
                 if (this.pick.indexOf(key) === -1) {
                     return { isSucc: false, key: key }
                 }

@@ -35,7 +35,7 @@ export class Base64Util {
                 bufferLength--;
             }
         }
-        let buf = new Uint8Array(bufferLength);
+        const buf = new Uint8Array(bufferLength);
         for (let i = 0; i < len; i += 4) {
             encoded1 = lookup[base64.charCodeAt(i)];
             encoded2 = lookup[base64.charCodeAt(i + 1)];

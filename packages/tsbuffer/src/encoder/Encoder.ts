@@ -75,9 +75,9 @@ export class Encoder {
                     break;
                 }
                 value = Object.assign({}, value);
-                let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
-                for (let key in value) {
-                    let property = flatSchema.properties.find(v => v.name === key);
+                const flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+                for (const key in value) {
+                    const property = flatSchema.properties.find(v => v.name === key);
                     if (property) {
                         value[key] = this.encodeJSON(value[key], property.type);
                     }
@@ -91,7 +91,7 @@ export class Encoder {
             case SchemaType.Pick:
             case SchemaType.Omit:
             case SchemaType.Overwrite:
-                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                const parsed = this._validator.protoHelper.parseMappedType(schema);
                 return this.encodeJSON(value, parsed);
             case SchemaType.Buffer:
                 if (!(value instanceof ArrayBuffer) && !ArrayBuffer.isView(value)) {
@@ -102,8 +102,8 @@ export class Encoder {
                     if (schema.arrayType === 'Uint8Array') {
                         return Base64Util.bufferToBase64(value as Uint8Array);
                     }
-                    let view = value as ArrayBufferView;
-                    let buf = view.byteLength === view.buffer.byteLength && view.byteOffset === 0 ? view.buffer
+                    const view = value as ArrayBufferView;
+                    const buf = view.byteLength === view.buffer.byteLength && view.byteOffset === 0 ? view.buffer
                         : view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
                     return Base64Util.bufferToBase64(new Uint8Array(buf));
                 }
@@ -117,7 +117,7 @@ export class Encoder {
             case SchemaType.Union:
             case SchemaType.Intersection: {
                 // 逐个编码 然后合并 （失败的会原值返回，所以不影响结果）
-                for (let member of schema.members) {
+                for (const member of schema.members) {
                     value = this.encodeJSON(value, member.type);
                 }
                 return value;
@@ -163,7 +163,7 @@ export class Encoder {
                 this._writer.push({ type: 'string', value: value });
                 break;
             case SchemaType.Array: {
-                let _v = value as any[];
+                const _v = value as any[];
                 // 数组长度：Varint
                 this._writer.push({ type: 'varint', value: Varint64.from(_v.length) });
                 // Element Payload
@@ -177,10 +177,10 @@ export class Encoder {
                     throw new Error('Elements oversized, maximum supported tuple elements is 64, now get ' + schema.elementTypes.length)
                 }
 
-                let _v = value as any[];
+                const _v = value as any[];
 
                 // 计算maskPos（要编码的值的index）
-                let maskIndices: number[] = [];
+                const maskIndices: number[] = [];
                 for (let i = 0; i < _v.length; ++i) {
                     // undefined 不编码
                     // null as undefined
@@ -193,7 +193,7 @@ export class Encoder {
                 // 生成PayloadMask：Varint64
                 let lo = 0;
                 let hi = 0;
-                for (let v of maskIndices) {
+                for (const v of maskIndices) {
                     if (v < 32) {
                         lo |= 1 << v;
                     }
@@ -204,13 +204,13 @@ export class Encoder {
                 this._writer.push({ type: 'varint', value: new Varint64(hi, lo) });
 
                 // Element Payload
-                for (let i of maskIndices) {
+                for (const i of maskIndices) {
                     this._write(_v[i], schema.elementTypes[i]);
                 }
                 break;
             }
             case SchemaType.Enum:
-                let enumItem = schema.members.find(v => v.value === value);
+                const enumItem = schema.members.find(v => v.value === value);
                 if (!enumItem) {
                     throw new Error(`Unexpect enum value: ${value}`);
                 }
@@ -244,7 +244,7 @@ export class Encoder {
             case SchemaType.Pick:
             case SchemaType.Omit:
             case SchemaType.Overwrite:
-                let parsed = this._validator.protoHelper.parseMappedType(schema);
+                const parsed = this._validator.protoHelper.parseMappedType(schema);
                 if (parsed.type === SchemaType.Interface) {
                     this._writePureMappedType(value, schema, options);
                 }
@@ -271,7 +271,7 @@ export class Encoder {
                 if (!schema.encode) {
                     throw new Error('Missing encode method for CustomTypeSchema');
                 }
-                let buf = schema.encode(value);
+                const buf = schema.encode(value);
                 // 以 Buffer 形式写入
                 this._writeBuffer(buf);
                 break;
@@ -292,8 +292,8 @@ export class Encoder {
         if (schema.type === 'Pick') {
             // 已存在 取交集
             if (options.pickFields) {
-                let newPickFields: { [key: string]: 1 } = {};
-                for (let v of schema.keys) {
+                const newPickFields: { [key: string]: 1 } = {};
+                for (const v of schema.keys) {
                     if (options.pickFields[v]) {
                         newPickFields[v] = 1;
                     }
@@ -303,7 +303,7 @@ export class Encoder {
             // 不存在 初始化
             else {
                 options.pickFields = {};
-                for (let v of schema.keys) {
+                for (const v of schema.keys) {
                     options.pickFields[v] = 1;
                 }
             }
@@ -317,12 +317,12 @@ export class Encoder {
                 options.skipFields = {};
             }
             // 取并集                
-            for (let v of schema.keys) {
+            for (const v of schema.keys) {
                 options.skipFields[v] = 1;
             }
         }
         else if (schema.type === 'Overwrite') {
-            let parsed = this._parseOverwrite(value, schema);
+            const parsed = this._parseOverwrite(value, schema);
             // 写入Overwrite部分
             this._write(parsed.overwriteValue, parsed.overwrite, options);
         }
@@ -333,7 +333,7 @@ export class Encoder {
         }
 
         // Write Interface
-        let parsedTarget = this._validator.protoHelper.parseReference(schema.target);
+        const parsedTarget = this._validator.protoHelper.parseReference(schema.target);
         if (parsedTarget.type === 'Interface') {
             this._writeInterface(value, parsedTarget, options);
         }
@@ -344,7 +344,7 @@ export class Encoder {
 
     private _writeNumber(value: any, schema: NumberTypeSchema) {
         // 默认为double
-        let scalarType = schema.scalarType || 'double';
+        const scalarType = schema.scalarType || 'double';
 
         switch (scalarType) {
             // 定长编码
@@ -377,7 +377,7 @@ export class Encoder {
         }
 
         // 记录起始op位置，用于最后插入BlockID数量
-        let opStartOps = this._writer.ops.length;
+        const opStartOps = this._writer.ops.length;
         let blockIdCount = 0;
 
         // 以下，interface
@@ -388,17 +388,17 @@ export class Encoder {
                 throw new Error(`Max support ${Config.interface.maxExtendsNum} extends, actual: ${schema.extends.length}`);
             }
 
-            for (let extend of schema.extends) {
+            for (const extend of schema.extends) {
                 // BlockID = extend.id + 1
-                let blockId = extend.id + 1;
+                const blockId = extend.id + 1;
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
-                let blockIdPos = this._writer.ops.length - 1;
+                const blockIdPos = this._writer.ops.length - 1;
 
                 // 写入extend interface前 writeOps的长度
-                let opsLengthBeforeWrite = this._writer.ops.length;
+                const opsLengthBeforeWrite = this._writer.ops.length;
 
                 // extend Block
-                let parsedExtend = this._validator.protoHelper.parseReference(extend.type) as InterfaceTypeSchema;
+                const parsedExtend = this._validator.protoHelper.parseReference(extend.type) as InterfaceTypeSchema;
                 this._writeInterface(value, parsedExtend, {
                     ...options,
                     // 确保indexSignature是在最小层级编码
@@ -420,8 +420,8 @@ export class Encoder {
 
         // property
         if (schema.properties) {
-            for (let property of schema.properties) {
-                let parsedType = this._validator.protoHelper.parseReference(property.type);
+            for (const property of schema.properties) {
+                const parsedType = this._validator.protoHelper.parseReference(property.type);
                 let propValue = value[property.name];
 
                 // PickFields
@@ -451,10 +451,10 @@ export class Encoder {
                 }
                 options.skipFields[property.name] = 1;
 
-                let blockId = property.id + Config.interface.maxExtendsNum + 1;
+                const blockId = property.id + Config.interface.maxExtendsNum + 1;
                 // BlockID (propertyID)
                 this._writer.push({ type: 'varint', value: Varint64.from(blockId) });
-                let blockIdPos = this._writer.ops.length - 1;
+                const blockIdPos = this._writer.ops.length - 1;
 
                 // Value Payload
                 this._write(propValue, parsedType);
@@ -466,9 +466,9 @@ export class Encoder {
 
         // indexSignature
         if (!options.skipIndexSignature) {
-            let flat = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+            const flat = this._validator.protoHelper.getFlatInterfaceSchema(schema);
             if (flat.indexSignature) {
-                for (let key in value) {
+                for (const key in value) {
                     if (value[key] === undefined || this._nullAsUndefined(value[key], flat.indexSignature.type)) {
                         continue;
                     }
@@ -486,11 +486,11 @@ export class Encoder {
 
                     // BlockID == 0
                     this._writer.push({ type: 'varint', value: Varint64.from(0) });
-                    let blockIdPos = this._writer.ops.length - 1;
+                    const blockIdPos = this._writer.ops.length - 1;
 
                     // 字段名
                     this._writer.push({ type: 'string', value: key });
-                    let lengthPrefixPos = this._writer.ops.length;
+                    const lengthPrefixPos = this._writer.ops.length;
 
                     // Value Payload
                     this._write(value[key], flat.indexSignature.type);
@@ -513,22 +513,22 @@ export class Encoder {
     }
 
     private _parseOverwrite(value: any, schema: OverwriteTypeSchema) {
-        let skipFields: { [key: string]: 1 } = {};
+        const skipFields: { [key: string]: 1 } = {};
 
         // 解引用
-        let target = this._validator.protoHelper.parseReference(schema.target) as Exclude<OverwriteTypeSchema['target'], TypeReference>;
-        let overwrite = this._validator.protoHelper.parseReference(schema.overwrite) as Exclude<OverwriteTypeSchema['overwrite'], TypeReference>;
-        let flatTarget = this._validator.protoHelper.getFlatInterfaceSchema(target);
-        let flatOverwrite = this._validator.protoHelper.getFlatInterfaceSchema(overwrite);
+        const target = this._validator.protoHelper.parseReference(schema.target) as Exclude<OverwriteTypeSchema['target'], TypeReference>;
+        const overwrite = this._validator.protoHelper.parseReference(schema.overwrite) as Exclude<OverwriteTypeSchema['overwrite'], TypeReference>;
+        const flatTarget = this._validator.protoHelper.getFlatInterfaceSchema(target);
+        const flatOverwrite = this._validator.protoHelper.getFlatInterfaceSchema(overwrite);
 
         // 先区分哪些字段进入Target块，哪些字段进入Overwrite块
-        let overwriteValue: any = {};
-        let targetValue: any = {};
+        const overwriteValue: any = {};
+        const targetValue: any = {};
 
         // Overwrite块 property
         if (flatOverwrite.properties) {
             // 只要Overwrite中有此Property，即在Overwrite块编码
-            for (let property of flatOverwrite.properties) {
+            for (const property of flatOverwrite.properties) {
                 // undefined不编码，跳过SkipFIelds
                 if (value[property.name] !== undefined && !skipFields[property.name]) {
                     overwriteValue[property.name] = value[property.name];
@@ -539,7 +539,7 @@ export class Encoder {
 
         // Target块 property
         if (flatTarget.properties) {
-            for (let property of flatTarget.properties) {
+            for (const property of flatTarget.properties) {
                 // undefined不编码，跳过SkipFields
                 if (value[property.name] !== undefined && !skipFields[property.name]) {
                     targetValue[property.name] = value[property.name];
@@ -561,7 +561,7 @@ export class Encoder {
             indexSignatureWriteValue = targetValue;
         }
         if (indexSignature) {
-            for (let key in value) {
+            for (const key in value) {
                 if (skipFields[key]) {
                     continue;
                 }
@@ -590,7 +590,7 @@ export class Encoder {
         // })
 
         // 记住编码起点
-        let encodeStartPos = this._writer.ops.length;
+        const encodeStartPos = this._writer.ops.length;
         let idNum = 0;
 
         // null as undefined
@@ -598,9 +598,9 @@ export class Encoder {
             value = undefined;
         }
 
-        for (let member of schema.members) {
+        for (const member of schema.members) {
             // 验证该member是否可以编码            
-            let vRes = this._validator.validate(value, member.type, {
+            const vRes = this._validator.validate(value, member.type, {
                 // 禁用excessPropertyChecks（以代替unionProperties）
                 excessPropertyChecks: false,
                 // 启用strictNullChecks（null as undefined已经前置处理）
@@ -611,7 +611,7 @@ export class Encoder {
                 // 编码
                 // Part2: ID
                 this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
-                let idPos = this._writer.ops.length - 1;
+                const idPos = this._writer.ops.length - 1;
 
                 // Part3: Payload
                 if (member.type.type === 'Union') {
@@ -650,10 +650,10 @@ export class Encoder {
         this._writer.push({ type: 'varint', value: Varint64.from(schema.members.length) });
 
         // 按Member依次编码
-        for (let member of schema.members) {
+        for (const member of schema.members) {
             // ID
             this._writer.push({ type: 'varint', value: Varint64.from(member.id) });
-            let idPos = this._writer.ops.length - 1;
+            const idPos = this._writer.ops.length - 1;
 
             // 编码块
             this._write(value, member.type, {
@@ -674,9 +674,9 @@ export class Encoder {
         }
         // 其它TypedArray 转为Uint8Array
         else {
-            let key = value.constructor.name as keyof typeof TypedArrays;
-            let arrType = TypedArrays[key];
-            let uint8Arr = new Uint8Array(value.buffer, value.byteOffset, value.length * arrType.BYTES_PER_ELEMENT);
+            const key = value.constructor.name as keyof typeof TypedArrays;
+            const arrType = TypedArrays[key];
+            const uint8Arr = new Uint8Array(value.buffer, value.byteOffset, value.length * arrType.BYTES_PER_ELEMENT);
             this._writer.push({ type: 'buffer', value: uint8Arr });
         }
     }
@@ -699,23 +699,23 @@ export class Encoder {
      * @param idPos 
      */
     private _processIdWithLengthType(idPos: number, payloadType: TSBufferSchema, lengthPrefixPos?: number) {
-        let idOp = this._writer.ops[idPos];
+        const idOp = this._writer.ops[idPos];
         if (idOp.type !== 'varint') {
             throw new Error('Error idPos: ' + idPos);
         }
 
         // 解引用
-        let parsedSchema = this._validator.protoHelper.parseReference(payloadType);
+        const parsedSchema = this._validator.protoHelper.parseReference(payloadType);
 
-        let lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
-        let newId = (idOp.value.toNumber() << 2) + lengthInfo.lengthType;
+        const lengthInfo = IdBlockUtil.getPayloadLengthInfo(parsedSchema, this._validator.protoHelper);
+        const newId = (idOp.value.toNumber() << 2) + lengthInfo.lengthType;
         this._writer.ops[idPos] = this._writer.req2op({
             type: 'varint',
             value: Varint64.from(newId)
         });
 
         if (lengthInfo.needLengthPrefix) {
-            let payloadByteLength = this._writer.ops.filter((v, i) => i > idPos).sum(v => v.length);
+            const payloadByteLength = this._writer.ops.filter((v, i) => i > idPos).sum(v => v.length);
             this._writer.ops.splice(lengthPrefixPos == undefined ? idPos + 1 : lengthPrefixPos, 0, this._writer.req2op({
                 type: 'varint',
                 value: Varint64.from(payloadByteLength)

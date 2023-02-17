@@ -12,7 +12,7 @@ export class ProtoHelper {
     parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === SchemaType.Reference) {
-            let parsedSchema = this.proto[schema.target];
+            const parsedSchema = this.proto[schema.target];
             if (!parsedSchema) {
                 throw new Error(`Cannot find reference target: ${schema.target}`);
             }
@@ -31,8 +31,8 @@ export class ProtoHelper {
             }
 
             // find prop item
-            let flat = this.getFlatInterfaceSchema(schema.objectType);
-            let propItem = flat.properties!.find(v => v.name === schema.index);
+            const flat = this.getFlatInterfaceSchema(schema.objectType);
+            const propItem = flat.properties!.find(v => v.name === schema.index);
             let propType: TSBufferSchema;
             if (propItem) {
                 propType = propItem.type;
@@ -70,7 +70,7 @@ export class ProtoHelper {
             return this.isTypeReference(propType) ? this.parseReference(propType) : propType;
         }
         else if (schema.type === SchemaType.Keyof) {
-            let flatInterface = this.getFlatInterfaceSchema(schema.target);
+            const flatInterface = this.getFlatInterfaceSchema(schema.target);
             return {
                 type: SchemaType.Union,
                 members: flatInterface.properties.map((v, i) => ({
@@ -89,7 +89,7 @@ export class ProtoHelper {
 
     isInterface(schema: TSBufferSchema, excludeReference = false): schema is InterfaceTypeSchema | InterfaceReference {
         if (!excludeReference && this.isTypeReference(schema)) {
-            let parsed = this.parseReference(schema);
+            const parsed = this.parseReference(schema);
             return this.isInterface(parsed, excludeReference);
         }
         else {
@@ -110,7 +110,7 @@ export class ProtoHelper {
 
     private _schemaWithUuids: (TSBufferSchema & { uuid: number })[] = [];
     private _getSchemaUuid(schema: TSBufferSchema) {
-        let schemaWithUuid: TSBufferSchema & { uuid?: number } = schema;
+        const schemaWithUuid: TSBufferSchema & { uuid?: number } = schema;
         if (!schemaWithUuid.uuid) {
             schemaWithUuid.uuid = this._schemaWithUuids.push(schemaWithUuid as TSBufferSchema & { uuid: number });
         }
@@ -119,7 +119,7 @@ export class ProtoHelper {
 
     private _unionPropertiesCache: { [uuid: number]: string[] } = {};
     getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema) {
-        let uuid = this._getSchemaUuid(schema);
+        const uuid = this._getSchemaUuid(schema);
         if (!this._unionPropertiesCache[uuid]) {
             this._unionPropertiesCache[uuid] = this._addUnionProperties([], schema.members.map(v => v.type));
         }
@@ -131,17 +131,17 @@ export class ProtoHelper {
      */
     private _addUnionProperties(unionProperties: string[], schemas: TSBufferSchema[]): string[] {
         for (let i = 0, len = schemas.length; i < len; ++i) {
-            let schema = this.parseReference(schemas[i]);
+            const schema = this.parseReference(schemas[i]);
 
             // Interface及其Ref 加入interfaces
             if (this.isInterface(schema)) {
-                let flat = this.getFlatInterfaceSchema(schema);
+                const flat = this.getFlatInterfaceSchema(schema);
                 flat.properties.forEach(v => {
                     unionProperties.binaryInsert(v.name, true);
                 });
 
                 if (flat.indexSignature) {
-                    let key = `[[${flat.indexSignature.keyType}]]`;
+                    const key = `[[${flat.indexSignature.keyType}]]`;
                     unionProperties.binaryInsert(key, true);
                 }
             }
@@ -161,12 +161,12 @@ export class ProtoHelper {
      * 以此来跳过对它们的检查（用于Intersection/Union）
      */
     applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[]): FlatInterfaceTypeSchema {
-        let newSchema: FlatInterfaceTypeSchema = {
+        const newSchema: FlatInterfaceTypeSchema = {
             ...schema,
             properties: schema.properties.slice()
         };
 
-        for (let prop of unionProperties) {
+        for (const prop of unionProperties) {
             if (prop === '[[String]]') {
                 newSchema.indexSignature = newSchema.indexSignature || {
                     keyType: SchemaType.String,
@@ -199,7 +199,7 @@ export class ProtoHelper {
      * 将interface及其引用转换为展平的schema
      */
     getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
-        let uuid = this._getSchemaUuid(schema);
+        const uuid = this._getSchemaUuid(schema);
 
         // from cache
         if (this._flatInterfaceSchemaCache[uuid]) {
@@ -207,7 +207,7 @@ export class ProtoHelper {
         }
 
         if (this.isTypeReference(schema)) {
-            let parsed = this.parseReference(schema);
+            const parsed = this.parseReference(schema);
             if (parsed.type !== SchemaType.Interface) {
                 throw new Error(`Cannot flatten non interface type: ${parsed.type}`);
             }
@@ -231,7 +231,7 @@ export class ProtoHelper {
      * 展平interface
      */
     private _flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
-        let properties: {
+        const properties: {
             [name: string]: {
                 optional?: boolean;
                 type: TSBufferSchema;
@@ -241,7 +241,7 @@ export class ProtoHelper {
 
         // 自身定义的properties和indexSignature优先级最高
         if (schema.properties) {
-            for (let prop of schema.properties) {
+            for (const prop of schema.properties) {
                 properties[prop.name] = {
                     optional: prop.optional,
                     type: prop.type
@@ -254,7 +254,7 @@ export class ProtoHelper {
 
         // extends的优先级次之，补全没有定义的字段
         if (schema.extends) {
-            for (let extend of schema.extends) {
+            for (const extend of schema.extends) {
                 // 解引用
                 let parsedExtRef = this.parseReference(extend.type);
                 if (this.isMappedType(parsedExtRef)) {
@@ -266,11 +266,11 @@ export class ProtoHelper {
                 }
 
                 // 递归展平extends
-                let flatenExtendsSchema = this.getFlatInterfaceSchema(parsedExtRef);
+                const flatenExtendsSchema = this.getFlatInterfaceSchema(parsedExtRef);
 
                 // properties
                 if (flatenExtendsSchema.properties) {
-                    for (let prop of flatenExtendsSchema.properties) {
+                    for (const prop of flatenExtendsSchema.properties) {
                         if (!properties[prop.name]) {
                             properties[prop.name] = {
                                 optional: prop.optional,
@@ -305,7 +305,7 @@ export class ProtoHelper {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
         if (this.isTypeReference(schema.target)) {
-            let parsed = this.parseReference(schema.target);
+            const parsed = this.parseReference(schema.target);
             target = parsed as typeof target;
         }
         else {
@@ -326,9 +326,9 @@ export class ProtoHelper {
 
         // 开始执行Mapped逻辑
         if (schema.type === SchemaType.Pick) {
-            let properties: NonNullable<InterfaceTypeSchema['properties']> = [];
-            for (let key of schema.keys) {
-                let propItem = flatTarget.properties!.find(v => v.name === key);
+            const properties: NonNullable<InterfaceTypeSchema['properties']> = [];
+            for (const key of schema.keys) {
+                const propItem = flatTarget.properties!.find(v => v.name === key);
                 if (propItem) {
                     properties.push({
                         id: properties.length,
@@ -351,23 +351,23 @@ export class ProtoHelper {
             }
         }
         else if (schema.type === SchemaType.Partial) {
-            for (let v of flatTarget.properties!) {
+            for (const v of flatTarget.properties!) {
                 v.optional = true;
             }
             return flatTarget;
         }
         else if (schema.type === SchemaType.Omit) {
-            for (let key of schema.keys) {
+            for (const key of schema.keys) {
                 flatTarget.properties!.removeOne(v => v.name === key);
             }
             return flatTarget;
         }
         else if (schema.type === SchemaType.Overwrite) {
-            let overwrite = this.getFlatInterfaceSchema(schema.overwrite);
+            const overwrite = this.getFlatInterfaceSchema(schema.overwrite);
             if (overwrite.indexSignature) {
                 flatTarget.indexSignature = overwrite.indexSignature;
             }
-            for (let prop of overwrite.properties!) {
+            for (const prop of overwrite.properties!) {
                 flatTarget.properties!.removeOne(v => v.name === prop.name);
                 flatTarget.properties!.push(prop);
             }
@@ -380,7 +380,7 @@ export class ProtoHelper {
 
     parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema | IntersectionTypeSchema {
         // 解嵌套，例如：Pick<Pick<Omit, XXX, 'a'|'b'>>>
-        let parents: (PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema)[] = [];
+        const parents: (PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema)[] = [];
         let child: TSBufferSchema = schema;
         do {
             parents.push(child);
@@ -394,13 +394,13 @@ export class ProtoHelper {
         }
         // PickOmit<A|B> === PickOmit<A> | PickOmit<B>
         else if (child.type === SchemaType.Union || child.type === SchemaType.Intersection) {
-            let newSchema: UnionTypeSchema | IntersectionTypeSchema = {
+            const newSchema: UnionTypeSchema | IntersectionTypeSchema = {
                 type: child.type,
                 members: child.members.map(v => {
                     // 从里面往外装
                     let type: TSBufferSchema = v.type;
                     for (let i = parents.length - 1; i > -1; --i) {
-                        let parent = parents[i];
+                        const parent = parents[i];
                         type = {
                             ...parent,
                             target: type

@@ -201,7 +201,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateNonNullableType(value, schema, options);
                 break;
             case SchemaType.Custom:
-                let res = schema.validate(value);
+                const res = schema.validate(value);
                 vRes = res.isSucc ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.CustomError, res.errMsg);
                 break;
             // 错误的type
@@ -233,13 +233,13 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @returns Validate result and pruned value. if validate failed, `pruneOutput` would be undefined.
      */
     prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: Partial<ValidateOptions>): PruneOutput<T> {
-        let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
+        const schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
         if (!schema) {
             throw new Error('Cannot find schema: ' + schemaOrId);
         }
 
-        let prune: ValidateOptions['prune'] = {};
-        let vRes = this._validate(value, schema, {
+        const prune: ValidateOptions['prune'] = {};
+        const vRes = this._validate(value, schema, {
             ...options,
             prune: prune,
             excessPropertyChecks: false,
@@ -253,7 +253,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateBooleanType(value: any, schema: BooleanTypeSchema): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type === 'boolean') {
             return ValidateResultUtil.succ;
         }
@@ -264,11 +264,11 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
     private _validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
         // 默认为double
-        let scalarType = schema.scalarType || 'double';
+        const scalarType = schema.scalarType || 'double';
 
         // Wrong Type
-        let type = this._getTypeof(value);
-        let rightType = scalarType.indexOf('big') > -1 ? 'bigint' : 'number';
+        const type = this._getTypeof(value);
+        const rightType = scalarType.indexOf('big') > -1 ? 'bigint' : 'number';
         if (type !== rightType) {
             return ValidateResultUtil.error(ErrorType.TypeError, rightType, type);
         }
@@ -287,26 +287,26 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateStringType(value: any, schema: StringTypeSchema): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'string', type);
     }
 
     private _validateArrayType(value: any, schema: ArrayTypeSchema, options: ValidateOptions): ValidateResult {
         // is Array type
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type !== SchemaType.Array) {
             return ValidateResultUtil.error(ErrorType.TypeError, SchemaType.Array, type);
         }
 
         // prune output
-        let prune = options.prune;
+        const prune = options.prune;
         if (prune) {
             prune.output = Array.from({ length: value.length });
         }
 
         // validate elementType
         for (let i = 0; i < value.length; ++i) {
-            let elemValidateResult = this._validate(value[i], schema.elementType, {
+            const elemValidateResult = this._validate(value[i], schema.elementType, {
                 ...options,
                 prune: prune?.output ? {
                     parent: {
@@ -326,12 +326,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
     private _validateTupleType(value: any, schema: TupleTypeSchema, options: ValidateOptions): ValidateResult {
         // is Array type
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type !== SchemaType.Array) {
             return ValidateResultUtil.error(ErrorType.TypeError, SchemaType.Array, type);
         }
 
-        let prune = options.prune;
+        const prune = options.prune;
 
         // validate length
         // excessPropertyChecks 与 prune互斥
@@ -348,9 +348,9 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         for (let i = 0; i < schema.elementTypes.length; ++i) {
             // MissingRequiredProperty: NotOptional && is undefined
             if (value[i] === undefined || value[i] === null && !options.strictNullChecks) {
-                let canBeNull = this._canBeNull(schema.elementTypes[i]);
-                let canBeUndefined = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
-                let isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
+                const canBeNull = this._canBeNull(schema.elementTypes[i]);
+                const canBeUndefined = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
+                const isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
                 // skip undefined property
                 if (isOptional) {
                     // Prune null & undefined->null
@@ -370,7 +370,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             }
 
             // element type check
-            let elemValidateResult = this._validate(value[i], schema.elementTypes[i], {
+            const elemValidateResult = this._validate(value[i], schema.elementTypes[i], {
                 prune: prune?.output ? {
                     parent: {
                         value: prune.output,
@@ -414,7 +414,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
     private _validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type !== 'string' && type !== 'number') {
             return ValidateResultUtil.error(ErrorType.TypeError, 'string | number', type);
         }
@@ -446,12 +446,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateObjectType(value: any, schema: ObjectTypeSchema): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         return type === 'Object' || type === 'Array' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
 
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options: ValidateOptions): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type !== 'Object') {
             return ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
         }
@@ -468,7 +468,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options: ValidateOptions): ValidateResult {
-        let parsed = this.protoHelper.parseMappedType(schema);
+        const parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === SchemaType.Interface) {
             return this._validateInterfaceType(value, schema, options);
         }
@@ -486,22 +486,22 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema, options: ValidateOptions) {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === SchemaType.Number) {
-            for (let key in value) {
+            for (const key in value) {
                 if (!this._isNumberKey(key)) {
                     return ValidateResultUtil.error(ErrorType.InvalidNumberKey, key);
                 }
             }
         }
 
-        let prune = options.prune;
+        const prune = options.prune;
         if (prune) {
             prune.output = {};
         }
 
         // Excess property check (与prune互斥)
         if (!prune && options.excessPropertyChecks && !schema.indexSignature) {
-            let validProperties = schema.properties.map(v => v.name);
-            let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
+            const validProperties = schema.properties.map(v => v.name);
+            const firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
             if (firstExcessProperty) {
                 return ValidateResultUtil.error(ErrorType.ExcessProperty, firstExcessProperty);
             }
@@ -509,12 +509,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
         // 校验properties
         if (schema.properties) {
-            for (let property of schema.properties) {
+            for (const property of schema.properties) {
                 // MissingRequiredProperty: is undefined && !isOptional
                 if (value[property.name] === undefined || value[property.name] === null && !options.strictNullChecks) {
-                    let canBeNull = this._canBeNull(property.type);
-                    let canBeUndefined = property.optional || this._canBeUndefined(property.type);
-                    let isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
+                    const canBeNull = this._canBeNull(property.type);
+                    const canBeUndefined = property.optional || this._canBeUndefined(property.type);
+                    const isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
                     // skip undefined optional property
                     if (isOptional) {
                         // Prune null & undefined->null
@@ -534,7 +534,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 }
 
                 // property本身验证
-                let vRes = this._validate(value[property.name], property.type, {
+                const vRes = this._validate(value[property.name], property.type, {
                     prune: prune?.output && property.id > -1 ? {
                         parent: {
                             value: prune.output,
@@ -552,12 +552,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
         // 检测indexSignature
         if (schema.indexSignature) {
-            for (let key in value) {
+            for (const key in value) {
                 // only prune is (property is pruned already)
                 // let memberPrune: ValidatePruneOptions | undefined = schema.properties.some(v => v.name === key) ? undefined : {};
 
                 // validate each field
-                let vRes = this._validate(value[key], schema.indexSignature.type, {
+                const vRes = this._validate(value[key], schema.indexSignature.type, {
                     prune: prune?.output ? {
                         parent: {
                             value: prune.output,
@@ -577,12 +577,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if (type !== 'Object') {
             return ValidateResultUtil.error(ErrorType.TypeError, schema.arrayType || 'ArrayBuffer', type);
         }
         else if (schema.arrayType) {
-            let typeArrayClass = typedArrays[schema.arrayType];
+            const typeArrayClass = typedArrays[schema.arrayType];
             if (!typeArrayClass) {
                 throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
@@ -600,21 +600,21 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     private _validateUnionType(value: any, schema: UnionTypeSchema, options: ValidateOptions): ValidateResult {
         options.unionProperties = options.unionProperties || this.protoHelper.getUnionProperties(schema);
 
-        let isObjectPrune: boolean = false;
-        let prune = options.prune;
+        let isObjectPrune = false;
+        const prune = options.prune;
         if (prune && value && Object.getPrototypeOf(value) === Object.prototype) {
             isObjectPrune = true;
             prune.output = {};
         }
 
         // 有一成功则成功
-        let isSomeSucc: boolean = false;
-        let memberErrors: ValidateResultError[] = [];
+        let isSomeSucc = false;
+        const memberErrors: ValidateResultError[] = [];
         for (let i = 0; i < schema.members.length; ++i) {
-            let member = schema.members[i];
-            let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
-            let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
-            let vRes: ValidateResult = this._validate(value, memberType, {
+            const member = schema.members[i];
+            const memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
+            const memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
+            const vRes: ValidateResult = this._validate(value, memberType, {
                 ...options,
                 prune: memberPrune
             });
@@ -646,21 +646,21 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         // 全部失败，则失败
         else {
             // All member error is the same, return the first
-            let msg0 = memberErrors[0].errMsg;
+            const msg0 = memberErrors[0].errMsg;
             if (memberErrors.every(v => v.errMsg === msg0)) {
                 return memberErrors[0];
             }
 
             // mutual exclusion: return the only one
-            let nonLiteralErrors = memberErrors.filter(v => v.error.type !== ErrorType.InvalidLiteralValue);
+            const nonLiteralErrors = memberErrors.filter(v => v.error.type !== ErrorType.InvalidLiteralValue);
             if (nonLiteralErrors.length === 1) {
                 return nonLiteralErrors[0];
             }
 
             // All member error without inner: show simple msg
             if (memberErrors.every(v => !v.error.inner && (v.error.type === ErrorType.TypeError || v.error.type === ErrorType.InvalidLiteralValue))) {
-                let valueType = this._getTypeof(value);
-                let expectedTypes = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : this._getTypeof(v.error.params[0])).distinct();
+                const valueType = this._getTypeof(value);
+                const expectedTypes = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : this._getTypeof(v.error.params[0])).distinct();
 
                 // Expected type A|B|C, actually type D
                 if (expectedTypes.indexOf(valueType) === -1) {
@@ -669,7 +669,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // `'D'` is not matched to `'A'|'B'|'C'`
                 if (valueType !== 'Object' && valueType !== SchemaType.Array) {
-                    let types = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : stringify(v.error.params[0])).distinct();
+                    const types = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : stringify(v.error.params[0])).distinct();
                     return ValidateResultUtil.error(ErrorType.UnionTypesNotMatch, value, types);
                 }
             }
@@ -682,8 +682,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, options: ValidateOptions): ValidateResult {
         options.unionProperties = options.unionProperties || this.protoHelper.getUnionProperties(schema);
 
-        let isObjectPrune: boolean = false;
-        let prune = options.prune;
+        let isObjectPrune = false;
+        const prune = options.prune;
         if (prune && value && Object.getPrototypeOf(value) === Object.prototype) {
             prune.output = {};
             isObjectPrune = true;
@@ -694,9 +694,9 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             // 验证member
             let memberType = schema.members[i].type;
             memberType = this.protoHelper.isTypeReference(memberType) ? this.protoHelper.parseReference(memberType) : memberType;
-            let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
+            const memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
 
-            let vRes: ValidateResult = this._validate(value, memberType, {
+            const vRes: ValidateResult = this._validate(value, memberType, {
                 ...options,
                 prune: memberPrune
             });
@@ -728,7 +728,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateNonNullableType(value: any, schema: NonNullableTypeSchema, options: ValidateOptions): ValidateResult {
-        let type = this._getTypeof(value);
+        const type = this._getTypeof(value);
         if ((type === 'null' || type === 'undefined') && schema.target.type !== 'Any') {
             return ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', type);
         }
@@ -736,12 +736,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _isNumberKey(key: string): boolean {
-        let int = parseInt(key);
+        const int = parseInt(key);
         return !(isNaN(int) || ('' + int) !== key);
     }
 
     private _getTypeof(value: any): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "Object" | "function" | "Array" | "null" {
-        let type = typeof value;
+        const type = typeof value;
         if (type === 'object') {
             if (value === null) {
                 return 'null';

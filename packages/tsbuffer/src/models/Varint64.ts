@@ -17,7 +17,7 @@ export class Varint64 {
             return this.Zero;
         }
 
-        let sign = value < 0;
+        const sign = value < 0;
         if (sign) {
             value = -value;
         }
@@ -39,7 +39,7 @@ export class Varint64 {
 
     toNumber(unsigned?: boolean): number {
         if (!unsigned && this.uint32s[0] >>> 31) {
-            var low = ~this.uint32s[1] + 1 >>> 0,
+            let low = ~this.uint32s[1] + 1 >>> 0,
                 high = ~this.uint32s[0] >>> 0;
             if (!low)
                 high = high + 1 >>> 0;
@@ -49,14 +49,14 @@ export class Varint64 {
     }
 
     zzEncode() {
-        let mask = this.uint32s[0] >> 31;
+        const mask = this.uint32s[0] >> 31;
         this.uint32s[0] = ((this.uint32s[0] << 1 | this.uint32s[1] >>> 31) ^ mask) >>> 0;
         this.uint32s[1] = (this.uint32s[1] << 1 ^ mask) >>> 0;
         return this;
     }
 
     zzDecode() {
-        let mask = -(this.uint32s[1] & 1);
+        const mask = -(this.uint32s[1] & 1);
         this.uint32s[1] = ((this.uint32s[1] >>> 1 | this.uint32s[0] << 31) ^ mask) >>> 0;
         this.uint32s[0] = (this.uint32s[0] >>> 1 ^ mask) >>> 0;
         return this;
@@ -65,7 +65,7 @@ export class Varint64 {
     private _byteLength?: number;
     get byteLength(): number {
         if (this._byteLength === undefined) {
-            let part0 = this.uint32s[1],
+            const part0 = this.uint32s[1],
                 part1 = (this.uint32s[1] >>> 28 | this.uint32s[0] << 4) >>> 0,
                 part2 = this.uint32s[0] >>> 24;
             this._byteLength = part2 === 0
@@ -104,7 +104,7 @@ export class Varint64 {
     }
 
     static readFromBuffer(buf: Uint8Array, pos: number): Varint64 {
-        let startPos = pos;
+        const startPos = pos;
         let hi = 0, lo = 0;
         let i = 0;
         if (buf.byteLength - pos > 4) { // fast route (lo)

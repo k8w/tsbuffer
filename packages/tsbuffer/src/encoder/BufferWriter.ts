@@ -32,7 +32,7 @@ export class BufferWriter {
 
     req2op(req: WriteReq): WriteOp {
         if (req.type === 'string' || req.type === 'buffer') {
-            let valueLength = this.measureLength(req);
+            const valueLength = this.measureLength(req);
             // Length
             this.push({ type: 'varint', value: Varint64.from(valueLength) });
             // Value
@@ -42,7 +42,7 @@ export class BufferWriter {
             }
         }
         else {
-            let length = this.measureLength(req);
+            const length = this.measureLength(req);
             return {
                 ...req,
                 length: length
@@ -68,15 +68,15 @@ export class BufferWriter {
     }
 
     finish(): Uint8Array {
-        let byteLength = this._ops.sum(v => v.length);
+        const byteLength = this._ops.sum(v => v.length);
         let pos = 0;
-        let buf = new Uint8Array(byteLength);
-        let view = new DataView(buf.buffer);
+        const buf = new Uint8Array(byteLength);
+        const view = new DataView(buf.buffer);
 
-        for (let op of this._ops) {
+        for (const op of this._ops) {
             switch (op.type) {
                 case 'varint':
-                    let newPos = op.value.writeToBuffer(buf, pos);
+                    const newPos = op.value.writeToBuffer(buf, pos);
                     if (newPos !== pos + op.length) {
                         throw new Error(`Error varint measuredLength ${op.length}, actual is ${newPos - pos}, value is ${op.value.toNumber()}`);
                     }
@@ -85,7 +85,7 @@ export class BufferWriter {
                     view.setFloat64(buf.byteOffset + pos, op.value);
                     break;
                 case 'string':
-                    let encLen = Utf8Coder.write(op.value, buf, pos);
+                    const encLen = Utf8Coder.write(op.value, buf, pos);
                     if (encLen !== op.length) {
                         throw new Error(`Expect ${op.length} bytes but encoded ${encLen} bytes`);
                     }

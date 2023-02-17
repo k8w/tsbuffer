@@ -15,21 +15,21 @@ export class EncodeIdUtil {
     static genEncodeIds(values: (string | number | object)[], compatible?: EncodeIdItem[]): EncodeIdItem[] {
         // 新元素的起始ID，有compatible则从其下一个开始，全新模式从0开始
         let nextId = 0;
-        let existKeyId: { [key: string]: number } = compatible ? compatible.reduce((prev, next) => {
+        const existKeyId: { [key: string]: number } = compatible ? compatible.reduce((prev, next) => {
             prev[next.key] = next.id;
             nextId = Math.max(nextId, next.id + 1);
             return prev;
         }, {} as { [key: string]: number }) : {};
-        let output: EncodeIdItem[] = [];
-        let keys = values.map(v => this.getKey(v));
-        for (let key of keys) {
-            let id = existKeyId[key] ?? nextId++;
+        const output: EncodeIdItem[] = [];
+        const keys = values.map(v => this.getKey(v));
+        for (const key of keys) {
+            const id = existKeyId[key] ?? nextId++;
             existKeyId[key] = id;
             output.push({ key: key, id: id })
         }
 
         // 可优化节点>=32,4096
-        let uniqueKeyLength = keys.distinct().length;
+        const uniqueKeyLength = keys.distinct().length;
         if (nextId > 32 && uniqueKeyLength <= 32 || nextId > 4096 && uniqueKeyLength <= 4096) {
             this.onGenCanOptimized?.();
         }

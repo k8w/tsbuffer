@@ -33,7 +33,7 @@ export class ValidateResultError<T extends ErrorType = ErrorType>  {
     }
 
     static getErrMsg<T extends keyof typeof ErrorMsg>(error: ValidateResultError<T>['error']) {
-        let errMsg = (ErrorMsg[error.type] as any)(...error.params)
+        const errMsg = (ErrorMsg[error.type] as any)(...error.params)
 
         if (error.inner?.property.length) {
             return `Property \`${error.inner.property.join('.')}\`: ${errMsg}`

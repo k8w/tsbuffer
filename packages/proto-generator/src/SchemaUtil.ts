@@ -13,7 +13,7 @@ export class SchemaUtil {
 
         let output: ReferenceTypeSchema[] = [];
 
-        for (let schema of schemas) {
+        for (const schema of schemas) {
             switch (schema.type) {
                 case SchemaType.Array:
                     output = output.concat(this.getUsedReferences(schema.elementType));
