@@ -1,0 +1,50 @@
+{
+  "name": "@tsbuffer/schema",
+  "version": "2.2.0",
+  "description": "TSBuffer schema declarations",
+  "main": "index.js",
+  "exports": {
+    "require": "./index.js",
+    "import": "./index.mjs"
+  },
+  "typings": "index.d.ts",
+  "scripts": {
+    "bp": "tsc --noEmit && npm version patch && npm run build && cd dist && npm publish && cd ..",
+    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
+    "build:js": "rm -rf dist && npx rollup -c",
+    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
+    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k8w/tsbuffer-schema.git"
+  },
+  "keywords": [
+    "TSBuffer",
+    "tsbuf",
+    "buffer",
+    "k8w",
+    "protobuf",
+    "TypeScript",
+    "interface",
+    "serialization",
+    "JSON",
+    "schema",
+    "序列化",
+    "binary",
+    "encoding"
+  ],
+  "author": "k8w",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/k8w/tsbuffer-schema/issues"
+  },
+  "homepage": "https://github.com/k8w/tsbuffer#readme",
+  "devDependencies": {
+    "@microsoft/api-documenter": "^7.13.63",
+    "@microsoft/api-extractor": "^7.18.16",
+    "rollup": "^2.58.0",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typedoc": "^0.22.5"
+  }
+}

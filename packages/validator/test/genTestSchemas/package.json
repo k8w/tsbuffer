@@ -1,0 +1,20 @@
+{
+  "name": "gentestschemas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate": "ts-node generate.ts",
+    "ug": "npm i tsbuffer-proto-generator@*",
+    "listen": "onchange -i -v source/**/*.ts -- ts-node generate.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/glob": "^7.2.0",
+    "glob": "^7.2.0"
+  },
+  "devDependencies": {
+    "@tsbuffer/proto-generator": "^1.7.0-dev.3"
+  }
+}

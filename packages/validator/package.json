@@ -1,0 +1,74 @@
+{
+  "name": "@tsbuffer/validator",
+  "version": "2.1.1",
+  "description": "Validator for TSBuffer values",
+  "main": "index.js",
+  "exports": {
+    "require": "./index.js",
+    "import": "./index.mjs"
+  },
+  "typings": "./index.d.ts",
+  "scripts": {
+    "test": "npx mocha",
+    "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
+    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
+    "build:js": "rm -rf dist && npx rollup -c",
+    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
+    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api",
+    "bp": "npm version patch && npm run build && cd dist && npm publish & cd.."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k8w/tsbuffer-validator.git"
+  },
+  "keywords": [
+    "k8w",
+    "tsbuffer",
+    "typescript",
+    "validator",
+    "interface",
+    "protobuf",
+    "buffer",
+    "json",
+    "schema",
+    "validate"
+  ],
+  "author": "k8w",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/k8w/tsbuffer-validator/issues"
+  },
+  "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
+  "dependencies": {
+    "k8w-extend-native": "^1.4.6",
+    "@tsbuffer/schema": "workspace:^",
+    "tslib": "*"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "coverage",
+      "test",
+      "dist"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
+  },
+  "devDependencies": {
+    "@microsoft/api-documenter": "^7.19.14",
+    "@microsoft/api-extractor": "^7.31.2",
+    "@types/mocha": "^8.2.3",
+    "@types/node": "^15.14.9",
+    "mocha": "^9.2.2",
+    "nyc": "^15.1.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-typescript2": "^0.34.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.3"
+  }
+}

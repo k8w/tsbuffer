@@ -1,0 +1,98 @@
+{
+  "fileName/InterfaceName": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "a",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 1,
+        "name": "b",
+        "type": {
+          "type": "Number"
+        }
+      },
+      {
+        "id": 2,
+        "name": "c",
+        "type": {
+          "type": "Array",
+          "elementType": {
+            "type": "Boolean"
+          }
+        },
+        "optional": true
+      },
+      {
+        "id": 3,
+        "name": "d",
+        "type": {
+          "type": "Interface",
+          "properties": [
+            {
+              "id": 0,
+              "name": "value",
+              "type": {
+                "type": "String"
+              }
+            },
+            {
+              "id": 1,
+              "name": "date",
+              "type": {
+                "type": "Number"
+              }
+            }
+          ]
+        },
+        "optional": true
+      }
+    ]
+  },
+  "fileName/TestEnum": {
+    "type": "Enum",
+    "members": [
+      {
+        "id": 0,
+        "value": 0
+      },
+      {
+        "id": 1,
+        "value": 1
+      },
+      {
+        "id": 2,
+        "value": 2
+      },
+      {
+        "id": 3,
+        "value": 100
+      },
+      {
+        "id": 4,
+        "value": 101
+      },
+      {
+        "id": 5,
+        "value": 102
+      }
+    ]
+  },
+  "fileName/TypeName": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "value",
+        "type": {
+          "type": "Reference",
+          "target": "fileName/TestEnum"
+        }
+      }
+    ]
+  }
+}

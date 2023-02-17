@@ -1,67 +1,36 @@
 {
-  "name": "tsbuffer",
-  "version": "2.2.7",
-  "description": "",
-  "main": "index.js",
-  "exports": {
-    "require": "./index.js",
-    "import": "./index.mjs"
-  },
-  "typings": "./index.d.ts",
-  "directories": {
-    "doc": "docs"
-  },
-  "dependencies": {
-    "k8w-extend-native": "^1.4.6",
-    "tsbuffer-validator": "^2.1.1",
-    "tslib": "*"
-  },
+  "private": true,
+  "type": "module",
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.19.14",
-    "@microsoft/api-extractor": "^7.31.2",
-    "@types/mocha": "^8.2.3",
-    "@types/node": "^15.14.9",
-    "mocha": "^9.2.2",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "lerna": "^6.4.1",
+    "nx": "^15.6.3",
     "nyc": "^15.1.0",
-    "rollup": "^2.79.1",
-    "rollup-plugin-typescript2": "^0.34.0",
+    "onchange": "^7.1.0",
+    "prettier": "^2.8.4",
+    "shx": "^0.3.4",
+    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.1",
-    "tsbuffer-proto-generator": "^1.7.2",
-    "typescript": "^4.8.3"
+    "typescript": "^4.9.5"
   },
   "scripts": {
-    "test": "npx mocha",
-    "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
-    "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
-    "build:js": "rm -rf dist && npx rollup -c",
-    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
-    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/k8w/tsbuffer.git"
-  },
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "coverage",
-      "test",
-      "dist",
-      "benchmark",
-      "scripts"
-    ],
-    "reporter": [
-      "html"
-    ],
-    "all": true
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/k8w/tsbuffer/issues"
-  },
-  "homepage": "https://github.com/k8w/tsbuffer#readme"
+    "lint": "nx run-many --target=lint",
+    "test": "nx run-many --target=test",
+    "check": "nx run-many --target=check",
+    "coverage": "nx run-many --target=coverage",
+    "dev": "onchange -i -k 'packages/*/src/**/*.ts' -e 'packages/test' -- npm run build",
+    "build": "nx run-many --target=build",
+    "format": "nx format:write --all",
+    "format:check": "nx format:check --all",
+    "version:dev": "lerna version --conventional-commits --conventional-prerelease --preid dev --no-git-tag-version",
+    "version:prod": "",
+    "publish:dev": "",
+    "publish:prod": ""
+  }
 }

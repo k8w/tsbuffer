@@ -3,6 +3,7 @@ dist
 .rpt2_cache
 .DS_STORE
 temp
-lib
 coverage
 .nyc_output
+package-lock.json
+yarn.lock
