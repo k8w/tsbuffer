@@ -23,7 +23,7 @@
     "rollup-plugin-typescript2": "^0.34.1"
   },
   "scripts": {
-    "lint": "npx eslint packages/*/src/**/*.ts --fix",
+    "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "check": "nx run-many --target=check",
     "coverage": "nx run-many --target=coverage",
