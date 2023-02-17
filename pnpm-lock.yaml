@@ -16,6 +16,9 @@ importers:
       nyc: ^15.1.0
       onchange: ^7.1.0
       prettier: ^2.8.4
+      rollup: ^2.79.1
+      rollup-plugin-dts: ^4.2.3
+      rollup-plugin-typescript2: ^0.34.1
       shx: ^0.3.4
       source-map-support: ^0.5.21
       ts-node: ^10.9.1
@@ -34,6 +37,9 @@ importers:
       nyc: 15.1.0
       onchange: 7.1.0
       prettier: 2.8.4
+      rollup: 2.79.1
+      rollup-plugin-dts: 4.2.3_zptcx3kz3uwp66hzhyyt545weq
+      rollup-plugin-typescript2: 0.34.1_zptcx3kz3uwp66hzhyyt545weq
       shx: 0.3.4
       source-map-support: 0.5.21
       ts-node: 10.9.1_4bewfcp2iebiwuold25d6rgcsy
@@ -43,6 +49,7 @@ importers:
   packages/cli:
     specifiers:
       '@tsbuffer/proto-generator': workspace:^
+      '@tsbuffer/schema': workspace:^
       '@types/glob': ^7.2.0
       '@types/minimist': ^1.2.2
       '@types/node': ^15.14.9
@@ -52,9 +59,6 @@ importers:
       minimist: ^1.2.5
       node-json-color-stringify: ^1.1.0
       os-locale: ^5.0.0
-      rollup: ^2.79.1
-      rollup-plugin-dts: ^4.2.3
-      rollup-plugin-typescript2: ^0.34.1
       tsbuffer: workspace:^
       tslib: ^2.3.1
     dependencies:
@@ -65,15 +69,13 @@ importers:
       minimist: 1.2.8
       node-json-color-stringify: 1.1.0
       os-locale: 5.0.0
-      tsbuffer: link:../tsbuffer
       tslib: 2.5.0
     devDependencies:
+      '@tsbuffer/schema': link:../schema
       '@types/glob': 7.2.0
       '@types/minimist': 1.2.2
       '@types/node': 15.14.9
-      rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_rollup@2.79.1
-      rollup-plugin-typescript2: 0.34.1_rollup@2.79.1
+      tsbuffer: link:../tsbuffer
 
   packages/proto-generator:
     specifiers:
@@ -84,61 +86,43 @@ importers:
       k8w-extend-native: ^1.4.6
       mocha: ^9.2.2
       nyc: ^15.1.0
-      rollup: ^2.79.1
-      rollup-plugin-dts: ^4.2.3
-      rollup-plugin-typescript2: ^0.34.1
       tslib: '*'
-      typescript: ^4
+      typescript: ^4.9.5
     dependencies:
       '@tsbuffer/schema': link:../schema
       k8w-crypto: 0.2.0
-      k8w-extend-native: 1.4.6
       tslib: 2.5.0
-      typescript: 4.9.5
     devDependencies:
       '@types/mocha': 8.2.3
       '@types/node': 15.14.9
+      k8w-extend-native: 1.4.6
       mocha: 9.2.2
       nyc: 15.1.0
-      rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_zptcx3kz3uwp66hzhyyt545weq
-      rollup-plugin-typescript2: 0.34.1_zptcx3kz3uwp66hzhyyt545weq
+      typescript: 4.9.5
 
   packages/schema:
-    specifiers:
-      rollup: ^2.79.1
-      rollup-plugin-dts: ^4.2.3
-      rollup-plugin-typescript2: ^0.34.1
-    devDependencies:
-      rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_rollup@2.79.1
-      rollup-plugin-typescript2: 0.34.1_rollup@2.79.1
+    specifiers: {}
 
   packages/tsbuffer:
     specifiers:
       '@tsbuffer/proto-generator': workspace:^
+      '@tsbuffer/schema': workspace:^
       '@tsbuffer/validator': workspace:^
       '@types/mocha': ^8.2.3
       '@types/node': ^15.14.9
       k8w-extend-native: ^1.4.6
       mocha: ^9.2.2
       nyc: ^15.1.0
-      rollup: ^2.79.1
-      rollup-plugin-dts: ^4.2.3
-      rollup-plugin-typescript2: ^0.34.1
       tslib: '*'
-    dependencies:
-      '@tsbuffer/validator': link:../validator
     devDependencies:
       '@tsbuffer/proto-generator': link:../proto-generator
+      '@tsbuffer/schema': link:../schema
+      '@tsbuffer/validator': link:../validator
       '@types/mocha': 8.2.3
       '@types/node': 15.14.9
       k8w-extend-native: 1.4.6
       mocha: 9.2.2
       nyc: 15.1.0
-      rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_rollup@2.79.1
-      rollup-plugin-typescript2: 0.34.1_rollup@2.79.1
       tslib: 2.5.0
 
   packages/validator:
@@ -148,9 +132,6 @@ importers:
       k8w-extend-native: ^1.4.6
       mocha: ^9.2.2
       nyc: ^15.1.0
-      rollup: ^2.79.1
-      rollup-plugin-dts: ^4.2.3
-      rollup-plugin-typescript2: ^0.34.1
       tslib: '*'
     dependencies:
       '@tsbuffer/schema': link:../schema
@@ -160,9 +141,6 @@ importers:
       k8w-extend-native: 1.4.6
       mocha: 9.2.2
       nyc: 15.1.0
-      rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_rollup@2.79.1
-      rollup-plugin-typescript2: 0.34.1_rollup@2.79.1
 
 packages:
 
@@ -5215,19 +5193,6 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup-plugin-dts/4.2.3_rollup@2.79.1:
-    resolution: {integrity: sha512-jlcpItqM2efqfIiKzDB/IKOS9E9fDvbkJSGw5GtK/PqPGS9eC3R3JKyw2VvpTktZA+TNgJRMu1NTv244aTUzzQ==}
-    engines: {node: '>=v12.22.12'}
-    peerDependencies:
-      rollup: ^2.55
-      typescript: ^4.1
-    dependencies:
-      magic-string: 0.26.7
-      rollup: 2.79.1
-    optionalDependencies:
-      '@babel/code-frame': 7.18.6
-    dev: true
-
   /rollup-plugin-dts/4.2.3_zptcx3kz3uwp66hzhyyt545weq:
     resolution: {integrity: sha512-jlcpItqM2efqfIiKzDB/IKOS9E9fDvbkJSGw5GtK/PqPGS9eC3R3JKyw2VvpTktZA+TNgJRMu1NTv244aTUzzQ==}
     engines: {node: '>=v12.22.12'}
@@ -5240,20 +5205,6 @@ packages:
       typescript: 4.9.5
     optionalDependencies:
       '@babel/code-frame': 7.18.6
-    dev: true
-
-  /rollup-plugin-typescript2/0.34.1_rollup@2.79.1:
-    resolution: {integrity: sha512-P4cHLtGikESmqi1CA+tdMDUv8WbQV48mzPYt77TSTOPJpERyZ9TXdDgjSDix8Fkqce6soYz3+fa4lrC93IEkcw==}
-    peerDependencies:
-      rollup: '>=1.26.3'
-      typescript: '>=2.4.0'
-    dependencies:
-      '@rollup/pluginutils': 4.2.1
-      find-cache-dir: 3.3.2
-      fs-extra: 10.1.0
-      rollup: 2.79.1
-      semver: 7.3.8
-      tslib: 2.5.0
     dev: true
 
   /rollup-plugin-typescript2/0.34.1_zptcx3kz3uwp66hzhyyt545weq:
@@ -5848,6 +5799,7 @@ packages:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /uglify-js/3.17.4:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}

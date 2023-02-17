@@ -38,22 +38,24 @@
   },
   "homepage": "https://github.com/k8w/tsbuffer-cli#readme",
   "devDependencies": {
+    "@tsbuffer/schema": "workspace:^",
     "@types/glob": "^7.2.0",
     "@types/minimist": "^1.2.2",
     "@types/node": "^15.14.9",
-    "rollup": "^2.79.1",
-    "rollup-plugin-dts": "^4.2.3",
-    "rollup-plugin-typescript2": "^0.34.1"
+    "tsbuffer": "workspace:^"
   },
   "dependencies": {
+    "@tsbuffer/proto-generator": "workspace:^",
     "colors": "^1.4.0",
     "glob": "^7.2.0",
     "k8w-extend-native": "^1.4.6",
     "minimist": "^1.2.5",
     "node-json-color-stringify": "^1.1.0",
     "os-locale": "^5.0.0",
-    "tsbuffer": "workspace:^",
-    "@tsbuffer/proto-generator": "workspace:^",
     "tslib": "^2.3.1"
+  },
+  "peerDependencies": {
+    "@tsbuffer/schema": "workspace:^",
+    "tsbuffer": "workspace:^"
   }
 }
