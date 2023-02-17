@@ -26,6 +26,7 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             target: 'es5',
+            module: 'esnext'
           },
         },
       }),
@@ -47,6 +48,7 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             target: 'es6',
+            module: 'esnext'
           },
         },
       }),

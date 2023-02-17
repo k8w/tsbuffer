@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
     require: [
         'ts-node/register',
@@ -7,7 +9,6 @@ module.exports = {
     timeout: 999999,
     'preserve-symlinks': true,
     spec: [
-        './test/**/*.test.ts'
-    ],
-    parallel: false
+        path.resolve(__dirname, './test/**/*.test.ts')        
+    ]
 }

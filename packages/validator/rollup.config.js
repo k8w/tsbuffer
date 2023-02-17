@@ -1,5 +1,5 @@
-import typescript from 'rollup-plugin-typescript2';
 import dts from 'rollup-plugin-dts';
+import typescript from 'rollup-plugin-typescript2';
 import packageJSON from './package.json';
 
 const banner = `/*!
@@ -26,6 +26,7 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             target: 'es5',
+            module: 'esnext'
           },
         },
       }),
@@ -47,6 +48,7 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             target: 'es6',
+            module: 'esnext'
           },
         },
       }),

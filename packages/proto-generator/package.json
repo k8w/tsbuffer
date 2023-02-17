@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "npx mocha",
+    "test": "npx mocha test/**/*.test.ts",
     "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
     "dev": "rollup -c -w",
     "check": "tsc --noEmit",
