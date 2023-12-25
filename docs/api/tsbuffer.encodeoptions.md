@@ -5,7 +5,7 @@
 ## EncodeOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface EncodeOptions 
@@ -13,7 +13,7 @@ export interface EncodeOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [skipValidate?](./tsbuffer.encodeoptions.skipvalidate.md) | boolean | <i>(Optional)</i> Skip validate value \*before\* encode |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [skipValidate?](./tsbuffer.encodeoptions.skipvalidate.md) |  | boolean | _(Optional)_ Skip validate value \*before\* encode |
 

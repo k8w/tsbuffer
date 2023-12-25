@@ -6,7 +6,7 @@
 
 Skip validate value \*before\* encode
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 skipValidate?: boolean;

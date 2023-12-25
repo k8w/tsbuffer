@@ -6,7 +6,7 @@
 
 从 JSON Object 解码，根据协议将 ArrayBuffer、Date、ObjectId 等类型从 JSON 中还原
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 decodeJSON<T = unknown>(json: any, schemaOrId: string | TSBufferSchema, options?: DecodeOptions): DecodeOutput<T>;
@@ -18,9 +18,9 @@ decodeJSON<T = unknown>(json: any, schemaOrId: string | TSBufferSchema, options?
 |  --- | --- | --- |
 |  json | any | JSON Object (是 JSON 对象，而非 JSON 字符串) |
 |  schemaOrId | string \| TSBufferSchema |  |
-|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) |  |
+|  options | [DecodeOptions](./tsbuffer.decodeoptions.md) | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 [DecodeOutput](./tsbuffer.decodeoutput.md)<!-- -->&lt;T&gt;
 

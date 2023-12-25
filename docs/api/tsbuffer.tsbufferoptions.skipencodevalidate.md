@@ -6,7 +6,7 @@
 
 正常编码流程是：先校验value类型合法，再进行编码 此值为 `true` 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 `false`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 skipEncodeValidate: boolean;

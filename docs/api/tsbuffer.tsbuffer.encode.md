@@ -6,7 +6,7 @@
 
 编码
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 encode(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions): EncodeOutput;
@@ -18,9 +18,9 @@ encode(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions)
 |  --- | --- | --- |
 |  value | any | 要编码的值 |
 |  schemaOrId | string \| TSBufferSchema | Schema 或 SchemaID，例如<code>a/b.ts</code>下的<code>Test</code>类型，其ID为<code>a/b/Test</code> |
-|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) |  |
+|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 [EncodeOutput](./tsbuffer.encodeoutput.md)
 

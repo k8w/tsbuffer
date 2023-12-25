@@ -5,10 +5,10 @@
 ## DecodeOutput type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-export declare type DecodeOutput<T> = {
+export type DecodeOutput<T> = {
     isSucc: true;
     value: T;
     errMsg?: undefined;

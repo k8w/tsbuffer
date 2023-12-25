@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "2.2.7",
+  "version": "2.2.8-dev.0",
   "description": "",
   "main": "index.js",
   "exports": {
@@ -17,17 +17,17 @@
     "tslib": "*"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.19.14",
-    "@microsoft/api-extractor": "^7.31.2",
+    "@microsoft/api-documenter": "^7.23.15",
+    "@microsoft/api-extractor": "^7.39.0",
     "@types/mocha": "^8.2.3",
-    "@types/node": "^15.14.9",
+    "@types/node": "^20.10.5",
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
     "rollup": "^2.79.1",
-    "rollup-plugin-typescript2": "^0.34.0",
-    "ts-node": "^10.9.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "ts-node": "^10.9.2",
     "tsbuffer-proto-generator": "^1.7.2",
-    "typescript": "^4.8.3"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "test": "npx mocha",

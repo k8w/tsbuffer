@@ -8,7 +8,7 @@
 
 默认：`true`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excessPropertyChecks: boolean;

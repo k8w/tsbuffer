@@ -4,7 +4,7 @@
 
 ## TSBuffer.prune property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 prune: TSBufferValidator<Proto>['prune'];

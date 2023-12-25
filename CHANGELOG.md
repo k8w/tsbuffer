@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.8-dev.0] - 2022-12-25
+### Fixed
+- Update dependencies
+
 ## [2.2.7] - 2022-11-17
 ### Fixed
 - Infinite loop when using `encodeJSON` if there are circular reference in types.

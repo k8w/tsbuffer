@@ -5,7 +5,7 @@
 ## TSBuffer class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class TSBuffer<Proto extends TSBufferProto = TSBufferProto> 

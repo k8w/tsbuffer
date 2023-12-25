@@ -4,7 +4,7 @@
 
 ## Base64Util.bufferToBase64() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static bufferToBase64(buf: Uint8Array): string;
@@ -16,7 +16,7 @@ static bufferToBase64(buf: Uint8Array): string;
 |  --- | --- | --- |
 |  buf | Uint8Array |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

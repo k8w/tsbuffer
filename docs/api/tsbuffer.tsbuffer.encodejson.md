@@ -6,7 +6,7 @@
 
 编码为 JSON Object，根据协议将 JSON 不支持的格式（如 ArrayBuffer、Date、ObjectId）转换成 JSON 可传输的格式
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 encodeJSON(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOptions): EncodeJsonOutput;
@@ -18,9 +18,9 @@ encodeJSON(value: any, schemaOrId: string | TSBufferSchema, options?: EncodeOpti
 |  --- | --- | --- |
 |  value | any |  |
 |  schemaOrId | string \| TSBufferSchema |  |
-|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) |  |
+|  options | [EncodeOptions](./tsbuffer.encodeoptions.md) | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 EncodeJsonOutput
 

@@ -5,7 +5,7 @@
 ## TSBufferOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface TSBufferOptions 
@@ -13,12 +13,12 @@ export interface TSBufferOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [cloneProto?](./tsbuffer.tsbufferoptions.cloneproto.md) | boolean | <i>(Optional)</i> Clone the proto, don't change this if you don't know what it is. |
-|  [customTypes?](./tsbuffer.tsbufferoptions.customtypes.md) | { \[schemaId: string\]: CustomTypeSchema; } | <i>(Optional)</i> Append <code>CustomTypeSchema</code> to given schema, to customize validate &amp; encode methods for specific types. For example 'mongodb/ObjectId'. |
-|  [excessPropertyChecks](./tsbuffer.tsbufferoptions.excesspropertychecks.md) | boolean | 检查值中是否包含Schema定义之外多余的字段 仅对 <code>validate</code> 方法生效 是因为实现机制原因, <code>prune</code> <code>encode</code> <code>decode</code> 方法都会天然保证不会混入多余字段<!-- -->默认：<code>true</code> |
-|  [skipDecodeValidate](./tsbuffer.tsbufferoptions.skipdecodevalidate.md) | boolean | 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
-|  [skipEncodeValidate](./tsbuffer.tsbufferoptions.skipencodevalidate.md) | boolean | 正常编码流程是：先校验value类型合法，再进行编码 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
-|  [strictNullChecks](./tsbuffer.tsbufferoptions.strictnullchecks.md) | boolean | 同 <code>tsconfig.json</code> 中的 <code>strictNullChecks</code> 是否使用严格等于去判定 <code>undefined</code> 和 <code>null</code> 如果该值为 <code>false</code>，则在编码过程中，<code>null</code> 在类型不兼容时可编码为<code>undefined</code>， 解码过程中，<code>undefined</code> 在类型不兼容时可解码为 <code>null</code>。 |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [cloneProto?](./tsbuffer.tsbufferoptions.cloneproto.md) |  | boolean | _(Optional)_ Clone the proto, don't change this if you don't know what it is. |
+|  [customTypes?](./tsbuffer.tsbufferoptions.customtypes.md) |  | { \[schemaId: string\]: CustomTypeSchema; } | _(Optional)_ Append <code>CustomTypeSchema</code> to given schema, to customize validate &amp; encode methods for specific types. For example 'mongodb/ObjectId'. |
+|  [excessPropertyChecks](./tsbuffer.tsbufferoptions.excesspropertychecks.md) |  | boolean | <p>检查值中是否包含Schema定义之外多余的字段 仅对 <code>validate</code> 方法生效 是因为实现机制原因, <code>prune</code> <code>encode</code> <code>decode</code> 方法都会天然保证不会混入多余字段</p><p>默认：<code>true</code></p> |
+|  [skipDecodeValidate](./tsbuffer.tsbufferoptions.skipdecodevalidate.md) |  | boolean | 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
+|  [skipEncodeValidate](./tsbuffer.tsbufferoptions.skipencodevalidate.md) |  | boolean | 正常编码流程是：先校验value类型合法，再进行编码 此值为 <code>true</code> 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 <code>false</code> |
+|  [strictNullChecks](./tsbuffer.tsbufferoptions.strictnullchecks.md) |  | boolean | 同 <code>tsconfig.json</code> 中的 <code>strictNullChecks</code> 是否使用严格等于去判定 <code>undefined</code> 和 <code>null</code> 如果该值为 <code>false</code>，则在编码过程中，<code>null</code> 在类型不兼容时可编码为<code>undefined</code>， 解码过程中，<code>undefined</code> 在类型不兼容时可解码为 <code>null</code>。 |
 

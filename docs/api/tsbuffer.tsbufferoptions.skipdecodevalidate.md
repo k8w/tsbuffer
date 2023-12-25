@@ -6,7 +6,7 @@
 
 正常解码流程是：先进行二进制解码，再校验解码后的类型符合Schema定义 此值为 `true` 时，将跳过校验步骤以提升性能 但需要自行确保值类型合法，否则可能引发不确定的问题 默认为 `false`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 skipDecodeValidate: boolean;

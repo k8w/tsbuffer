@@ -4,7 +4,7 @@
 
 ## Base64Util class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class Base64Util 

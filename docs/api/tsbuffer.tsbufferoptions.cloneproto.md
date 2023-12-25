@@ -6,7 +6,7 @@
 
 Clone the proto, don't change this if you don't know what it is.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 cloneProto?: boolean;

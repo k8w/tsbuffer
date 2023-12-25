@@ -5,10 +5,10 @@
 ## EncodeOutput type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-export declare type EncodeOutput = {
+export type EncodeOutput = {
     isSucc: true;
     buf: Uint8Array;
     errMsg?: undefined;

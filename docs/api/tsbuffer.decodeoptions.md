@@ -5,7 +5,7 @@
 ## DecodeOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DecodeOptions 
@@ -13,7 +13,7 @@ export interface DecodeOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [skipValidate?](./tsbuffer.decodeoptions.skipvalidate.md) | boolean | <i>(Optional)</i> Skip validate value \*after\* decode |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [skipValidate?](./tsbuffer.decodeoptions.skipvalidate.md) |  | boolean | _(Optional)_ Skip validate value \*after\* decode |
 

@@ -6,7 +6,7 @@
 
 Append `CustomTypeSchema` to given schema, to customize validate &amp; encode methods for specific types. For example 'mongodb/ObjectId'.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 customTypes?: {

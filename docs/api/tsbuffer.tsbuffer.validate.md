@@ -4,7 +4,7 @@
 
 ## TSBuffer.validate property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 validate: TSBufferValidator<Proto>['validate'];

@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `TSBuffer` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(proto: Proto, options?: Partial<TSBufferOptions>);
@@ -17,5 +17,5 @@ constructor(proto: Proto, options?: Partial<TSBufferOptions>);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  proto | Proto |  |
-|  options | Partial&lt;[TSBufferOptions](./tsbuffer.tsbufferoptions.md)<!-- -->&gt; |  |
+|  options | Partial&lt;[TSBufferOptions](./tsbuffer.tsbufferoptions.md)<!-- -->&gt; | _(Optional)_ |
 
