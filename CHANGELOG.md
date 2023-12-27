@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.2.8-dev.0] - 2022-12-25
+## [2.2.8] - 2022-12-28
 ### Fixed
 - Update dependencies
 

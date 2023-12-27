@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "2.2.8-dev.0",
+  "version": "2.2.8",
   "description": "",
   "main": "index.js",
   "exports": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "k8w-extend-native": "^1.4.6",
-    "tsbuffer-validator": "^2.1.1",
+    "tsbuffer-validator": "^2.1.2",
     "tslib": "*"
   },
   "devDependencies": {
