@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
+import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBuffer } from '../../src/index';
 
 describe('Interface', function () {
@@ -453,6 +454,46 @@ describe('Interface', function () {
         ].forEach(v => {
             assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/b2').json!)), 'a/b2').value, v);
         });
+    })
+
+    it('OverwriteDate', async function () {
+        let proto: TSBufferProto = {
+            a: {
+                "type": "Overwrite",
+                "target": {
+                    "type": "Interface",
+                    "properties": [
+                        {
+                            "id": 0,
+                            "name": "a",
+                            "type": {
+                                "type": "String"
+                            }
+                        }
+                    ]
+                },
+                "overwrite": {
+                    "type": "Interface",
+                    "properties": [
+                        {
+                            "id": 0,
+                            "name": "a",
+                            "type": {
+                                "type": "Date"
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        let tsb = new TSBuffer(proto);
+        const v = { a: new Date() }
+
+        const encoded = tsb.encodeJSON(v, 'a');
+        assert.strictEqual(encoded.isSucc, true, encoded.errMsg);
+        const decoded = tsb.decodeJSON(JSON.parse(JSON.stringify(encoded.json!)), 'a');
+        assert.strictEqual(decoded.isSucc, true, decoded.errMsg);
+        assert.deepEqual(decoded.value, v);
     })
 
     it('AllowUnknownFields', async function () {

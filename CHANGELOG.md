@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.2.9] - 2024-05-05
+### Fixed
+- `decodeJSON` error when using `Overwrite` with `{xxx: Date}`
+
 ## [2.2.8] - 2022-12-28
 ### Fixed
 - Update dependencies

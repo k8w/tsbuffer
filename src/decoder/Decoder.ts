@@ -79,7 +79,30 @@ export class Decoder {
             case SchemaType.Omit:
             case SchemaType.Overwrite:
                 let parsed = this._validator.protoHelper.parseMappedType(schema);
-                return this.decodeJSON(json, parsed);
+                if (parsed.type === SchemaType.Interface) {
+                    if (json.constructor !== Object) {
+                        break;
+                    }
+                    json = Object.assign({}, json);
+                    let flatSchema = this._validator.protoHelper.getFlatInterfaceSchema(schema);
+                    for (let key in json) {
+                        let property = flatSchema.properties.find(v => v.name === key);
+                        if (property) {
+                            json[key] = this.decodeJSON(json[key], property.type)
+                        }
+                        else if (flatSchema.indexSignature) {
+                            json[key] = this.decodeJSON(json[key], flatSchema.indexSignature.type);
+                        }
+                    }
+                    return json;
+                }
+                else if (parsed.type === SchemaType.Union || parsed.type === SchemaType.Intersection) {
+                    for (let member of parsed.members) {
+                        json = this.decodeJSON(json, member.type);
+                    }
+                    return json;
+                }
+                break;
             case SchemaType.Buffer:
                 if (typeof json !== 'string') {
                     break;

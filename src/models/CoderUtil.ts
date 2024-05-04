@@ -42,7 +42,16 @@ export class CoderUtil {
                 case SchemaType.Omit:
                 case SchemaType.Overwrite: {
                     let parsed = protoHelper.parseMappedType(schema);
-                    schemaInfo[key] = this.isJsonCompatible(parsed, type, protoHelper);
+                    if (parsed.type === SchemaType.Interface) {
+                        let flatSchema = protoHelper.getFlatInterfaceSchema(schema);
+                        schemaInfo[key] = flatSchema.properties.every(v => this.isJsonCompatible(v.type, type, protoHelper));
+                        if (flatSchema.indexSignature) {
+                            schemaInfo[key] = schemaInfo[key] && this.isJsonCompatible(flatSchema.indexSignature.type, type, protoHelper);
+                        }
+                    }
+                    else if (parsed.type === SchemaType.Union || parsed.type === SchemaType.Intersection) {
+                        schemaInfo[key] = parsed.members.every(v => this.isJsonCompatible(v.type, type, protoHelper));
+                    }
                     break;
                 }
                 case SchemaType.Custom:
