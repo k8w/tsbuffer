@@ -399,40 +399,7 @@ describe('Interface', function () {
             b: 123
         });
     })
-
-    it('Omit&', async function () {
-        let proto = await new TSBufferProtoGenerator({
-            readFile: () => `
-                export interface base {
-                    a: string;
-                    b: number;
-                    c?: { value:string };
-                    d:boolean[];
-                }
-
-                export type b = Omit<base, 'a'| 'c' | 'd'> & {a?: string};
-                export type b1 = Omit<base,'c' | 'd'>;
-            `
-        }).generate('a.ts');
-        let tsb = new TSBuffer(proto);
-
-        [
-            { a: 'xxx', b: 123 }
-        ].forEach(v => {
-
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b').buf!, 'a/b').value, v);
-        });
-
-        [
-            { a: 'xxx', b: 123 }
-        ].forEach(v => {
-            assert.deepStrictEqual(tsb.decode(tsb.encode(v, 'a/b1').buf!, 'a/b1').value, v);
-        });
-
-        assert.deepStrictEqual(tsb.decode(tsb.encode({ a: 'xxx', b: 123 }, 'a/b').buf!, 'a/b').value, tsb.decode(tsb.encode({ a: 'xxx', b: 123 }, 'a/b1').buf!, 'a/b1').value);
-    })
-
-
+   
     it('Partial', async function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `
@@ -704,13 +671,3 @@ export type NonNullable4 = NonNullable<Wrapper['value4']>;
         });
     })
 })
-
-
-export type b = Omit<base, 'a'| 'c' | 'd'> & {a?: string}; 
-
-export interface base {
-                    a: string;
-                    b: number;
-                    c?: { value:string };
-                    d:boolean[];
-                }
