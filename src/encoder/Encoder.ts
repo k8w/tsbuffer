@@ -150,6 +150,7 @@ export class Encoder {
     private _write(value: any, schema: TSBufferSchema, options?: {
         skipFields?: { [fieldName: string]: 1 },
         pickFields?: { [fieldName: string]: 1 },
+        fromIntersection?: boolean;
         skipIndexSignature?: boolean
     }) {
         switch (schema.type) {
@@ -366,6 +367,7 @@ export class Encoder {
     private _writeInterface(value: any, schema: InterfaceTypeSchema, options?: {
         skipFields?: { [fieldName: string]: 1 },
         pickFields?: { [fieldName: string]: 1 },
+        fromIntersection?: boolean,
         skipIndexSignature?: boolean
     }) {
         // skipFields默认值
@@ -446,7 +448,7 @@ export class Encoder {
                 }
 
                 // SkipFields
-                if (options.skipFields[property.name]) {
+                if (options.skipFields[property.name] && !options.fromIntersection) {
                     continue;
                 }
                 options.skipFields[property.name] = 1;
@@ -657,7 +659,8 @@ export class Encoder {
 
             // 编码块
             this._write(value, member.type, {
-                skipFields: skipFields
+                skipFields: skipFields,
+                fromIntersection: true,
             });
             this._processIdWithLengthType(idPos, member.type);
         }

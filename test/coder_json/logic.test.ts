@@ -217,4 +217,36 @@ describe('LogicTypes', function () {
 
 
     })
+
+    it('Omit & {a?: string}', async function () {
+        let proto = await new TSBufferProtoGenerator({
+            readFile: () => `
+                export interface base {
+                    a: string;
+                    b: number;
+                    c?: { value:string };
+                    d:boolean[];
+                }
+
+                export type b = Omit<base, 'a'| 'c' | 'd'> & {a?: string};
+                export type b1 = Omit<base,'c' | 'd'>;
+            `
+        }).generate('a.ts');
+        let tsb = new TSBuffer(proto);
+
+        [
+            { a: 'xxx', b: 123 }
+        ].forEach(v => {
+
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, 'a/b').json!, 'a/b').value, v);
+        });
+
+        [
+            { a: 'xxx', b: 123 }
+        ].forEach(v => {
+            assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, 'a/b1').json!, 'a/b1').value, v);
+        });
+
+        assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON({ a: 'xxx', b: 123 }, 'a/b').json!, 'a/b').value, tsb.decodeJSON(tsb.encodeJSON({ a: 'xxx', b: 123 }, 'a/b1').json!, 'a/b1').value);
+    })
 })
