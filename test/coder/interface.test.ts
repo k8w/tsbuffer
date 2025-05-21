@@ -29,7 +29,6 @@ describe("Interface", function () {
       tsb.encode({ a: "哈哈", e: { a: "0".repeat(1000), b: "哈哈" } }, "a/b").buf!.length,
       21
     )
-
     ;[
       { a: "xx" },
       { a: "xxxx", b: 123 },
@@ -204,7 +203,6 @@ describe("Interface", function () {
     assert.equal(tsb.encode({ a: "哈哈" }, "a/b").buf!.length, 9)
     assert.equal(tsb.encode({ a: "哈哈", b: "a" }, "a/b").buf!.length, 14)
     assert.equal(tsb.encode({ a: "哈哈", abc: "a" }, "a/b").buf!.length, 16)
-
     ;[{ a: "xx" }, { a: "xx", b: "" }, { a: "xx", b: "xx", c: "xxx", zxvzxcvzxv: "xxxx" }].forEach(
       v => {
         assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
@@ -261,7 +259,6 @@ describe("Interface", function () {
       tsb.encode({ v1: "base1", v2: "base2", xx: "xx", a: "xxx" }, "a/b").buf,
       new Uint8Array([2, 40, 3, 120, 120, 120, 0, 2, 120, 120, 2, 120, 120])
     )
-
     ;[
       { v1: "base1", v2: "base2", a: "xxx" },
       // { v1: 'base1', v2: 'base2', a: 'xxx', b: 'ccc' }
@@ -335,11 +332,9 @@ describe("Interface", function () {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b3").buf!, "a/b3").value, v)
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b4").buf!, "a/b4").value, v)
     })
-
     ;[{ a: "xxx" }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
     })
-
     ;["a/b", "a/b3", "a/b4"].forEach(v => {
       assert.deepStrictEqual(
         tsb.decode(
@@ -390,7 +385,6 @@ describe("Interface", function () {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b2").buf!, "a/b2").value, v)
     })
-
     ;["a/b", "a/b1", "a/b2"].forEach(v => {
       assert.deepStrictEqual(
         tsb.decode(
@@ -431,7 +425,6 @@ describe("Interface", function () {
     ;[{ a: "xxx", b: 123 }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[{ a: "xxx" }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
     })
@@ -481,7 +474,6 @@ describe("Interface", function () {
     ].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[
       {},
       { a: "asdg" },
@@ -509,11 +501,9 @@ describe("Interface", function () {
     let tsb = new TSBuffer(proto)
 
     assert.equal(tsb.encode({ a: "xxx", b: { value: 123 } }, "a/b").buf!.length, 11)
-
     ;[{ a: "xxx", b: { value: 1234 } }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[
       {
         a: [true, false, true],
@@ -531,7 +521,6 @@ describe("Interface", function () {
     ].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
     })
-
     ;[
       [
         {
@@ -802,7 +791,6 @@ export type NonNullable4 = NonNullable<Wrapper['value4']>;
     ;["a/NonNullable1", "a/NonNullable2", "a/NonNullable3"].forEach(schemaId => {
       assert.deepStrictEqual(tsb.decode(tsb.encode("AAA", schemaId).buf!, schemaId).value, "AAA")
     })
-
     ;[{}, { a: null }, { a: {} }, { a: { b: null } }, { a: { b: "ASDF" } }].forEach(v => {
       assert.deepStrictEqual(
         tsb.decode(tsb.encode(v, "a/NonNullable4").buf!, "a/NonNullable4").value,

@@ -16,11 +16,9 @@ describe("Nest", function () {
     ;[[], [1, 2, 3]].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[[], ["a/b", "c"]].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/c").buf!, "a/c").value, v)
     })
-
     ;[[], [["a"], ["b", "b"], ["c", "c", "c"]]].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/d").buf!, "a/d").value, v)
     })
@@ -41,7 +39,6 @@ describe("Nest", function () {
     ].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[
       [123, "asbc"],
       [123, "asdg", "sgdasdg"],
@@ -49,7 +46,6 @@ describe("Nest", function () {
     ].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/c").buf!, "a/c").value, v)
     })
-
     ;[[123.124, "asdg", "asdg", 412, true]].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/c").buf!, "a/c").value, v)
     })

@@ -19,14 +19,12 @@ describe("Nest", function () {
         v
       )
     })
-
     ;[[], ["a/b", "c"]].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/c").json!)), "a/c").value,
         v
       )
     })
-
     ;[[], [["a"], ["b", "b"], ["c", "c", "c"]]].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/d").json!)), "a/d").value,
@@ -53,7 +51,6 @@ describe("Nest", function () {
         v
       )
     })
-
     ;[
       [123, "asbc"],
       [123, "asdg", "sgdasdg"],
@@ -64,7 +61,6 @@ describe("Nest", function () {
         v
       )
     })
-
     ;[[123.124, "asdg", "asdg", 412, true]].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/c").json!)), "a/c").value,

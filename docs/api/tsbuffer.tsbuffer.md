@@ -21,8 +21,8 @@ export declare class TSBuffer<Proto extends TSBufferProto = TSBufferProto>
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [prune](./tsbuffer.tsbuffer.prune.md) |  | TSBufferValidator&lt;Proto&gt;\['prune'\] |  |
-|  [validate](./tsbuffer.tsbuffer.validate.md) |  | TSBufferValidator&lt;Proto&gt;\['validate'\] |  |
+|  [prune](./tsbuffer.tsbuffer.prune.md) |  | TSBufferValidator&lt;Proto&gt;\["prune"\] |  |
+|  [validate](./tsbuffer.tsbuffer.validate.md) |  | TSBufferValidator&lt;Proto&gt;\["validate"\] |  |
 
 ## Methods
 

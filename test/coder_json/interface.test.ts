@@ -346,7 +346,6 @@ describe("Interface", function () {
         v
       )
     })
-
     ;[{ a: "xxx" }].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/b1").json!)), "a/b1").value,
@@ -406,7 +405,6 @@ describe("Interface", function () {
       assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, "a/b1").json!, "a/b1").value, v)
       assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, "a/b2").json!, "a/b2").value, v)
     })
-
     ;["a/b", "a/b1", "a/b2"].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(
@@ -450,7 +448,6 @@ describe("Interface", function () {
         v
       )
     })
-
     ;[{ a: "xxx" }].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/b1").json!)), "a/b1").value,
@@ -510,7 +507,6 @@ describe("Interface", function () {
         v
       )
     })
-
     ;[
       {},
       { a: "asdg" },
@@ -546,7 +542,6 @@ describe("Interface", function () {
         v
       )
     })
-
     ;[
       {
         a: [true, false, true],
@@ -567,7 +562,6 @@ describe("Interface", function () {
         v
       )
     })
-
     ;[
       [
         {
@@ -927,7 +921,6 @@ export type NonNullable4 = NonNullable<Wrapper['value4']>;
         "AAA"
       )
     })
-
     ;[{}, { a: null }, { a: {} }, { a: { b: null } }, { a: { b: "ASDF" } }].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(

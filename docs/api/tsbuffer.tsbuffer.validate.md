@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-validate: TSBufferValidator<Proto>['validate'];
+validate: TSBufferValidator<Proto>["validate"];
 ```

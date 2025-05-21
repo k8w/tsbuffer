@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-prune: TSBufferValidator<Proto>['prune'];
+prune: TSBufferValidator<Proto>["prune"];
 ```

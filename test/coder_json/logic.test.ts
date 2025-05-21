@@ -16,7 +16,6 @@ describe("LogicTypes", function () {
     let tsb = new TSBuffer(proto)
 
     tsb.encodeJSON({ a: "asdg", b: 12412, c: false }, "a/b2")
-
     ;[{ a: "a" }, { b: 12 }, { c: true }, { a: "asdg", b: 12412, c: false }].forEach(v => {
       assert.deepStrictEqual(
         tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/b").json!)), "a/b").value,
@@ -287,7 +286,6 @@ describe("LogicTypes", function () {
     ;[{ a: "xxx", b: 123 }].forEach(v => {
       assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, "a/b").json!, "a/b").value, v)
     })
-
     ;[{ a: "xxx", b: 123 }].forEach(v => {
       assert.deepStrictEqual(tsb.decodeJSON(tsb.encodeJSON(v, "a/b1").json!, "a/b1").value, v)
     })

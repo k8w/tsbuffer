@@ -700,9 +700,10 @@ export class Encoder {
       this._writer.push({ type: "varint", value: Varint64.from(member.id) })
       let idPos = this._writer.ops.length - 1
 
-      // 编码块
+      // 编码块 - 为每个 member 创建新的 skipFields
+      let memberSkipFields = { ...skipFields }
       this._write(value, member.type, {
-        skipFields: skipFields,
+        skipFields: memberSkipFields,
       })
       this._processIdWithLengthType(idPos, member.type)
     }

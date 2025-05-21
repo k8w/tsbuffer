@@ -20,7 +20,6 @@ describe("LogicTypes", function () {
     assert.equal(tsb.encode({ b: 23, c: true }, "a/b").buf!.length, 16)
 
     tsb.encode({ a: "asdg", b: 12412, c: false }, "a/b2")
-
     ;[{ a: "a" }, { b: 12 }, { c: true }, { a: "asdg", b: 12412, c: false }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
@@ -66,7 +65,6 @@ describe("LogicTypes", function () {
     let tsb = new TSBuffer(proto)
 
     assert.equal(tsb.encode({ a: "abc", b: 123, c: "asdfasdf" }, "a/b").buf!.length, 21)
-
     ;[{ a: "asdgasdg", b: 1234567890, c: "asdfasdf" }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
@@ -232,7 +230,6 @@ describe("LogicTypes", function () {
     ;[{ a: "xxx", b: 123 }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
-
     ;[{ a: "xxx", b: 123 }].forEach(v => {
       assert.deepStrictEqual(tsb.decode(tsb.encode(v, "a/b1").buf!, "a/b1").value, v)
     })

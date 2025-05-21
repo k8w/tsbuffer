@@ -86,7 +86,6 @@ describe("Basic Encode", function () {
 
     assert.equal(tsb.encode(60, "a/b").buf!.length, 1)
     assert.equal(tsb.encode(-60, "a/b").buf!.length, 1)
-
     ;[0, 1234567890123, -1234567890123].forEach(v => {
       assert.strictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
@@ -102,7 +101,6 @@ describe("Basic Encode", function () {
 
     assert.equal(tsb.encode(60, "a/b").buf!.length, 1)
     assert.equal(tsb.encode(-60, "a/b", { skipValidate: true }).buf!.length, 10)
-
     ;[0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER - 1].forEach(v => {
       assert.strictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })
@@ -118,7 +116,6 @@ describe("Basic Encode", function () {
     assert.equal(tsb.encode("", "a/b").buf!.length, 1)
     assert.equal(tsb.encode("a", "a/b").buf!.length, 2)
     assert.equal(tsb.encode("啊啊a1", "a/b").buf!.length, 9)
-
     ;["", "abc", "啊啊啊啊啊", "你好中国\nTest123\n~!@@#!%!@#$^&#%*^%&\u1234\u2234"].forEach(v => {
       assert.strictEqual(tsb.decode(tsb.encode(v, "a/b").buf!, "a/b").value, v)
     })

@@ -15,7 +15,7 @@ export type DecodeOutput<T> = {
 } | {
     isSucc: false;
     errMsg: string;
-    errPhase: 'decode' | 'validate' | undefined;
+    errPhase: "decode" | "validate" | undefined;
     value?: undefined;
 };
 ```
