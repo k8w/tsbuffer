@@ -399,7 +399,7 @@ describe('Interface', function () {
             b: 123
         });
     })
-
+   
     it('Partial', async function () {
         let proto = await new TSBufferProtoGenerator({
             readFile: () => `
