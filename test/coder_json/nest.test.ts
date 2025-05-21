@@ -1,77 +1,116 @@
-import * as assert from 'assert';
-import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
-import { TSBuffer } from '../../src/index';
+import * as assert from "assert"
+import { TSBufferProtoGenerator } from "tsbuffer-proto-generator"
+import { TSBuffer } from "../../src/index"
 
-describe('Nest', function () {
-    it('Array', async function () {
-        let proto = await new TSBufferProtoGenerator({
-            readFile: () => `
+describe("Nest", function () {
+  it("Array", async function () {
+    let proto = await new TSBufferProtoGenerator({
+      readFile: () => `
                 export type b = number[];
                 export type c = string[];
                 export type d = string[][];
-            `
-        }).generate('a.ts');
-        let tsb = new TSBuffer(proto);
+            `,
+    }).generate("a.ts")
+    let tsb = new TSBuffer(proto)
 
-        [[], [1, 2, 3]].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/b').json!)), 'a/b').value, v);
-        });
-
-        [[], ['a/b', 'c']].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/c').json!)), 'a/c').value, v);
-        });
-
-        [[], [['a'], ['b', 'b'], ['c', 'c', 'c']]].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/d').json!)), 'a/d').value, v);
-        });
+    ;[[], [1, 2, 3]].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/b").json!)), "a/b").value,
+        v
+      )
     })
 
-    it('Tuple', async function () {
-        let proto = await new TSBufferProtoGenerator({
-            readFile: () => `
+    ;[[], ["a/b", "c"]].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/c").json!)), "a/c").value,
+        v
+      )
+    })
+
+    ;[[], [["a"], ["b", "b"], ["c", "c", "c"]]].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/d").json!)), "a/d").value,
+        v
+      )
+    })
+  })
+
+  it("Tuple", async function () {
+    let proto = await new TSBufferProtoGenerator({
+      readFile: () => `
                 export type b = [number, number, string];
                 export type c = [number, string, string?, number?, true?];
-            `
-        }).generate('a.ts');
-        let tsb = new TSBuffer(proto);
+            `,
+    }).generate("a.ts")
+    let tsb = new TSBuffer(proto)
 
-        [[1, 0, 'asdg'], [-123, 123.456, '']].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/b').json!)), 'a/b').value, v);
-        });
-
-        [[123, 'asbc'], [123, 'asdg', 'sgdasdg'], [123.124, 'asdg', 'asdg', 412]].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/c').json!)), 'a/c').value, v);
-        });
-
-        [[123.124, 'asdg', 'asdg', 412, true]].forEach(v => {
-            assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, 'a/c').json!)), 'a/c').value, v);
-        });
-
-        assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, undefined]);
-        // assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, 123, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, 123]);
+    ;[
+      [1, 0, "asdg"],
+      [-123, 123.456, ""],
+    ].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/b").json!)), "a/b").value,
+        v
+      )
     })
 
-    it('Cycle Reference in interface', async function () {
-        let proto = await new TSBufferProtoGenerator({
-            readFile: () => `
+    ;[
+      [123, "asbc"],
+      [123, "asdg", "sgdasdg"],
+      [123.124, "asdg", "asdg", 412],
+    ].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/c").json!)), "a/c").value,
+        v
+      )
+    })
+
+    ;[[123.124, "asdg", "asdg", 412, true]].forEach(v => {
+      assert.deepStrictEqual(
+        tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON(v, "a/c").json!)), "a/c").value,
+        v
+      )
+    })
+
+    assert.deepStrictEqual(
+      tsb.decodeJSON(
+        JSON.parse(
+          JSON.stringify(tsb.encodeJSON([123.124, "asdg", undefined, undefined], "a/c").json!)
+        ),
+        "a/c"
+      ).value,
+      [123.124, "asdg", undefined, undefined]
+    )
+    // assert.deepStrictEqual(tsb.decodeJSON(JSON.parse(JSON.stringify(tsb.encodeJSON([123.124, 'asdg', undefined, 123, undefined], 'a/c').json!)), 'a/c').value, [123.124, 'asdg', undefined, 123]);
+  })
+
+  it("Cycle Reference in interface", async function () {
+    let proto = await new TSBufferProtoGenerator({
+      readFile: () => `
                 export type Node = {
                     name: string,
                     children?: Node[]
                 }
-            `
-        }).generate('a.ts');
-        let tsb = new TSBuffer(proto);
+            `,
+    }).generate("a.ts")
+    let tsb = new TSBuffer(proto)
 
-        type Node = {
-            name: string,
-            children: Node[]
-        }
-        let node1: Node = { name: '111', children: [] };
-        let node2: Node = { name: '222', children: [{ name: '222-1', children: [] }, { name: '222-2', children: [] }] }
-        let root: Node = { name: 'root', children: [node1, node2] };
+    type Node = {
+      name: string
+      children: Node[]
+    }
+    let node1: Node = { name: "111", children: [] }
+    let node2: Node = {
+      name: "222",
+      children: [
+        { name: "222-1", children: [] },
+        { name: "222-2", children: [] },
+      ],
+    }
+    let root: Node = { name: "root", children: [node1, node2] }
 
-        const encode = tsb.encodeJSON(root, 'a/Node');
-        assert.ok(encode.json, encode.errMsg);
-        assert.deepStrictEqual(tsb.decodeJSON(encode.json!, 'a/Node').value, root);
-    })
+    const encode = tsb.encodeJSON(root, "a/Node")
+    assert.ok(encode.json, encode.errMsg)
+    assert.deepStrictEqual(tsb.decodeJSON(encode.json!, "a/Node").value, root)
+  })
 })
