@@ -931,4 +931,27 @@ export type NonNullable4 = NonNullable<Wrapper['value4']>;
       )
     })
   })
+
+  it("Pick<Union,Date>[]", async function () {
+    let proto = await new TSBufferProtoGenerator({
+      readFile: () => `
+export type WithPick = Pick<{date: Date} | {date: Date}, 'date'>;
+
+export type NoPick = {date: Date} | {date: Date};
+}
+
+      `,
+    }).generate("a.ts")
+    let tsb = new TSBuffer(proto)
+
+    const value = {
+      date: "2025-09-29T07:05:13.128Z",
+    }
+
+    // const decoded_noPick = tsb.decodeJSON(value, "a/NoPick")
+    // assert.ok(decoded_noPick.isSucc, decoded_noPick.errMsg)
+
+    const decoded_withPick = tsb.decodeJSON(value, "a/WithPick")
+    assert.ok(decoded_withPick.isSucc, decoded_withPick.errMsg)
+  })
 })
