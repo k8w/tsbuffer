@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer",
-  "version": "2.2.11",
+  "version": "2.2.22",
   "description": "",
   "main": "index.js",
   "exports": {

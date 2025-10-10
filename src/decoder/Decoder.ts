@@ -14,7 +14,7 @@ import {
 } from "tsbuffer-schema"
 import { TSBufferValidator } from "tsbuffer-validator"
 import { Base64Util } from "../models/Base64Util"
-import { CoderUtil } from "../models/CoderUtil"
+import { CoderUtil, JsonCompatibleResult } from "../models/CoderUtil"
 import { IdBlockUtil, LengthType } from "../models/IdBlockUtil"
 import { SchemaUtil } from "../models/SchemaUtil"
 import { TypedArrays } from "../models/TypedArrays"
@@ -51,7 +51,8 @@ export class Decoder {
   decodeJSON(json: any, schema: TSBufferSchema): any {
     if (
       json === null ||
-      CoderUtil.isJsonCompatible(schema, "decode", this._validator.protoHelper)
+      CoderUtil.checkJsonCompatible(schema, "decode", this._validator.protoHelper) ===
+        JsonCompatibleResult.Yes
     ) {
       return json
     }

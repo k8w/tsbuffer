@@ -1,7 +1,7 @@
 import assert from "assert"
 import { TSBufferProto } from "tsbuffer-schema"
 import { TSBuffer } from "../../src"
-import { CoderUtil } from "../../src/models/CoderUtil"
+import { CoderUtil, JsonCompatibleResult } from "../../src/models/CoderUtil"
 
 describe("CoderUtil", function () {
   it("withDate", function () {
@@ -37,12 +37,12 @@ describe("CoderUtil", function () {
     const tsbuffer = new TSBuffer(proto)
 
     assert.strictEqual(
-      CoderUtil.isJsonCompatible(
+      CoderUtil.checkJsonCompatible(
         proto["user/PtlGet/ResGet"],
         "decode",
         tsbuffer["_validator"].protoHelper
       ),
-      false
+      JsonCompatibleResult.No
     )
   })
 })

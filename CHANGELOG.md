@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.2.22] - 2025-10-10
+
+### Fixed
+- Fixed bug that `JsonCompatible` calculated error in nested type, refactored the `checkJsonCompatible` part.
+
 ## [2.2.11] - 2025-10-02
 
 ### Fixed

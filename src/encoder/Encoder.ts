@@ -13,7 +13,7 @@ import {
 } from "tsbuffer-schema"
 import { TSBufferValidator } from "tsbuffer-validator"
 import { Base64Util } from ".."
-import { CoderUtil } from "../models/CoderUtil"
+import { CoderUtil, JsonCompatibleResult } from "../models/CoderUtil"
 import { Config } from "../models/Config"
 import { IdBlockUtil } from "../models/IdBlockUtil"
 import { SchemaUtil } from "../models/SchemaUtil"
@@ -68,7 +68,8 @@ export class Encoder {
     if (
       typeof value !== "object" ||
       value === null ||
-      CoderUtil.isJsonCompatible(schema, "encode", this._validator.protoHelper)
+      CoderUtil.checkJsonCompatible(schema, "encode", this._validator.protoHelper) ===
+        JsonCompatibleResult.Yes
     ) {
       return value
     }

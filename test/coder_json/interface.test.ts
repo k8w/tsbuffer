@@ -954,4 +954,48 @@ export type NoPick = {date: Date} | {date: Date};
     const decoded_withPick = tsb.decodeJSON(value, "a/WithPick")
     assert.ok(decoded_withPick.isSucc, decoded_withPick.errMsg)
   })
+
+  it("Omit<Union> & {Date}", async function () {
+    let proto = await new TSBufferProtoGenerator({
+      readFile: () => `
+/** 审批流节点（递归结构） */
+export interface ApprovalFlowNode {
+  children?: ApprovalFlowNode[]
+  tasks?: {
+    completedTime?: Date
+  }[]
+}   
+`,
+    }).generate("a.ts")
+    let tsb = new TSBuffer(proto)
+
+    const value = {
+      children: [
+        {
+          tasks: [
+            {
+              completedTime: "2025-10-10T09:41:58.582Z",
+            },
+          ],
+        },
+      ],
+    }
+    // const value = {
+    //   date: {
+    //     a: {
+    //       b: [
+    //         {
+    //           c: "2025-09-29T07:05:13.128Z",
+    //         },
+    //       ],
+    //     },
+    //   },
+    // }
+
+    // const decoded_noPick = tsb.decodeJSON(value, "a/NoPick")
+    // assert.ok(decoded_noPick.isSucc, decoded_noPick.errMsg)
+
+    const decoded_withOmit = tsb.decodeJSON(value, "a/ApprovalFlowNode")
+    assert.ok(decoded_withOmit.isSucc, decoded_withOmit.errMsg)
+  })
 })
