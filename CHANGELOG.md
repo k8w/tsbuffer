@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.2.23] - 2025-10-13
+
+### Fixed
+- Refactored `checkJsonCompatible` to `isJsonCompatible` for improved clarity and performance in JSON compatibility checks. Updated related tests accordingly.
+
 ## [2.2.22] - 2025-10-10
 
 ### Fixed
